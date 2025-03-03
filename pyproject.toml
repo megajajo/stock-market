@@ -8,5 +8,6 @@ dependencies = [
     "fastapi>=0.115.11",
     "numpy>=2.2.3",
     "pandas>=2.2.3",
+    "pre-commit>=4.1.0",
     "uvicorn>=0.34.0",
 ]
