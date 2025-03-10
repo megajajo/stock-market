@@ -5,6 +5,7 @@
 To initialize virtual enviroment:
 ```
 uv venv
+uv sync
 source .venv/bin/activate
 ```
 
@@ -21,5 +22,7 @@ pre-commit install
 
 To start the server:
 ```
-uvicorn app:app --reload
+uvicorn app:app --reload --host 0.0.0.0 --port 8000
 ```
+
+It will be accessible on localhost:8000
