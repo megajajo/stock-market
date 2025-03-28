@@ -27,13 +27,13 @@ class Client:
 
     def __init__(
         self,
-        username,
-        password,
-        email,
-        first_names,
-        last_name,
+        username: str,
+        password: str,
+        email: str,
+        first_names: str,
+        last_name: str,
         balance=0,
-        portfolio=dict(),
+        portfolio=None,
     ):
         self.client_id = Client.counter
         Client.counter += 1
@@ -45,7 +45,10 @@ class Client:
         self.last_name = last_name
 
         self.balance = balance
-        self.portfolio = portfolio
+        self.portfolio = portfolio if portfolio is not None else {}
+
+    def __str__(self):
+        return f"{self.first_names} {self.last_name} ({self.username})"
 
     @staticmethod
     def get_client_by_id(id):
@@ -65,6 +68,8 @@ class Client:
         if not ticker in self.portfolio:
             self.portfolio[ticker] = vol
         else:
+            if vol > self.portfolio[ticker]:
+                raise ValueError("Insufficient stock in portfolio")
             self.portfolio[ticker] += vol
 
 
@@ -113,6 +118,7 @@ class Order:
     def execute_volume(self, amt):
         self.volume -= amt
         self.executed_volume += amt
+        self.client.add_stock_to_portfolio(self.stock_id, amt)
 
     def get_client(self):
         return self.client
@@ -136,9 +142,10 @@ class Order:
         if self.side == BUY:
             max_feasible_volume = client.balance // self.price  # no fractional shares
         else:  # self.side == SELL
-            if self.stock_id not in client.portfolio:
+            ticker = OrderBook.get_ticker_by_id(self.stock_id)
+            if ticker not in client.portfolio:
                 return 0
-            max_feasible_volume = client.portfolio[self.stock_id]
+            max_feasible_volume = client.portfolio[ticker]
 
         return min(max_feasible_volume, self.volume)
 
@@ -147,29 +154,38 @@ class Transaction:
     counter = 0
     _all_transactions = []
 
-    def __init__(self, bidder_id, bid_price, asker_id, ask_price, vol, stock_id):
+    def __init__(self, bidder, bid_price, asker, ask_price, price, vol, stock_id):
         self.transaction_id = Transaction.counter
         Transaction.counter += 1
-        _all_transactions += [self]
+        Transaction._all_transactions += [self]
         self.timestamp = datetime.now(timezone.utc)
-        self.bidder_id = bidder_id
+        self.bidder = bidder
         self.bid_price = bid_price
-        self.asker_id = asker_id
+        self.asker = asker
         self.ask_price = ask_price
+        self.price = price
         self.vol = vol
         self.stock_id = stock_id
+
+    def __str__(self):
+        return f"TRANSACTION: {str(self.asker)} sold {str(self.bidder)} {self.vol} shares of {OrderBook.get_ticker_by_id(self.stock_id)} @ {self.price}"
 
     @classmethod
     def from_orders(cls, bid, ask, vol):
         if bid.get_stock_id() != ask.get_stock_id():
             raise ValueError(
                 "Both orders must be from the same stock"
-            )  # precondition: bid, ask have same stock
+            )  # precondition: bid and ask have same stock
+
+        # trade is executed at the price of the earlier order
+        price = bid.get_price() if bid.timestamp < ask.timestamp else ask.get_price()
+
         return cls(
             bid.get_client(),
             bid.get_price(),
             ask.get_client(),
             ask.get_price(),
+            price,
             vol,
             bid.get_stock_id(),
         )
@@ -195,15 +211,16 @@ Attributes:
     asks (SortedList): A SortedList storing sell orders, sorted by price (lowest first).
 
 Usage:
-    client1 = Client("u1","pw","timcook@aol.com","Tim","Cook")
-    client2 = Client("u2","pw","lbj@nba.com","LeBron","James")
+    client1 = Client("tapple", "pw", "timcook@aol.com", "Tim", "Cook")
+    client2 = Client(
+        "goat", "pw", "lbj@nba.com", "LeBron", "James", balance=1_000_000_000
+    )
 
     order_book = OrderBook("AAPL")
+    client1.add_stock_to_portfolio(0, 100)
+
     order_book.place_order(SELL, 100.5, 10, 0)
     order_book.place_order(BUY, 101.0, 5, 1)
-    best_bid = order_book.get_best_bid()
-    best_ask = order_book.get_best_ask()
-
 """
 
 
@@ -240,8 +257,6 @@ class OrderBook:
         opposite_book = self.asks if order.side == BUY else self.bids
         same_book = self.bids if order.side == BUY else self.asks
 
-        print(f"oppbk: {str(opposite_book)}, samebk: {str(same_book)}")
-
         # while a trade is feasible, try to execute one
         while order.valid_volume() > 0 and opposite_book:
             other_order = opposite_book[0]
@@ -255,29 +270,28 @@ class OrderBook:
 
             # if the other order isn't valid, remove it
             if other_order.valid_volume() == 0:
-                self.cancel(other_order.order_id)
+                print("WARNING: Cancelled " + other_order)
+                self._cancel(other_order)
                 opposite_book = opposite_book[1:]
                 continue
 
             # otherwise, a positive number of shares can be traded
             trade_volume = min(order.valid_volume(), other_order.valid_volume())
 
-            other_order.execute_volume(trade_volume)
-            order.execute_volume(trade_volume)
-            print(
-                f"Made by {other_order.client}, taken by {order.client}, {trade_volume} shares @ {trade_price}"
-            )
-
-            buyer = order.client if order.side == BUY else other_order.client
-            seller = order.client if order.side == SELL else other_order.client
-
-            buyer.add_stock_to_portfolio(self.stock_id, trade_volume)
-            seller.add_stock_to_portfolio(self.stock_id, trade_volume)
-            Transaction(order, other_order, trade_volume)
+            if order.side == BUY:
+                order.execute_volume(trade_volume)
+                other_order.execute_volume(-trade_volume)
+                trade = Transaction.from_orders(order, other_order, trade_volume)
+            else:  # order.side == SELL
+                order.execute_volume(-trade_volume)
+                other_order.execute_volume(trade_volume)
+                trade = Transaction.from_orders(other_order, order, trade_volume)
+            print(trade)
 
             if other_order.volume == 0:
-                self.cancel(other_order.get_id())
+                self._cancel(other_order)
 
+        print(order)
         if order.volume > 0:
             # all possible trades have been executed, so store the remaining order in the book
             same_book.add(order)
@@ -288,9 +302,8 @@ class OrderBook:
         self._place_order(order)
         return order.order_id
 
-    def cancel(self, order_id):
-        """Cancel an order, specified by its id."""
-        order = Order.get_order_by_id(order_id)
+    def _cancel(self, order):
+        """Cancel an order."""
         book = self.bids if order.get_side() == BUY else self.asks
 
         order.cancel()  # mark order as cancelled (to prevent future executions of it)
@@ -302,6 +315,10 @@ class OrderBook:
 
         return True
 
+    def cancel(self, order_id):
+        """Cancel an order, specified by its id."""
+        self._cancel(Order.get_order_by_id(order_id))
+
     def get_best_bid(self):
         """Returns highest bid price."""
         return self.bids[0].get_price() if self.bids else 0
@@ -309,6 +326,10 @@ class OrderBook:
     def get_best_ask(self):
         """Returns lowest ask price."""
         return self.asks[0].get_price() if self.asks else 0
+
+    def get_best(self):
+        """Returns tuple with (highest bid, lowest ask)."""
+        return (self.get_best_bid(), self.get_best_ask())
 
     def get_volume_at_price(self, side, price):
         """Returns volume of open orders for given side of the order book."""
@@ -320,17 +341,22 @@ class OrderBook:
 
 
 if __name__ == "__main__":
-    client1 = Client("u1", "pw", "timcook@aol.com", "Tim", "Cook")
+    client1 = Client("tapple", "pw", "timcook@aol.com", "Tim", "Cook")
     client2 = Client(
-        "u2", "pw", "lbj@nba.com", "LeBron", "James", balance=1_000_000_000
+        "goat", "pw", "lbj@nba.com", "LeBron", "James", balance=1_000_000_000
     )
+
+    # print(client1.portfolio, client2.portfolio)
 
     order_book = OrderBook("AAPL")
     client1.add_stock_to_portfolio(0, 100)
 
+    # print(client1.portfolio, client2.portfolio)
+
     order_book.place_order(SELL, 100.5, 10, 0)
+    # print(order_book.get_best())
     order_book.place_order(BUY, 101.0, 5, 1)
-    best_bid = order_book.get_best_bid()
-    best_ask = order_book.get_best_ask()
-    print(best_bid, best_ask)
-    print(Order.get_order_by_id(1).volume)
+    # print(order_book.get_best())
+
+    # print(Order.get_order_by_id(1).volume)
+    print(client1.portfolio, client2.portfolio)
