@@ -1,6 +1,7 @@
 from enum import Enum
-import heapq
-from collections import deque
+
+# import heapq
+# from collections import deque
 from datetime import datetime, timezone
 from sortedcontainers import SortedList
 
@@ -25,9 +26,9 @@ class Client:
     _all_clients = []
 
     def __init__(self, username, password, email, first_names, last_name):
-        counter += 1
-        self.client_id = counter
-        all_clients += self
+        self.client_id = Client.counter
+        Client.counter += 1
+        Client._all_clients += [self]
         self.username = username
         self.password = password
         self.email = email
@@ -50,10 +51,10 @@ class Order:
     _all_orders = []
 
     def __init__(self, stock_id, side, price, volume, client_id):
-        counter += 1
-        self.order_id = counter
+        self.order_id = Order.counter
+        Order.counter += 1
         self.cancelled = False
-        _all_orders += self
+        Order._all_orders += [self]
         self.timestamp = datetime.now(timezone.utc)
         self.stock_id = stock_id
         self.side = side
@@ -100,8 +101,10 @@ class Order:
         client = self.client
 
         if self.side == BUY:
-            max_feasible_volume = client.balance // self.price
+            max_feasible_volume = client.balance // self.price  # no fractional shares
         else:  # self.side == SELL
+            if self.stock_id not in client.portfolio:
+                return 0
             max_feasible_volume = client.portfolio[self.stock_id]
 
         return min(max_feasible_volume, self.volume)
@@ -112,9 +115,9 @@ class Transaction:
     _all_transactions = []
 
     def __init__(self, bidder_id, bid_price, asker_id, ask_price, vol, stock_id):
-        counter += 1
-        self.transaction_id = counter
-        _all_transactions += self
+        self.transaction_id = Transaction.counter
+        Transaction.counter += 1
+        _all_transactions += [self]
         self.timestamp = datetime.now(timezone.utc)
         self.bidder_id = bidder_id
         self.bid_price = bid_price
@@ -124,8 +127,8 @@ class Transaction:
         self.stock_id = stock_id
 
     def __init__(self, bid, ask, vol):  # precondition: bid, ask have same stock
-        counter += 1
-        self.transaction_id = counter
+        self.transaction_id = Transaction.counter
+        Transaction.counter += 1
         _all_transactions += self
         self.timestamp = datetime.now(timezone.utc)
         self.bidder_id = bid.get_client()
@@ -149,9 +152,12 @@ Attributes:
     asks (SortedList): A SortedList storing sell orders, sorted by price (lowest first).
 
 Usage:
-    order_book = OrderBook()
-    order_book.place_order("order1", BUY, 100.5, 10, "ClientA")
-    order_book.place_order("order2", SELL, 101.0, 5, "ClientB")
+    client1 = Client("u1","pw","timcook@aol.com","Tim","Cook")
+    client2 = Client("u2","pw","lbj@nba.com","LeBron","James")
+
+    order_book = OrderBook("AAPL")
+    order_book.place_order(SELL, 100.5, 10, 0)
+    order_book.place_order(BUY, 101.0, 5, 1)
     best_bid = order_book.get_best_bid()
     best_ask = order_book.get_best_ask()
 
@@ -162,8 +168,8 @@ class OrderBook:
     counter = 0
 
     def __init__(self, ticker: str):
-        counter += 1
-        self.counter = counter
+        self.stock_id = OrderBook.counter
+        OrderBook.counter += 1
         if not ticker:
             ticker = ""
         self.ticker = ticker
@@ -197,7 +203,7 @@ class OrderBook:
 
     def place_order(self, side, price, volume, client):
         """Place order directly with the information entered."""
-        order = Order(side, price, volume, client)
+        order = Order(self.stock_id, side, price, volume, client)
         self._place_order(order)
         return order.order_id
 
@@ -215,11 +221,11 @@ class OrderBook:
 
     def get_best_bid(self):
         """Returns highest bid price."""
-        return self.bids[0] if self.bids else None
+        return self.bids[0].get_price() if self.bids else 0
 
     def get_best_ask(self):
         """Returns lowest ask price."""
-        return self.asks[0] if self.asks else None
+        return self.asks[0].get_price() if self.asks else 0
 
     def get_volume_at_price(self, side, price):
         """Returns volume of open orders for given side of the order book."""
@@ -231,9 +237,12 @@ class OrderBook:
 
 
 if __name__ == "__main__":
+    client1 = Client("u1", "pw", "timcook@aol.com", "Tim", "Cook")
+    client2 = Client("u2", "pw", "lbj@nba.com", "LeBron", "James")
+
     order_book = OrderBook("AAPL")
-    order_book.place_order("order1", SELL, 100.5, 10, "ClientA")
-    order_book.place_order("order2", BUY, 101.0, 5, "ClientB")
+    order_book.place_order(SELL, 100.5, 10, 0)
+    order_book.place_order(BUY, 101.0, 5, 1)
     best_bid = order_book.get_best_bid()
     best_ask = order_book.get_best_ask()
-    print(best_bid)
+    print(best_bid, best_ask)
