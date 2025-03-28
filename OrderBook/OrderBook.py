@@ -72,6 +72,12 @@ class Client:
                 raise ValueError("Insufficient stock in portfolio")
             self.portfolio[ticker] += vol
 
+    def display_portfolio(self):
+        res = f"Portfolio of {str(self)}:"
+        for ticker in self.portfolio:
+            res += f"\n  {ticker}:\t  {self.portfolio[ticker]}"
+        return res
+
 
 class Order:
     counter = 0
@@ -359,4 +365,5 @@ if __name__ == "__main__":
     # print(order_book.get_best())
 
     # print(Order.get_order_by_id(1).volume)
-    print(client1.portfolio, client2.portfolio)
+    print(client1.display_portfolio())
+    print(client2.display_portfolio())
