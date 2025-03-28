@@ -2,6 +2,7 @@ from enum import Enum
 import heapq
 from collections import deque
 from datetime import datetime, timezone
+from sortedcontainers import SortedList
 
 
 class BuyOrSell(Enum):
@@ -25,7 +26,7 @@ class Client:
 
     def __init__(self, username, password, email, first_names, last_name):
         counter += 1
-        self.counter = counter
+        self.client_id = counter
         all_clients += self
         self.username = username
         self.password = password
@@ -40,6 +41,9 @@ class Client:
     def get_client_by_id(id):
         return Client._all_clients[id]
 
+    def get_id(self):
+        return self.client_id
+
 
 class Order:
     counter = 0
@@ -48,7 +52,8 @@ class Order:
     def __init__(self, stock_id, side, price, volume, client_id):
         counter += 1
         self.order_id = counter
-        __all_orders += self
+        self.cancelled = False
+        _all_orders += self
         self.timestamp = datetime.now(timezone.utc)
         self.stock_id = stock_id
         self.side = side
@@ -60,11 +65,38 @@ class Order:
     def get_order_by_id(id):
         return Order._all_orders[id]
 
-    def _amount_valid(self):
+    def get_id(self):
+        return self.order_id
+
+    def get_side(self):
+        return self.side
+
+    def get_price(self):
+        return self.price
+
+    def get_volume(self):
+        return self.volume
+
+    def add_volume(self, amt):
+        self.volume += amt
+
+    def get_client(self):
+        return self.client
+
+    def get_stock_id(self):
+        return self.stock_id
+
+    def cancel(self):
+        self.cancelled = True
+
+    def valid_volume(self):
         """
         Returns the maximum possible volume of a given order that is valid. If 0 is returned,
-        then order is not valid.
+        then order is not valid or cancelled.
         """
+        if self.cancelled:
+            return 0
+
         client = self.client
 
         if self.side == BUY:
@@ -77,10 +109,12 @@ class Order:
 
 class Transaction:
     counter = 0
+    _all_transactions = []
 
     def __init__(self, bidder_id, bid_price, asker_id, ask_price, vol, stock_id):
         counter += 1
         self.transaction_id = counter
+        _all_transactions += self
         self.timestamp = datetime.now(timezone.utc)
         self.bidder_id = bidder_id
         self.bid_price = bid_price
@@ -88,6 +122,18 @@ class Transaction:
         self.ask_price = ask_price
         self.vol = vol
         self.stock_id = stock_id
+
+    def __init__(self, bid, ask, vol):  # precondition: bid, ask have same stock
+        counter += 1
+        self.transaction_id = counter
+        _all_transactions += self
+        self.timestamp = datetime.now(timezone.utc)
+        self.bidder_id = bid.get_client()
+        self.bid_price = bid.get_price()
+        self.asker_id = ask.get_client()
+        self.ask_price = ask.get_price()
+        self.vol = vol
+        self.stock_id = bid.get_stock_id()
 
 
 """
@@ -99,11 +145,8 @@ adding, modifying, and removing orders. It also automatically matches trades whe
 
 Attributes:
     ticker (str): The symbol representing the asset being traded.
-    bids (sorted array): An array storing buy orders, sorted by price (highest first).
-    asks (sorted array): An array storing sell orders, sorted by price (lowest first).
-    order_map (dict): A mapping of order IDs to their corresponding orders.
-    volume_map (dict): A mapping of price and side to volume tradeable at that price.
-    queue_map (dict): A mapping of price and side to the relevant queue with orders.
+    bids (SortedList): A SortedList storing buy orders, sorted by price (highest first).
+    asks (SortedList): A SortedList storing sell orders, sorted by price (lowest first).
 
 Usage:
     order_book = OrderBook()
@@ -124,79 +167,51 @@ class OrderBook:
         if not ticker:
             ticker = ""
         self.ticker = ticker
-        self.bids = []
-        self.asks = []
-        self.order_map = dict()
-        self.volume_map = dict()
-        self.queue_map = dict()
-        self.cancelled = []
-
-    def __add_order_to_book(self, order):
-        """Add order to order book."""
-        if not (order.price, order.side) in self.queue_map:
-            # orders at price,side don't exist
-            self.queue_map[(order.price, order.side)] = deque()
-            self.queue_map[(order.price, order.side)].append(order)
-            self.volume_map[(order.price, order.side)] = order.volume
-            same_book = self.bids if order.side == BUY else self.asks
-            heapq.heappush(same_book, order.volume)
-
-        else:
-            # orders at price,side already exist
-            self.queue_map[(order.price, order.side)].append(order)
-            self.volume_map[(order.price, order.side)] += order.volume
+        self.bids = SortedList(key=lambda o: (-o.price, o.timestamp))
+        self.asks = SortedList(key=lambda o: (o.price, o.timestamp))
 
     def _place_order(self, order):
         """Place a given order and execute trades if feasible."""
         opposite_book = self.asks if order.side == BUY else self.bids
         same_book = self.bids if order.side == BUY else self.asks
-        self.order_map[order.order_id] = order
 
-        while order.volume > 0 and opposite_book:
-            trade_price = opposite_book[0]
-            opposite_side = order.side.opposite()
-            if not trade_price <= order.price:
+        while order.valid_volume() > 0 and opposite_book:
+            other_order = opposite_book[0]
+            trade_price = other_order.get_price()
+            if not trade_price <= order.get_price():
                 break
-            try:
-                queue = self.queue_map[(trade_price, opposite_side)]
-            except:
-                break
-            other_order = queue[0]
-            trade_price = other_order.price, trade_volume = min(
-                order.volume, other_order.volume
-            )
-            other_order.volume -= trade_volume
-            order.volume -= trade_volume
+            trade_volume = min(order.valid_volume(), other_order.valid_volume())
+            other_order.add_volume(-trade_volume)
+            order.add_volume(-trade_volume)
             print(
                 f"Made by {other_order.client}, taken by {order.client}, {trade_volume} shares @ {trade_price}"
             )
+            Transaction(order, other_order, trade_volume)
 
             if other_order.volume == 0:
-                self.cancel(other_order.order_id)
+                self.cancel(other_order.get_id())
 
         if order.volume > 0:
             # all possible trades have been executed, so store in the book
-            self.__add_order_to_book(order)
+            same_book.add(order)
 
     def place_order(self, side, price, volume, client):
         """Place order directly with the information entered."""
-        self._place_order(Order(side, price, volume, client))
-        return
+        order = Order(side, price, volume, client)
+        self._place_order(order)
+        return order.order_id
 
     def cancel(self, order_id):
         """Cancel an order, specified by its id."""
-        if order_id in self.order_map:
-            order = self.order_map[order_id]
-            price_queue = self.queue_map[(order.price, order.side)]
-            price_queue.remove(order)
+        order = Order.get_order_by_id(order_id)
+        book = self.bids if order.get_side() == BUY else self.asks
 
-            # if the queue is empty, remove the price from the bids/asks heaps
-            if price_queue.len == 0:
-                heapq.heappop(same_book)
-                same_book = self.bids if order.side == BUY else self.asks
+        try:
+            book.remove(order)
+        except:
+            return False
 
-            self.volume_map[(order.price, order.side)] -= order.volume
-            self.order_map.delete(order_id)
+        return True
 
     def get_best_bid(self):
         """Returns highest bid price."""
@@ -206,12 +221,13 @@ class OrderBook:
         """Returns lowest ask price."""
         return self.asks[0] if self.asks else None
 
-    def get_volume_at_price(self, side):
+    def get_volume_at_price(self, side, price):
         """Returns volume of open orders for given side of the order book."""
-        book = self.bids if side == BUY else self.asks
-        if not book:
-            return 0
-        return book[0]
+        pass
+
+    def edit_order(self, order_id, new_price, new_vol):
+        """Edits order with new price and volume."""
+        pass
 
 
 if __name__ == "__main__":
