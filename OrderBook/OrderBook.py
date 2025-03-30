@@ -24,6 +24,7 @@ SELL = BuyOrSell.SELL
 class Client:
     counter = 0
     _all_clients = []
+    usernames = set()
 
     def __init__(
         self,
@@ -38,7 +39,10 @@ class Client:
         self.client_id = Client.counter
         Client.counter += 1
         Client._all_clients += [self]
+        if username in Client.usernames:
+            raise ValueError(f"Username {username} is not available")
         self.username = username
+        Client.usernames.add(username)
         self.password = password
         self.email = email
         self.first_names = first_names
@@ -50,10 +54,10 @@ class Client:
     def __str__(self):
         return f"{self.first_names} {self.last_name} ({self.username})"
 
-    @staticmethod
-    def get_client_by_id(id):
+    @classmethod
+    def get_client_by_id(cls, id):
         try:
-            return Client._all_clients[id]
+            return cls._all_clients[id]
         except:
             return None
 
@@ -94,15 +98,16 @@ class Order:
         self.price = price
         self.volume = volume
         self.client = Client.get_client_by_id(client_id)
+        self._total_volume = volume  # constant keeping track of total volume
         self.executed_volume = 0
 
     def __str__(self):
         return f"Order[{self.order_id}]: {self.side,OrderBook.get_ticker_by_id(self.stock_id),self.volume} @ {self.price}"
 
-    @staticmethod
-    def get_order_by_id(id):
+    @classmethod
+    def get_order_by_id(cls, id):
         try:
-            return Order._all_orders[id]
+            return cls._all_orders[id]
         except:
             return None
 
@@ -115,11 +120,23 @@ class Order:
     def get_price(self):
         return self.price
 
+    def set_price(self, price):
+        self.price = price
+
     def get_volume(self):
         return self.volume
 
-    def _add_volume(self, amt):  # to be used in the edit function
-        self.volume += amt
+    def get_total_volume(self):  # to be used in the edit function
+        return self._total_volume
+
+    def set_volume(self, amt):  # to be used in the edit function
+        """Sets volume of order and returns the difference in volumes."""
+        diff = min(
+            amt - self._total_volume, -self.volume
+        )  # can't decrease volume by more than itself
+        self._total_volume += diff
+        self.volume += diff
+        return diff
 
     def execute_volume(self, amt):
         self.volume -= amt
@@ -196,12 +213,20 @@ class Transaction:
             bid.get_stock_id(),
         )
 
-    @staticmethod
-    def get_transaction_by_id(id):
+    @classmethod
+    def get_transaction_by_id(cls, id):
         try:
-            return Transaction._all_transactions[id]
+            return cls._all_transactions[id]
         except:
             return None
+
+    @classmethod
+    def export_transactions(cls):
+        """Returns all transactions as 5-tuples (order_id, timestamp, price, volume, stock_id) for export to frontend."""
+        return [
+            (t.transaction_id, t.timestamp, t.price, t.vol, t.stock_id)
+            for t in cls._all_transactions
+        ]
 
 
 """
@@ -244,16 +269,16 @@ class OrderBook:
         self.bids = SortedList(key=lambda o: (-o.price, o.timestamp))
         self.asks = SortedList(key=lambda o: (o.price, o.timestamp))
 
-    @staticmethod
-    def get_book_by_id(id):
+    @classmethod
+    def get_book_by_id(cls, id):
         try:
-            return OrderBook._all_books[id]
+            return cls._all_books[id]
         except:
             return None
 
-    @staticmethod
-    def get_ticker_by_id(id):
-        book = OrderBook.get_book_by_id(id)
+    @classmethod
+    def get_ticker_by_id(cls, id):
+        book = cls.get_book_by_id(id)
         if not book:
             return None
         return book.ticker
@@ -338,12 +363,45 @@ class OrderBook:
         return (self.get_best_bid(), self.get_best_ask())
 
     def get_volume_at_price(self, side, price):
-        """Returns volume of open orders for given side of the order book."""
-        pass
+        """Returns volume of open orders (some of which may not be valid) for given side of the order book."""
+        book = self.bids if side == BUY else self.asks
+        key = (
+            (-price, datetime.fromtimestamp(0, timezone.utc))
+            if side == BUY
+            else (price, datetime.fromtimestamp(0, timezone.utc))
+        )
+
+        first_index = book.bisect_key_left(
+            key
+        )  # first index i s.t. book[i].price >= price
+        if book[first_index].get_price() > price:
+            return 0
+
+        index = first_index
+        volume = 0
+        while index < len(book) and book[index].get_price() == price:
+            volume += book[index].get_volume()
+            index += 1
+        return volume
 
     def edit_order(self, order_id, new_price, new_vol):
-        """Edits order with new price and volume."""
-        pass
+        """Edits order with new price and volume. Returns difference in volumes (as it may not be possible to change volume fully)."""
+        order = Order.get_order_by_id(order_id)
+        order.set_price(new_price)
+        diff = order.set_volume(new_vol)
+        return diff
+
+    def export_asks(self):
+        """Returns all asks as 5-tuples (order_id, timestamp, price, volume, stock_id) for export to frontend."""
+        return [
+            (o.order_id, o.timestamp, o.price, o.volume, o.stock_id) for o in self.asks
+        ]
+
+    def get_all_bids(self):
+        """Returns all bids as 5-tuples (order_id, timestamp, price, volume, stock_id) for export to frontend."""
+        return [
+            (o.order_id, o.timestamp, o.price, o.volume, o.stock_id) for o in self.bids
+        ]
 
 
 if __name__ == "__main__":
