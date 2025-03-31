@@ -72,7 +72,7 @@ class Client:
         if not ticker in self.portfolio:
             self.portfolio[ticker] = vol
         else:
-            if vol > self.portfolio[ticker]:
+            if self.portfolio[ticker] + vol < 0:
                 raise ValueError("Insufficient stock in portfolio")
             self.portfolio[ticker] += vol
 
@@ -99,7 +99,7 @@ class Order:
         self.volume = volume
         self.client = Client.get_client_by_id(client_id)
         self._total_volume = volume  # constant keeping track of total volume
-        self.executed_volume = 0
+        self.transaction_ids = []  # TODO: implement this
 
     def __str__(self):
         return f"Order[{self.order_id}]: {self.side,OrderBook.get_ticker_by_id(self.stock_id),self.volume} @ {self.price}"
@@ -140,7 +140,6 @@ class Order:
 
     def execute_volume(self, amt):
         self.volume -= amt
-        self.executed_volume += amt
         self.client.add_stock_to_portfolio(self.stock_id, amt)
 
     def get_client(self):
@@ -152,7 +151,7 @@ class Order:
     def cancel(self):
         self.cancelled = True
 
-    def valid_volume(self):
+    def valid_volume(self):  # TODO: rewrite to use correct price
         """
         Returns the maximum possible volume of a given order that is valid. If 0 is returned,
         then order is not valid or cancelled.
@@ -178,6 +177,7 @@ class Transaction:
     _all_transactions = []
 
     def __init__(self, bidder, bid_price, asker, ask_price, price, vol, stock_id):
+        # TODO: rewrite to fix balance and add stock here, and log transaction
         self.transaction_id = Transaction.counter
         Transaction.counter += 1
         Transaction._all_transactions += [self]
@@ -389,6 +389,7 @@ class OrderBook:
         order = Order.get_order_by_id(order_id)
         order.set_price(new_price)
         diff = order.set_volume(new_vol)
+        # TODO: execute orders at this new (price, vol), if possible
         return diff
 
     def export_asks(self):
