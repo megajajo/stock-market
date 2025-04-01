@@ -3,3 +3,8 @@ I try to buy stocks with balance that I don't have?
 
 
 2. Might need a whole market if I test with multiple types of stocks, will implement this later in the week.
+
+
+3. What happens when a client wants to buy from himself?
+
+4. I want to organize all that is related to tests in a folder after I finish implementing everything

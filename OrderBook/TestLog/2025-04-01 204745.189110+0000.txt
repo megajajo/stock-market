@@ -1,0 +1,175 @@
+Clients:
+ID: 0, Balance: 2972
+ID: 1, Balance: 212
+ID: 2, Balance: 2626
+ID: 3, Balance: 4395
+
+------------------------------------------------------------
+Last processed order:    BUY: 1, 489 @ 53
+Asks:
+
+Bids:
+ID: 10, Price: 489, Volume: 53
+
+Clients:
+ID: 0, Balance: 2972
+ID: 1, Balance: 212
+ID: 2, Balance: 2626
+ID: 3, Balance: 4395
+
+------------------------------------------------------------
+Last processed order:    BUY: 1, 160 @ 92
+Asks:
+
+Bids:
+ID: 10, Price: 489, Volume: 53
+ID: 11, Price: 160, Volume: 92
+
+Clients:
+ID: 0, Balance: 2972
+ID: 1, Balance: 212
+ID: 2, Balance: 2626
+ID: 3, Balance: 4395
+
+------------------------------------------------------------
+Last processed order:    SELL: 0, 354 @ 4
+Asks:
+ID: 12, Price: 354, Volume: 4
+
+Bids:
+ID: 10, Price: 489, Volume: 53
+ID: 11, Price: 160, Volume: 92
+
+Clients:
+ID: 0, Balance: 2972
+ID: 1, Balance: 212
+ID: 2, Balance: 2626
+ID: 3, Balance: 4395
+
+------------------------------------------------------------
+Last processed order:    BUY: 2, 519 @ 29
+Asks:
+
+Bids:
+ID: 13, Price: 519, Volume: 29
+ID: 10, Price: 489, Volume: 53
+ID: 11, Price: 160, Volume: 92
+
+Clients:
+ID: 0, Balance: 2972
+ID: 1, Balance: 212
+ID: 2, Balance: 2626
+ID: 3, Balance: 4395
+
+------------------------------------------------------------
+Last processed order:    BUY: 1, 993 @ 49
+Asks:
+
+Bids:
+ID: 14, Price: 993, Volume: 49
+ID: 13, Price: 519, Volume: 29
+ID: 10, Price: 489, Volume: 53
+ID: 11, Price: 160, Volume: 92
+
+Clients:
+ID: 0, Balance: 2972
+ID: 1, Balance: 212
+ID: 2, Balance: 2626
+ID: 3, Balance: 4395
+
+------------------------------------------------------------
+Last processed order:    SELL: 3, 278 @ 70
+Asks:
+ID: 15, Price: 278, Volume: 70
+
+Bids:
+ID: 14, Price: 993, Volume: 49
+ID: 13, Price: 519, Volume: 29
+ID: 10, Price: 489, Volume: 53
+ID: 11, Price: 160, Volume: 92
+
+Clients:
+ID: 0, Balance: 2972
+ID: 1, Balance: 212
+ID: 2, Balance: 2626
+ID: 3, Balance: 4395
+
+------------------------------------------------------------
+Last processed order:    SELL: 3, 544 @ 25
+Asks:
+ID: 15, Price: 278, Volume: 70
+ID: 16, Price: 544, Volume: 25
+
+Bids:
+ID: 14, Price: 993, Volume: 49
+ID: 13, Price: 519, Volume: 29
+ID: 10, Price: 489, Volume: 53
+ID: 11, Price: 160, Volume: 92
+
+Clients:
+ID: 0, Balance: 2972
+ID: 1, Balance: 212
+ID: 2, Balance: 2626
+ID: 3, Balance: 4395
+
+------------------------------------------------------------
+Last processed order:    SELL: 2, 503 @ 14
+Asks:
+ID: 15, Price: 278, Volume: 70
+ID: 17, Price: 503, Volume: 14
+ID: 16, Price: 544, Volume: 25
+
+Bids:
+ID: 14, Price: 993, Volume: 49
+ID: 13, Price: 519, Volume: 29
+ID: 10, Price: 489, Volume: 53
+ID: 11, Price: 160, Volume: 92
+
+Clients:
+ID: 0, Balance: 2972
+ID: 1, Balance: 212
+ID: 2, Balance: 2626
+ID: 3, Balance: 4395
+
+------------------------------------------------------------
+Last processed order:    SELL: 3, 459 @ 42
+Asks:
+ID: 15, Price: 278, Volume: 70
+ID: 18, Price: 459, Volume: 42
+ID: 17, Price: 503, Volume: 14
+ID: 16, Price: 544, Volume: 25
+
+Bids:
+ID: 14, Price: 993, Volume: 49
+ID: 13, Price: 519, Volume: 29
+ID: 10, Price: 489, Volume: 53
+ID: 11, Price: 160, Volume: 92
+
+Clients:
+ID: 0, Balance: 2972
+ID: 1, Balance: 212
+ID: 2, Balance: 2626
+ID: 3, Balance: 4395
+
+------------------------------------------------------------
+Last processed order:    SELL: 0, 998 @ 42
+Asks:
+ID: 15, Price: 278, Volume: 70
+ID: 18, Price: 459, Volume: 42
+ID: 17, Price: 503, Volume: 14
+ID: 16, Price: 544, Volume: 25
+ID: 19, Price: 998, Volume: 42
+
+Bids:
+ID: 14, Price: 993, Volume: 49
+ID: 13, Price: 519, Volume: 29
+ID: 10, Price: 489, Volume: 53
+ID: 11, Price: 160, Volume: 92
+
+Clients:
+ID: 0, Balance: 2972
+ID: 1, Balance: 212
+ID: 2, Balance: 2626
+ID: 3, Balance: 4395
+
+------------------------------------------------------------
