@@ -1,34 +1,3 @@
-"""
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣤⣴⣶⣶⣿⣿⣿⣿⣿⣿⣿⣷⣶⣶⣦⣤⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣤⣾⣿⡿⠿⠛⠋⠉⠁⠀⠀⠀⠀⠀⠀⠈⠉⠙⠛⠿⢿⣿⣷⣦⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⣾⣿⠟⠋⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠙⠻⢿⣿⣦⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣴⣾⡿⠋⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠻⢿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⣾⡿⠋⠀⣠⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⢿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⣴⣿⠟⠀⠀⠀⣿⠀⠀⠀⢀⡄⠀⠀⠀⠀⠀⠀⠀⣠⣾⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠹⣿⣷⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⠏⠀⠀⠀⠀⣿⣄⠀⣠⣾⣇⠀⠀⠀⣀⣤⣶⡿⠛⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⣀⠀⠀⠀⠀⣼⣿⠃⠀⠀⠀⠀⢰⠟⣿⠿⠋⠘⠿⣿⣿⣿⡟⠋⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⣿⣿⡀⠀⠀⠀⠀⠀⠀⠀
-⣼⡿⠿⢿⣷⣶⣴⣿⠏⠀⠀⠀⠀⠀⣿⣿⡿⠀⠀⠀⠀⣿⣼⣿⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⣿⣷⠀⠀⠀⠀⠀⠀⠀
-⣿⣇⠀⠀⠈⢛⣿⡟⠀⠀⠀⠀⠀⠀⠘⠟⠁⠀⠀⠀⠀⢻⣿⠟⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⣀⣀⠀⠀⠀⢸⣿⣇⠀⠀⠀⠀⠀⠀
-⢹⣿⠀⠀⠀⣼⣿⠃⠀⠀⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣠⣴⣶⣦⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣤⣴⣾⠿⠟⠛⠛⠻⣿⣆⠀⠀⢿⣿⠀⠀⠀⠀⠀⠀
-⠘⣿⡇⠀⠀⣿⣿⠀⠀⢸⣷⡀⠀⠀⠀⠀⠀⠀⠀⣀⣠⣤⣶⡿⠟⠛⢩⣿⣿⠀⠀⠀⠀⠀⠀⠀⢀⣴⣾⠿⠛⠉⠀⠀⠀⠀⠀⢀⣿⡇⠀⠀⢸⣿⡇⠀⠀⠀⠀⠀
-⠀⢹⣿⡄⢰⣿⡇⠀⠀⠀⣿⣿⣶⣶⣶⣶⣶⣾⡿⠟⢻⣿⠁⠀⠀⠀⣸⣿⣿⡇⠀⠀⠀⠀⠀⠀⠿⠛⠁⠀⠀⠀⠀⠀⠀⠀⢀⣼⡿⠀⠀⠀⠀⣿⡇⠀⠀⠀⠀⠀
-⠀⠀⢻⣿⣼⣿⡇⠀⠀⠀⢸⡇⠈⠉⢹⣇⠀⣸⣧⠀⣼⣿⡆⠀⠀⢠⣿⣧⣿⠇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⣿⠟⠀⠀⠀⠀⠀⣿⣿⠀⠀⠀⠀⠀
-⠀⠀⠀⠹⣿⣿⡇⠀⠀⠀⢸⣿⠀⠀⢸⣿⣄⣿⣿⣷⣿⠿⣿⡄⠀⣼⡿⢸⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⣾⡿⠋⠀⠀⠀⠀⠀⠀⣿⣿⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⢸⣿⡇⠀⠀⠀⠸⣿⡆⠀⣿⣿⣿⡟⠋⠙⠁⠀⠙⢿⣶⣿⠃⢸⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⣾⡿⠋⠀⠀⠀⠀⠀⠀⠀⠀⣿⣿⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⢸⣿⡇⠀⠀⠀⠀⣿⣿⣾⣿⣿⡟⠀⠀⠀⠀⠀⠀⠈⠙⠁⠀⣿⡿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⡟⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠈⣿⣇⠀⠀⠀⠀⢿⣿⣿⣿⡟⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣿⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⡇⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⢿⣿⠀⠀⠀⠀⠸⣿⣿⣿⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣸⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣿⣷⣶⣶⣶⣤⣀
-⠀⠀⠀⠀⠀⠸⣿⡇⠀⠀⠀⠀⢹⣿⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⣿⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠸⠟⠁⠀⠀⠈⣹⣿
-⠀⠀⠀⠀⠀⠀⢻⣿⡄⠀⠀⠀⠀⢿⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⡿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⣿⠏
-⠀⠀⠀⠀⠀⠀⠈⢿⣷⡀⠀⠀⠀⠈⢿⣧⡀⠀⠀⠀⠀⠀⠀⢀⣼⡿⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣠⣾⠟⠁⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⢻⣿⣄⠀⠀⠀⠀⠹⣿⣦⣀⠀⠀⢀⣠⣾⡟⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣴⣿⠟⠁⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠹⣿⣦⡀⠀⠀⠀⠈⠛⠿⣿⣿⡿⠿⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣴⣾⡿⠟⠁⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠻⣿⣦⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣠⣴⣿⠿⠛⠁⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠻⢿⣷⣤⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣠⣤⣶⣾⡿⠟⠋⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠛⢿⣿⣶⣦⣤⣀⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣀⣤⣴⣶⣿⡿⠟⠛⠉⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠛⠿⠿⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠿⠿⠛⠋⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-
-"""
 from enum import Enum
 
 # import heapq
@@ -95,23 +64,55 @@ class Client:
     def get_id(self):
         return self.client_id
 
-    def add_stock_to_portfolio(self, stock_id, vol):
+    def get_balance(self):
+        return self.balance
+
+    def buy_stock(self, stock_id, price, vol):
+        # remove money from balance
+        if self.balance < vol * price:
+            raise ValueError(f"Buyer {self.username} has insufficient funds")
+        self.balance -= price * vol
+
+        # add stock to portfolio
         ticker = OrderBook.get_ticker_by_id(stock_id)
         if not ticker:
             raise ValueError("Stock does not exist")
+        if vol <= 0:
+            raise ValueError("Must buy a positive amount")
 
         if not ticker in self.portfolio:
             self.portfolio[ticker] = vol
         else:
-            if self.portfolio[ticker] + vol < 0:
-                raise ValueError("Insufficient stock in portfolio")
             self.portfolio[ticker] += vol
+
+    def sell_stock(self, stock_id, price, vol):
+        # add money to balance
+        self.balance += price * vol
+
+        # remove stock from portfolio
+        ticker = OrderBook.get_ticker_by_id(stock_id)
+        if not ticker:
+            raise ValueError("Stock does not exist")
+        if vol <= 0:
+            raise ValueError("Must sell a positive amount")
+
+        if not ticker in self.portfolio:
+            raise ValueError(f"Seller {self.username} does not own the stock")
+        else:
+            if self.portfolio[ticker] < vol:
+                raise ValueError(f"Seller {self.username} has insufficient stock")
+            self.portfolio[ticker] -= vol
+            if self.portfolio[ticker] == 0:  # if stock is no longer held
+                del self.portfolio[ticker]  # remove from portfolio
 
     def display_portfolio(self):
         res = f"Portfolio of {str(self)}:"
         for ticker in self.portfolio:
             res += f"\n  {ticker}:\t  {self.portfolio[ticker]}"
         return res
+
+    def display_balance(self):
+        return f"Balance of {str(self)}:\t  {self.balance}"
 
 
 class Order:
@@ -121,7 +122,7 @@ class Order:
     def __init__(self, stock_id, side, price, volume, client_id):
         self.order_id = Order.counter
         Order.counter += 1
-        self.cancelled = False
+        self.terminated = False
         Order._all_orders += [self]
         self.timestamp = datetime.now(timezone.utc)
         self.stock_id = stock_id
@@ -130,7 +131,7 @@ class Order:
         self.volume = volume
         self.client = Client.get_client_by_id(client_id)
         self._total_volume = volume  # constant keeping track of total volume
-        self.transaction_ids = []  # TODO: implement this
+        self.transaction_ids = []
 
     def __str__(self):
         return f"Order[{self.order_id}]: {self.side,OrderBook.get_ticker_by_id(self.stock_id),self.volume} @ {self.price}"
@@ -169,9 +170,29 @@ class Order:
         self.volume += diff
         return diff
 
-    def execute_volume(self, amt):
-        self.volume -= amt
-        self.client.add_stock_to_portfolio(self.stock_id, amt)
+    def execute_trade(self, transaction_id, price, vol, side: BuyOrSell):
+        """Update state to execute trade."""
+        if self.volume < vol:
+            raise ValueError(
+                "Order volume was exceeded"
+            )  # precondition: vol <= self.volume
+
+        self.transaction_ids += [transaction_id]
+        self.volume -= vol
+
+        if side == BUY:
+            self.client.buy_stock(self.stock_id, price, vol)
+            if self.volume > 0 and self.client.get_balance() == 0:
+                self.cancel()  # cancel the order if buyer has run out of funds
+        else:  # side == SELL
+            self.client.sell_stock(self.stock_id, price, vol)
+
+            ticker = OrderBook.get_ticker_by_id(self.stock_id)
+            if self.volume > 0 and ticker not in self.client.portfolio:
+                self.cancel()  # cancel the order if seller ran out of stock
+
+        if self.volume == 0:
+            self.terminated = True
 
     def get_client(self):
         return self.client
@@ -179,26 +200,62 @@ class Order:
     def get_stock_id(self):
         return self.stock_id
 
-    def cancel(self):
-        self.cancelled = True
+    def get_executed_volume(self):
+        return self._total_volume - self.volume
 
-    def valid_volume(self):  # TODO: rewrite to use correct price
+    def cancel(self):
+        """Cancel an order."""
+        self.terminated = True  # mark as cancelled
+
+        # remove stock from relevant order book
+        stock = OrderBook.get_book_by_id(self.stock_id)
+        book = stock.bids if self.side == BUY else stock.asks
+
+        if not self in book:
+            raise ValueError("Order not in book being cancelled")
+        book.remove(self)
+
+        # log cancellation
+        print(
+            f"Order[{self.order_id}] cancelled after {self.get_executed_volume()}/{self._total_volume} shares executed"
+        )
+
+    def is_executable(self):
+        """Returns whether order is executable (potentially with volume 0)."""
+        if self.terminated:  # order isn't executable if terminated
+            return False
+
+        if self.side == SELL:
+            ticker = OrderBook.get_ticker_by_id(self.stock_id)
+            return (
+                ticker in self.client.portfolio
+            )  # anything in the portfolio should have positive volume
+        # else:
+        #     return self.client.get_balance() >= self.price # buyer can afford at least one stock at full price
+
+        return True
+
+    def executable_volume(self, price=None):
         """
-        Returns the maximum possible volume of a given order that is valid. If 0 is returned,
-        then order is not valid or cancelled.
+        Returns the maximum possible executable volume of a given order. If 0 is returned,
+        then order is cancelled or has no executable volume at the price.
+
+        Precondition: If order is a sell, then ticker is in the seller's portfolio.
         """
-        if self.cancelled:
+        if self.terminated:
             return 0
 
-        client = self.client
+        price = price if price is not None else self.price
 
         if self.side == BUY:
-            max_feasible_volume = client.balance // self.price  # no fractional shares
+            max_feasible_volume = (
+                self.client.get_balance() // price
+            )  # no fractional shares
         else:  # self.side == SELL
             ticker = OrderBook.get_ticker_by_id(self.stock_id)
-            if ticker not in client.portfolio:
+            if ticker not in self.client.portfolio:
                 return 0
-            max_feasible_volume = client.portfolio[ticker]
+            max_feasible_volume = self.client.portfolio[ticker]
 
         return min(max_feasible_volume, self.volume)
 
@@ -207,42 +264,39 @@ class Transaction:
     counter = 0
     _all_transactions = []
 
-    def __init__(self, bidder, bid_price, asker, ask_price, price, vol, stock_id):
-        # TODO: rewrite to fix balance and add stock here, and log transaction
-        self.transaction_id = Transaction.counter
-        Transaction.counter += 1
-        Transaction._all_transactions += [self]
-        self.timestamp = datetime.now(timezone.utc)
-        self.bidder = bidder
-        self.bid_price = bid_price
-        self.asker = asker
-        self.ask_price = ask_price
-        self.price = price
-        self.vol = vol
-        self.stock_id = stock_id
-
-    def __str__(self):
-        return f"TRANSACTION: {str(self.asker)} sold {str(self.bidder)} {self.vol} shares of {OrderBook.get_ticker_by_id(self.stock_id)} @ {self.price}"
-
-    @classmethod
-    def from_orders(cls, bid, ask, vol):
+    def __init__(self, bid, ask, vol):
         if bid.get_stock_id() != ask.get_stock_id():
             raise ValueError(
                 "Both orders must be from the same stock"
             )  # precondition: bid and ask have same stock
+        else:
+            stock_id = bid.get_stock_id()
 
-        # trade is executed at the price of the earlier order
+        self.transaction_id = Transaction.counter
+        Transaction.counter += 1
+        Transaction._all_transactions += [self]
+
+        self.timestamp = datetime.now(timezone.utc)
+        self.bidder = bid.get_client()
+        self.bid_price = bid.get_price()
+        self.asker = ask.get_client()
+        self.ask_price = ask.get_price()
+
+        # trade is executed at the price of the order with earlier timestamp
         price = bid.get_price() if bid.timestamp < ask.timestamp else ask.get_price()
+        self.price = price
+        self.vol = vol
+        self.stock_id = stock_id
 
-        return cls(
-            bid.get_client(),
-            bid.get_price(),
-            ask.get_client(),
-            ask.get_price(),
-            price,
-            vol,
-            bid.get_stock_id(),
-        )
+        # update the state of the orders to reflect the transaction
+        bid.execute_trade(self.transaction_id, price, vol, BUY)
+        ask.execute_trade(self.transaction_id, price, vol, SELL)
+
+        # log transaction
+        print(self)
+
+    def __str__(self):
+        return f"TRANSACTION: {str(self.asker)} sold {str(self.bidder)} {self.vol} shares of {OrderBook.get_ticker_by_id(self.stock_id)} @ {self.price}"
 
     @classmethod
     def get_transaction_by_id(cls, id):
@@ -314,48 +368,47 @@ class OrderBook:
             return None
         return book.ticker
 
-    def _place_order(self, order):
+    def _place_order(self, order, editing=False):
         """Place a given order and execute trades if feasible."""
         opposite_book = self.asks if order.side == BUY else self.bids
         same_book = self.bids if order.side == BUY else self.asks
 
         # while a trade is feasible, try to execute one
-        while order.valid_volume() > 0 and opposite_book:
+        while order.is_executable() and opposite_book:
             other_order = opposite_book[0]
             trade_price = other_order.get_price()
 
-            # if all trades at valid prices have been executed, no more trades are executable
+            # if all trades at feasible prices have been executed, no more trades are executable
             if order.side == SELL and trade_price < order.get_price():
                 break
             elif order.side == BUY and trade_price > order.get_price():
                 break
 
-            # if the other order isn't valid, remove it
-            if other_order.valid_volume() == 0:
-                print("WARNING: Cancelled " + other_order)
-                self._cancel(other_order)
-                opposite_book = opposite_book[1:]
+            # if order is executable, but has 0 volume, no more trades would be currently feasible
+            if order.executable_volume(trade_price) == 0:
+                break
+
+            # if the other order can't trade at this price, skip it
+            if other_order.executable_volume() == 0:
+                if (
+                    not other_order.is_executable()
+                ):  # if the other order isn't executable, remove it
+                    other_order.cancel()
                 continue
 
             # otherwise, a positive number of shares can be traded
-            trade_volume = min(order.valid_volume(), other_order.valid_volume())
+            trade_volume = min(
+                order.executable_volume(), other_order.executable_volume()
+            )
 
             if order.side == BUY:
-                order.execute_volume(trade_volume)
-                other_order.execute_volume(-trade_volume)
-                trade = Transaction.from_orders(order, other_order, trade_volume)
+                trade = Transaction(order, other_order, trade_volume)
             else:  # order.side == SELL
-                order.execute_volume(-trade_volume)
-                other_order.execute_volume(trade_volume)
-                trade = Transaction.from_orders(other_order, order, trade_volume)
-            print(trade)
+                trade = Transaction(other_order, order, trade_volume)
 
-            if other_order.volume == 0:
-                self._cancel(other_order)
-
-        print(order)
-        if order.volume > 0:
+        if order.volume > 0 and not editing:
             # all possible trades have been executed, so store the remaining order in the book
+            # as long as the order is new (and not an edit of a previous order)
             same_book.add(order)
 
     def place_order(self, side, price, volume, client):
@@ -363,23 +416,6 @@ class OrderBook:
         order = Order(self.stock_id, side, price, volume, client)
         self._place_order(order)
         return order.order_id
-
-    def _cancel(self, order):
-        """Cancel an order."""
-        book = self.bids if order.get_side() == BUY else self.asks
-
-        order.cancel()  # mark order as cancelled (to prevent future executions of it)
-
-        try:
-            book.remove(order)
-        except:
-            return False
-
-        return True
-
-    def cancel(self, order_id):
-        """Cancel an order, specified by its id."""
-        self._cancel(Order.get_order_by_id(order_id))
 
     def get_best_bid(self):
         """Returns highest bid price."""
@@ -394,20 +430,24 @@ class OrderBook:
         return (self.get_best_bid(), self.get_best_ask())
 
     def get_volume_at_price(self, side, price):
-        """Returns volume of open orders (some of which may not be valid) for given side of the order book."""
+        """Returns volume of open orders (some of which may not be executable) for given side of the order book."""
         book = self.bids if side == BUY else self.asks
+
+        # key of a hypothetical order with given price and timestamp 0
         key = (
             (-price, datetime.fromtimestamp(0, timezone.utc))
             if side == BUY
             else (price, datetime.fromtimestamp(0, timezone.utc))
         )
 
-        first_index = book.bisect_key_left(
-            key
-        )  # first index i s.t. book[i].price >= price
-        if book[first_index].get_price() > price:
+        # first index i s.t. book[i].price >= price
+        first_index = book.bisect_key_left(key)
+        if (
+            not book or book[first_index].get_price() > price
+        ):  # no orders at given price
             return 0
 
+        # aggregate volume of all orders at this price in the book
         index = first_index
         volume = 0
         while index < len(book) and book[index].get_price() == price:
@@ -420,8 +460,8 @@ class OrderBook:
         order = Order.get_order_by_id(order_id)
         order.set_price(new_price)
         diff = order.set_volume(new_vol)
-        # TODO: execute orders at this new (price, vol), if possible
-        return diff
+        self._place_order(order, editing=True)
+        return diff  # is this really desired ? @Crroco
 
     def export_asks(self):
         """Returns all asks as 5-tuples (order_id, timestamp, price, volume, stock_id) for export to frontend."""
@@ -445,7 +485,7 @@ if __name__ == "__main__":
     # print(client1.portfolio, client2.portfolio)
 
     order_book = OrderBook("AAPL")
-    client1.add_stock_to_portfolio(0, 100)
+    client1.buy_stock(0, 0, 100)
 
     # print(client1.portfolio, client2.portfolio)
 
@@ -455,5 +495,7 @@ if __name__ == "__main__":
     # print(order_book.get_best())
 
     # print(Order.get_order_by_id(1).volume)
+    print(client1.display_balance())
     print(client1.display_portfolio())
+    print(client2.display_balance())
     print(client2.display_portfolio())
