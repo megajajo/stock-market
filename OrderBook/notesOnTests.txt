@@ -1,0 +1,5 @@
+1. What happens if the orders are not feasible? For example, I try to sell stock that I don't have or
+I try to buy stocks with balance that I don't have?
+
+
+2. Might need a whole market if I test with multiple types of stocks, will implement this later in the week.

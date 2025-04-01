@@ -51,8 +51,9 @@ class Client:
         self.balance = balance
         self.portfolio = portfolio if portfolio is not None else {}
 
+    # added balance to debug the tests
     def __str__(self):
-        return f"{self.first_names} {self.last_name} ({self.username})"
+        return f"{self.first_names} {self.last_name} ({self.username}), {self.balance}$"
 
     @classmethod
     def get_client_by_id(cls, id):
@@ -411,9 +412,9 @@ class OrderBook:
             # as long as the order is new (and not an edit of a previous order)
             same_book.add(order)
 
-    def place_order(self, side, price, volume, client):
+    def place_order(self, side, price, volume, client_id):
         """Place order directly with the information entered."""
-        order = Order(self.stock_id, side, price, volume, client)
+        order = Order(self.stock_id, side, price, volume, client_id)
         self._place_order(order)
         return order.order_id
 
@@ -462,6 +463,13 @@ class OrderBook:
         diff = order.set_volume(new_vol)
         self._place_order(order, editing=True)
         return diff  # is this really desired ? @Crroco
+        # I think we can have this, maybe it helps when we try to automate the trading, so we actually know how much the new order actually is)
+        # I think the only "ambiguity" here is for the following case:
+        # first I have an order for 10 shares and 7 of them go through, so I am left with 3s.
+        # and know I want to change the order to 2 shares (2 < 7 shares which I already transactioned). I think we can do 3 things here:
+        # 1. Just cancel the whole order (which happens now because diff = -volume => volume ends up being 0 => cancel), but the traded shares are not recovered.
+        # 2. Try to do the inverse order with volume =  7 - 2 at the same price, so we "technically" lose no money
+        # 3. Don't allow the change and throw an error. (this seems pointless, but I still included it)
 
     def export_asks(self):
         """Returns all asks as 5-tuples (order_id, timestamp, price, volume, stock_id) for export to frontend."""

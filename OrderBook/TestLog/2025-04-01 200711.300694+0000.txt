@@ -1,0 +1,160 @@
+Clients:
+ID: 0, Balance: 4008
+ID: 1, Balance: 7813
+ID: 2, Balance: 8000
+ID: 3, Balance: 1564
+
+Asks:
+ID: 10, Price: 298, Volume: 70
+
+Bids:
+
+Clients:
+ID: 0, Balance: 4008
+ID: 1, Balance: 7813
+ID: 2, Balance: 8000
+ID: 3, Balance: 1564
+
+Asks:
+
+Bids:
+ID: 11, Price: 832, Volume: 65
+
+Clients:
+ID: 0, Balance: 4008
+ID: 1, Balance: 7813
+ID: 2, Balance: 8000
+ID: 3, Balance: 1564
+
+Asks:
+
+Bids:
+ID: 11, Price: 832, Volume: 65
+ID: 12, Price: 422, Volume: 44
+
+Clients:
+ID: 0, Balance: 4008
+ID: 1, Balance: 7813
+ID: 2, Balance: 8000
+ID: 3, Balance: 1564
+
+Asks:
+
+Bids:
+ID: 11, Price: 832, Volume: 65
+ID: 13, Price: 787, Volume: 89
+ID: 12, Price: 422, Volume: 44
+
+Clients:
+ID: 0, Balance: 4008
+ID: 1, Balance: 7813
+ID: 2, Balance: 8000
+ID: 3, Balance: 1564
+
+Asks:
+ID: 14, Price: 907, Volume: 62
+
+Bids:
+ID: 11, Price: 832, Volume: 65
+ID: 13, Price: 787, Volume: 89
+ID: 12, Price: 422, Volume: 44
+
+Clients:
+ID: 0, Balance: 4008
+ID: 1, Balance: 7813
+ID: 2, Balance: 8000
+ID: 3, Balance: 1564
+
+Asks:
+ID: 14, Price: 907, Volume: 62
+
+Bids:
+ID: 11, Price: 832, Volume: 65
+ID: 13, Price: 787, Volume: 89
+ID: 12, Price: 422, Volume: 44
+ID: 15, Price: 402, Volume: 62
+
+Clients:
+ID: 0, Balance: 4008
+ID: 1, Balance: 7813
+ID: 2, Balance: 8000
+ID: 3, Balance: 1564
+
+Asks:
+ID: 16, Price: 218, Volume: 9
+ID: 14, Price: 907, Volume: 62
+
+Bids:
+ID: 11, Price: 832, Volume: 65
+ID: 13, Price: 787, Volume: 89
+ID: 12, Price: 422, Volume: 44
+ID: 15, Price: 402, Volume: 62
+
+Clients:
+ID: 0, Balance: 4008
+ID: 1, Balance: 7813
+ID: 2, Balance: 8000
+ID: 3, Balance: 1564
+
+Asks:
+ID: 14, Price: 907, Volume: 62
+
+Bids:
+ID: 11, Price: 832, Volume: 65
+ID: 17, Price: 794, Volume: 73
+ID: 13, Price: 787, Volume: 89
+ID: 12, Price: 422, Volume: 44
+ID: 15, Price: 402, Volume: 62
+
+Clients:
+ID: 0, Balance: 4008
+ID: 1, Balance: 7813
+ID: 2, Balance: 8000
+ID: 3, Balance: 1564
+
+Asks:
+ID: 14, Price: 907, Volume: 62
+
+Bids:
+ID: 11, Price: 832, Volume: 65
+ID: 17, Price: 794, Volume: 73
+ID: 13, Price: 787, Volume: 89
+ID: 12, Price: 422, Volume: 44
+ID: 15, Price: 402, Volume: 62
+ID: 18, Price: 18, Volume: 42
+
+Clients:
+ID: 0, Balance: 4008
+ID: 1, Balance: 7813
+ID: 2, Balance: 8000
+ID: 3, Balance: 1564
+
+Asks:
+ID: 14, Price: 907, Volume: 62
+
+Bids:
+ID: 19, Price: 883, Volume: 71
+ID: 11, Price: 832, Volume: 65
+ID: 17, Price: 794, Volume: 73
+ID: 13, Price: 787, Volume: 89
+ID: 12, Price: 422, Volume: 44
+ID: 15, Price: 402, Volume: 62
+ID: 18, Price: 18, Volume: 42
+
+Clients:
+ID: 0, Balance: 4008
+ID: 1, Balance: 7813
+ID: 2, Balance: 8000
+ID: 3, Balance: 1564
+
+Clients:
+Last processed order:    SELL: 3, 298 @ 70
+Last processed order:    BUY: 3, 832 @ 65
+Last processed order:    BUY: 0, 422 @ 44
+Last processed order:    BUY: 2, 787 @ 89
+Last processed order:    SELL: 2, 907 @ 62
+Last processed order:    BUY: 1, 402 @ 62
+Last processed order:    SELL: 1, 218 @ 9
+Last processed order:    BUY: 2, 794 @ 73
+Last processed order:    BUY: 2, 18 @ 42
+Last processed order:    BUY: 0, 883 @ 71
