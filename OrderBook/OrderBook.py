@@ -130,6 +130,7 @@ class Order:
         self.side = side
         self.price = price
         self.volume = volume
+        self.client_id = client_id
         self.client = Client.get_client_by_id(client_id)
         self._total_volume = volume  # constant keeping track of total volume
         self.transaction_ids = []
@@ -181,16 +182,21 @@ class Order:
         self.transaction_ids += [transaction_id]
         self.volume -= vol
 
+        stock = OrderBook.get_book_by_id(self.stock_id)
         if side == BUY:
             self.client.buy_stock(self.stock_id, price, vol)
             if self.volume > 0 and self.client.get_balance() == 0:
-                self.cancel()  # cancel the order if buyer has run out of funds
+                stock.cancel_order(
+                    self, cancelling=True
+                )  # cancel the order if buyer has run out of funds
         else:  # side == SELL
             self.client.sell_stock(self.stock_id, price, vol)
 
-            ticker = OrderBook.get_ticker_by_id(self.stock_id)
+            ticker = stock.get_ticker()
             if self.volume > 0 and ticker not in self.client.portfolio:
-                self.cancel()  # cancel the order if seller ran out of stock
+                stock.cancel_order(
+                    self, cancelling=True
+                )  # cancel the order if seller ran out of stock
 
         if self.volume == 0:
             self.terminated = True
@@ -204,21 +210,13 @@ class Order:
     def get_executed_volume(self):
         return self._total_volume - self.volume
 
-    def cancel(self):
-        """Cancel an order."""
-        self.terminated = True  # mark as cancelled
+    def terminate(self):
+        """Terminate an order."""
+        self.terminated = True
 
-        # remove stock from relevant order book
-        stock = OrderBook.get_book_by_id(self.stock_id)
-        book = stock.bids if self.side == BUY else stock.asks
-
-        if not self in book:
-            raise ValueError("Order not in book being cancelled")
-        book.remove(self)
-
-        # log cancellation
+        # log termination
         print(
-            f"Order[{self.order_id}] cancelled after {self.get_executed_volume()}/{self._total_volume} shares executed"
+            f"Order[{self.order_id}] terminated after {self.get_executed_volume()}/{self._total_volume} shares executed"
         )
 
     def is_executable(self):
@@ -355,6 +353,9 @@ class OrderBook:
         self.bids = SortedList(key=lambda o: (-o.price, o.timestamp))
         self.asks = SortedList(key=lambda o: (o.price, o.timestamp))
 
+    def get_ticker(self):
+        return self.ticker
+
     @classmethod
     def get_book_by_id(cls, id):
         try:
@@ -369,8 +370,8 @@ class OrderBook:
             return None
         return book.ticker
 
-    def _place_order(self, order, editing=False):
-        """Place a given order and execute trades if feasible."""
+    def _add_order(self, order):
+        """Add an order to the order book and execute trades if feasible."""
         opposite_book = self.asks if order.side == BUY else self.bids
         same_book = self.bids if order.side == BUY else self.asks
 
@@ -394,7 +395,7 @@ class OrderBook:
                 if (
                     not other_order.is_executable()
                 ):  # if the other order isn't executable, remove it
-                    other_order.cancel()
+                    self._remove_order(other_order, cancelling=True)
                 continue
 
             # otherwise, a positive number of shares can be traded
@@ -407,16 +408,33 @@ class OrderBook:
             else:  # order.side == SELL
                 trade = Transaction(other_order, order, trade_volume)
 
-        if order.volume > 0 and not editing:
+        if order.volume > 0:
             # all possible trades have been executed, so store the remaining order in the book
-            # as long as the order is new (and not an edit of a previous order)
             same_book.add(order)
 
-    def place_order(self, side, price, volume, client_id):
+    def _remove_order(self, order, cancelling=False):
+        """Remove an order from the order book."""
+
+        if cancelling:
+            order.terminate()  # mark order as cancelled
+
+        # remove stock from relevant order book
+        book = self.bids if order.side == BUY else self.asks
+
+        if not order in book:
+            raise ValueError("Order must be in book to be removed")
+        book.remove(order)
+
+    def place_order(self, side, price, volume, client):
         """Place order directly with the information entered."""
-        order = Order(self.stock_id, side, price, volume, client_id)
-        self._place_order(order)
+        order = Order(self.stock_id, side, price, volume, client)
+        self._add_order(order)
         return order.order_id
+
+    def cancel_order(self, order_id):
+        """Cancel an order."""
+        order = Order.get_order_by_id(order_id)
+        self._remove_order(order)
 
     def get_best_bid(self):
         """Returns highest bid price."""
@@ -458,10 +476,15 @@ class OrderBook:
 
     def edit_order(self, order_id, new_price, new_vol):
         """Edits order with new price and volume. Returns difference in volumes (as it may not be possible to change volume fully)."""
-        order = Order.get_order_by_id(order_id)
+        order = Order.get_order_by_id(order_id)  # first, find the order
+        self._remove_order(
+            order, cancelling=False
+        )  # and temporarily remove from the order book
+
+        # then update it and add back
         order.set_price(new_price)
         diff = order.set_volume(new_vol)
-        self._place_order(order, editing=True)
+        self._add_order(order)
         return diff  # is this really desired ? @Crroco
         # I think we can have this, maybe it helps when we try to automate the trading, so we actually know how much the new order actually is)
         # I think the only "ambiguity" here is for the following case:
