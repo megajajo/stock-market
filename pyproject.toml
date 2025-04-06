@@ -11,4 +11,5 @@ dependencies = [
     "pre-commit>=4.1.0",
     "sortedcontainers>=2.4.0",
     "uvicorn>=0.34.0",
+    "websockets>=15.0.1",
 ]
