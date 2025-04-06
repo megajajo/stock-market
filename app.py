@@ -204,7 +204,17 @@ async def get_all_asks(book_id: int):
     order_book = OrderBook.get_book_by_id(book_id)
     if order_book is None:
         return {"error": "Order book not found"}
-    return order_book.get_all_asks()
+    print(order_book.get_all_asks())
+    return [
+        {
+            "order_id": order_id,
+            "timestamp": timestamp,
+            "price": price,
+            "volume": volume,
+            "stock_id": stock_id,
+        }
+        for order_id, timestamp, price, volume, stock_id in order_book.get_all_asks()
+    ]
 
 
 @app.get("/api/get_all_bids")
@@ -223,7 +233,18 @@ async def get_all_bids(book_id: int):
     order_book = OrderBook.get_book_by_id(book_id)
     if order_book is None:
         return {"error": "Order book not found"}
-    return order_book.get_all_bids()
+
+    print(order_book.get_all_bids())
+    return [
+        {
+            "order_id": order_id,
+            "timestamp": timestamp,
+            "price": price,
+            "volume": volume,
+            "stock_id": stock_id,
+        }
+        for order_id, timestamp, price, volume, stock_id in order_book.get_all_bids()
+    ]
 
 
 # Store active WebSocket connections
