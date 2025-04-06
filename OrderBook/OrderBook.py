@@ -51,9 +51,8 @@ class Client:
         self.balance = balance
         self.portfolio = portfolio if portfolio is not None else {}
 
-    # added balance to debug the tests
     def __str__(self):
-        return f"{self.first_names} {self.last_name} ({self.username}), {self.balance}$"
+        return f"{self.first_names} {self.last_name} ({self.username})"
 
     @classmethod
     def get_client_by_id(cls, id):
@@ -129,7 +128,7 @@ class Order:
         self.stock_id = stock_id
         self.side = side
         self.price = price
-        self.volume = volume
+        self.volume = volume  # this is volume left to trade
         self.client_id = client_id
         self.client = Client.get_client_by_id(client_id)
         self._total_volume = volume  # constant keeping track of total volume
@@ -160,12 +159,14 @@ class Order:
     def get_volume(self):
         return self.volume
 
-    def get_total_volume(self):  # to be used in the edit function
+    def get_total_volume(self):  # to be used in the edit function !!! NOT USED
         return self._total_volume
 
-    def set_volume(self, amt):  # to be used in the edit function
+    def set_volume(
+        self, amt
+    ):  # to be used in the edit function, this sets the total_volume
         """Sets volume of order and returns the difference in volumes."""
-        diff = min(
+        diff = max(
             amt - self._total_volume, -self.volume
         )  # can't decrease volume by more than itself
         self._total_volume += diff
@@ -187,16 +188,14 @@ class Order:
             self.client.buy_stock(self.stock_id, price, vol)
             if self.volume > 0 and self.client.get_balance() == 0:
                 stock.cancel_order(
-                    self, cancelling=True
+                    self
                 )  # cancel the order if buyer has run out of funds
         else:  # side == SELL
             self.client.sell_stock(self.stock_id, price, vol)
 
             ticker = stock.get_ticker()
             if self.volume > 0 and ticker not in self.client.portfolio:
-                stock.cancel_order(
-                    self, cancelling=True
-                )  # cancel the order if seller ran out of stock
+                stock.cancel_order(self)  # cancel the order if seller ran out of stock
 
         if self.volume == 0:
             self.terminated = True
@@ -226,11 +225,10 @@ class Order:
 
         if self.side == SELL:
             ticker = OrderBook.get_ticker_by_id(self.stock_id)
-            return (
-                ticker in self.client.portfolio
-            )  # anything in the portfolio should have positive volume
-        # else:
-        #     return self.client.get_balance() >= self.price # buyer can afford at least one stock at full price
+            if ticker in self.client.portfolio:
+                return self.client.portfolio[ticker] > 0
+            elif not ticker in self.client.portfolio:
+                return False
 
         return True
 
@@ -263,6 +261,7 @@ class Transaction:
     counter = 0
     _all_transactions = []
 
+    # object as parameter, NOT IDs
     def __init__(self, bid, ask, vol):
         if bid.get_stock_id() != ask.get_stock_id():
             raise ValueError(
@@ -370,6 +369,7 @@ class OrderBook:
             return None
         return book.ticker
 
+    # object as parameter, NOT IDs
     def _add_order(self, order):
         """Add an order to the order book and execute trades if feasible."""
         opposite_book = self.asks if order.side == BUY else self.bids
@@ -391,16 +391,22 @@ class OrderBook:
                 break
 
             # if the other order can't trade at this price, skip it
-            if other_order.executable_volume() == 0:
+            if other_order.executable_volume(trade_price) == 0:
                 if (
-                    not other_order.is_executable()
+                    not other_order.is_executable()  # THIS DOESNT REMOVE UNFEASIBLE BUY ORDERS, but removes unfeasible sell orders
                 ):  # if the other order isn't executable, remove it
                     self._remove_order(other_order, cancelling=True)
-                continue
+                    continue
+                elif other_order.side == BUY:
+                    self._remove_order(other_order, cancelling=True)
+                    continue
+                else:  # if we dont remove it, then we would always try to match the same orders
+                    break
 
             # otherwise, a positive number of shares can be traded
             trade_volume = min(
-                order.executable_volume(), other_order.executable_volume()
+                order.executable_volume(trade_price),
+                other_order.executable_volume(trade_price),
             )
 
             if order.side == BUY:
@@ -408,10 +414,13 @@ class OrderBook:
             else:  # order.side == SELL
                 trade = Transaction(other_order, order, trade_volume)
 
+        # an order is added even though it might not be feasible, but it may become feasible in the future
+        # this means we should add "active orders" for each client
         if order.volume > 0:
             # all possible trades have been executed, so store the remaining order in the book
             same_book.add(order)
 
+    # object as parameter, NOT IDs
     def _remove_order(self, order, cancelling=False):
         """Remove an order from the order book."""
 
@@ -421,9 +430,15 @@ class OrderBook:
         # remove stock from relevant order book
         book = self.bids if order.side == BUY else self.asks
 
-        if not order in book:
+        """if not order in book:
             raise ValueError("Order must be in book to be removed")
-        book.remove(order)
+
+            What if I try to remove an order that is not in the book?
+            When I cancel an order before putting it in the book.
+        """
+
+        if order in book:
+            book.remove(order)
 
     def place_order(self, side, price, volume, client):
         """Place order directly with the information entered."""
@@ -431,10 +446,14 @@ class OrderBook:
         self._add_order(order)
         return order.order_id
 
-    def cancel_order(self, order_id):
+    # objects as parameter, NOT IDs
+    def cancel_order(self, order):
         """Cancel an order."""
-        order = Order.get_order_by_id(order_id)
-        self._remove_order(order)
+        if order == None:
+            return "Order does not exist"
+
+        self._remove_order(order, True)
+        return "Order cancelled"
 
     def get_best_bid(self):
         """Returns highest bid price."""
@@ -452,31 +471,25 @@ class OrderBook:
         """Returns volume of open orders (some of which may not be executable) for given side of the order book."""
         book = self.bids if side == BUY else self.asks
 
-        # key of a hypothetical order with given price and timestamp 0
-        key = (
-            (-price, datetime.fromtimestamp(0, timezone.utc))
-            if side == BUY
-            else (price, datetime.fromtimestamp(0, timezone.utc))
-        )
-
-        # first index i s.t. book[i].price >= price
-        first_index = book.bisect_key_left(key)
-        if (
-            not book or book[first_index].get_price() > price
-        ):  # no orders at given price
-            return 0
-
-        # aggregate volume of all orders at this price in the book
-        index = first_index
+        index = 0
         volume = 0
+
+        while index < len(book) and book[index].get_price() != price:
+            index += 1
+
         while index < len(book) and book[index].get_price() == price:
             volume += book[index].get_volume()
             index += 1
+
         return volume
 
-    def edit_order(self, order_id, new_price, new_vol):
+    # objects as parameter, NOT IDs
+    def edit_order(self, order, new_price, new_vol):
         """Edits order with new price and volume. Returns difference in volumes (as it may not be possible to change volume fully)."""
-        order = Order.get_order_by_id(order_id)  # first, find the order
+
+        if order == None:
+            return (0, "Order does not exist")
+
         self._remove_order(
             order, cancelling=False
         )  # and temporarily remove from the order book
@@ -485,7 +498,7 @@ class OrderBook:
         order.set_price(new_price)
         diff = order.set_volume(new_vol)
         self._add_order(order)
-        return diff  # is this really desired ? @Crroco
+        return (diff, "Order edited")  # is this really desired ? @Crroco
         # I think we can have this, maybe it helps when we try to automate the trading, so we actually know how much the new order actually is)
         # I think the only "ambiguity" here is for the following case:
         # first I have an order for 10 shares and 7 of them go through, so I am left with 3s.

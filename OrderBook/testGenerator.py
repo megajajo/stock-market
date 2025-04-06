@@ -33,28 +33,43 @@ def generate_random_string(length=8):
     return "".join(random.choice(characters) for _ in range(length))
 
 
+def generateTickers(num_tickers):
+    tickers = []
+    for _ in range(num_tickers):
+        ticker = generate_random_string(3)  # Random ticker of length 3
+        tickers.append(ticker)
+    return tickers
+
+
 # Generate a single client with random data
-def generateClient():
+def generateClient(tickers):
     user = generate_random_string()
     pw = generate_random_string()
     email = generate_random_string() + "@example.com"
     first_name = generate_random_string()
     last_name = generate_random_string()
     balance = random.randint(0, 10000)  # Random balance between 0 and 10,000
-    portfolio = None  # Assuming portfolio is None for simplicity
+    portfolio = {}
+
+    # for ticker in tickers:
+    #    portfolio[ticker] = random.randint(0, 100)  # Random number of stocks between 0 and 100
+
+    portfolio["JPK"] = random.randint(
+        0, 100
+    )  # Random number of stocks between 0 and 100
 
     return Client(user, pw, email, first_name, last_name, balance, portfolio)
 
 
 # Generate all the clients
-def generateClients(num_clients):
+def generateClients(num_clients, tickers):
     clients = []
     for _ in range(num_clients):
-        clients.append(generateClient())
+        clients.append(generateClient(tickers))
     return clients
 
 
-def generateOrder(num_tickers, num_clients):
+def generateOrder(tickers, num_clients):
     # side, price , volume, client
 
     stock_id = 0  # random.randint(0, num_tickers - 1)  # Random stock ID between 0 and the number of tickers
@@ -71,10 +86,10 @@ def generateOrder(num_tickers, num_clients):
     return Order(stock_id, side, price, volume, client_id)
 
 
-def generateOrders(num_orders, num_tickers, num_clients):
+def generateOrders(num_orders, tickers, num_clients):
     orders = []
     for _ in range(num_orders):
-        orders.append(generateOrder(num_tickers, num_clients))
+        orders.append(generateOrder(tickers, num_clients))
     return orders
 
 
@@ -83,8 +98,9 @@ def generateTest(all_random=False, num_clients=10, num_orders=20, num_tickers=1)
         num_clients = random.randint(1, 100)
         num_orders = random.randint(1, 100)
         num_tickers = random.randint(1, 10)
-    else:
-        clients = generateClients(num_clients)
-        orders = generateOrders(num_orders, num_tickers, num_clients)
 
-    return clients, orders
+    tickers = generateTickers(num_tickers)
+    clients = generateClients(num_clients, tickers)
+    orders = generateOrders(num_orders, tickers, num_clients)
+
+    return clients, orders, tickers

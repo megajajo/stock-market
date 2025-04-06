@@ -1,10 +1,102 @@
+!!!! Added logic for easier debug + call => always give an objects as parameters through functions
+Done testcases: 1, 6, 3, 7, 8, 9, 12
+
 1. What happens if the orders are not feasible? For example, I try to sell stock that I don't have or
 I try to buy stocks with balance that I don't have?
 
 
-2. Might need a whole market if I test with multiple types of stocks, will implement this later in the week.
+a. BUY first, but has no money, SELL is feasible => Infinite Loop when trying to add the SELL:
+    changed some code in OrderBook, to exit while if we dont remove the first order (otherwise we would keep trying to match with it)
+
+    file with tests + behaviour: 1-a-tests.py
+
+b. BUY first and feasible, SELL does not have stock => puts the order of SELL in the order book, but a transaction is not made
+
+    file with tests + behaviour: 1-b-tests.py
+
+c. SELL first and no stock, BUY second and feasible => Infinite Loop when trying to add BUY.
+
+    file with tests + behaviour: 1-c-tests.py
+
+d. SELL first and feasible, BUY does not have enough money => puts the order of BUY in the order book, but a transaction is not made
+
+    file with tests + behaviour: 1-d-tests.py
+
+All changes until now are done such that:
+- the prices are not compatible => both are added
+- the unfeasible one is the first one and prices are compatible =>  remove the unfeasible one from the list
+- the unfeasible one is the second and prices are compatible => both are added
+
+e. !!!! What if we have an unfeasible order that we still keep and it is the first one that we check with,
+    then we would never be able to do any trades!!!
+
+    Solution: Remove this first unfeasible order
+
+    file with tests + behaviour: 1-e-tests.py
+
+
+
+
+2. NEED MARKET, TEST LATER
+    Might need a whole market if I test with multiple types of stocks, will implement this later in the week.
+
+
+
 
 
 3. What happens when a client wants to buy from himself?
+    This seems to behave correctly.
+
 
 4. I want to organize all that is related to tests in a folder after I finish implementing everything
+
+
+5. Idea for Arav, should we use stock ids instead of tickers to store them in portfolio?
+
+6.
+When having just 2 bids, one SELL, one BUY, same volume, same price, one of them is still in the sorted list:
+
+ob.place_order(BUY, 10, 10, client1.get_id()) # id = 0
+ob.place_order(SELL, 10, 10, client2.get_id()) # id = 1
+
+printClientInfo(client1)
+printClientInfo(client2)
+
+print(ob.get_all_bids())
+print(ob.export_asks())
+
+The order goes through, but there is still an order in bids with volume = 0.
+
+!!! This does not matter, as the order would eventually be removed
+
+This has correct behaviour.
+
+7. Add a BUY, but have no money initially, make the money afterwards - works as intended
+
+8. Add a SELL, have no stock, make the stock afterwards - works as intended
+
+9. Check "API" functions and how they behave after generating tests.
+
+For edit_order, before any changes, the price does change, but the number of volume goes directly to 0
+and it is no longer added back in the list. Changed the change_volume function in Order.
+
+Added some if's for the edit_order a and cancel_order to work with non-existent orders.
+
+Changed the code for get_volume_at_price. It was not working before.
+
+file with tests + behaviour: 9-tests.py
+
+10. Generate random tests and see how the orderbook behaves
+
+11. Generate random tests and automatically check if the orderbook behaves as intended:
+    DO NOT SIMULATE THE ORDER BOOK AS THIS WOULD CREATE THE SAME CODE AS ARAV'S.
+- have the current and the previous state of the order book + the last order
+
+12. Check empty order book queries.
+file with tests + behaviour: 9-tests.py
+
+13. What if one order that is already in the order book becomes matchable with another order from the order book?
+    The way the order book is implemented we wont be able to match it with anything because we dont match orders
+    from the order book with other orders from the orderbook.
+
+    Do we want to change this later?

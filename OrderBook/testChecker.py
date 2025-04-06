@@ -16,8 +16,12 @@ def write_clients(clients, fileName):
     )  # assume it is run from the stock-market folder
 
     f.write("Clients:\n")
+
     for client in clients:
-        f.write(f"ID: {client.get_id()}, Balance: {client.get_balance()}\n")
+        f.write(f"Client ID: {client.get_id()}, ")
+        f.write(client.display_portfolio() + ", ")
+        f.write(client.display_balance() + "\n\n")
+
     f.write("\n" + "--" * 30 + "\n")
 
 
@@ -50,13 +54,9 @@ def write_list(orderBook, fileName, last_order=None):
 
 
 # What if there is an error while doing this? TODO
-def run_OrderBook(clients, orders):
+def run_OrderBook(clients, orders, tickers):
     timestamp = datetime.now(timezone.utc)
     fileName = str(timestamp) + ".txt"
-    f = open(
-        f"OrderBook/TestLog/{fileName}", "a"
-    )  # assume it is run from the stock-market folder
-
     ob = OrderBook("JPK")
     write_clients(clients, fileName)
     for order in orders:
@@ -114,8 +114,9 @@ if __name__ == "__main__":
 
     if args.newtest:
         # Generate a new test
-        clients, orders = generateTest(
+        clients, orders, tickers = generateTest(
             args.allrandom, args.clients, args.orders, args.tickers
         )
         # else get an existing test from a file -- TODO: implement this
-    run_OrderBook(clients, orders)
+
+    run_OrderBook(clients, orders, tickers)
