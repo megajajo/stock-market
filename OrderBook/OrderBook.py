@@ -1,7 +1,5 @@
 from enum import Enum
 
-# import heapq
-# from collections import deque
 from datetime import datetime, timezone
 from sortedcontainers import SortedList
 
@@ -304,12 +302,12 @@ class Transaction:
             return None
 
     @classmethod
-    def export_transactions(cls):
-        """Returns all transactions as 5-tuples (order_id, timestamp, price, volume, stock_id) for export to frontend."""
-        return [
-            (t.transaction_id, t.timestamp, t.price, t.vol, t.stock_id)
+    def get_all_transactions(cls):
+        """Returns all transactions as a dictionary { transaction_id -> (timestamp, price, volume, stock_id) }."""
+        return {
+            t.transaction_id: (t.timestamp, t.price, t.volume, t.stock_id)
             for t in cls._all_transactions
-        ]
+        }
 
 
 """
@@ -354,6 +352,11 @@ class OrderBook:
 
     def get_ticker(self):
         return self.ticker
+
+    @classmethod
+    def get_all_books(cls):
+        """Returns all order books as a dict { stock_id -> ticker }"""
+        return {id: cls._all_books[id].ticker for id in range(len(cls._all_books))}
 
     @classmethod
     def get_book_by_id(cls, id):
@@ -507,17 +510,17 @@ class OrderBook:
         # 2. Try to do the inverse order with volume =  7 - 2 at the same price, so we "technically" lose no money
         # 3. Don't allow the change and throw an error. (this seems pointless, but I still included it)
 
-    def export_asks(self):
-        """Returns all asks as 5-tuples (order_id, timestamp, price, volume, stock_id) for export to frontend."""
-        return [
-            (o.order_id, o.timestamp, o.price, o.volume, o.stock_id) for o in self.asks
-        ]
+    def get_all_asks(self):
+        """Returns all asks as 5-tuples (order_id, timestamp, price, volume, stock_id)."""
+        return {
+            o.order_id: (o.timestamp, o.price, o.volume, o.stock_id) for o in self.asks
+        }
 
     def get_all_bids(self):
-        """Returns all bids as 5-tuples (order_id, timestamp, price, volume, stock_id) for export to frontend."""
-        return [
-            (o.order_id, o.timestamp, o.price, o.volume, o.stock_id) for o in self.bids
-        ]
+        """Returns all bids as a dictionary { order_id -> (timestamp, price, volume, stock_id) }."""
+        return {
+            o.order_id: (o.timestamp, o.price, o.volume, o.stock_id) for o in self.bids
+        }
 
 
 if __name__ == "__main__":
