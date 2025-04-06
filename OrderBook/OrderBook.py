@@ -511,15 +511,15 @@ class OrderBook:
         # 3. Don't allow the change and throw an error. (this seems pointless, but I still included it)
 
     def get_all_asks(self):
-        """Returns all asks as 5-tuples (order_id, timestamp, price, volume, stock_id)."""
+        """Returns all asks as a list of 5-tuples (order_id, timestamp, price, volume, stock_id)."""
         return {
-            o.order_id: (o.timestamp, o.price, o.volume, o.stock_id) for o in self.asks
+            (o.order_id, o.timestamp, o.price, o.volume, o.stock_id) for o in self.asks
         }
 
     def get_all_bids(self):
-        """Returns all bids as a dictionary { order_id -> (timestamp, price, volume, stock_id) }."""
+        """Returns all bids as a list of 5-tuples (order_id, timestamp, price, volume, stock_id)."""
         return {
-            o.order_id: (o.timestamp, o.price, o.volume, o.stock_id) for o in self.bids
+            (o.order_id, o.timestamp, o.price, o.volume, o.stock_id) for o in self.bids
         }
 
 
