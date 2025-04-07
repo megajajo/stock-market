@@ -35,10 +35,10 @@ client3 = Client(
 client1.portfolio["JPK"] = 500
 client2.portfolio["JPK"] = 500
 
-ob.place_order(SELL, 150, 10, client1.get_id())  # order_id = 0
-ob.place_order(BUY, 150, 10, client1.get_id())  # order_id = 1
+ob._place_order(SELL, 150, 10, client1.get_id())  # order_id = 0
+ob._place_order(BUY, 150, 10, client1.get_id())  # order_id = 1
 
-print(ob.get_volume_at_price(SELL, 150))
-print(ob.get_best())
+print(ob._get_volume_at_price(SELL, 150))
+print(ob._get_best())
 
-print(ob.edit_order(Order.get_order_by_id(0), 200, 10))  # order_id = 0
+print(ob._edit_order(Order.get_order_by_id(0), 200, 10))  # order_id = 0
