@@ -1,4 +1,4 @@
-from OrderBook import *
+from .OrderBook import *
 from testGenerator import generateTest
 import argparse
 from datetime import datetime, timezone
@@ -61,10 +61,10 @@ def run_OrderBook(clients, orders, tickers):
     write_clients(clients, fileName)
     for order in orders:
         if order.side == BuyOrSell.BUY:
-            ob.place_order(BUY, order.price, order.volume, order.client.get_id())
+            ob._place_order(BUY, order.price, order.volume, order.client.get_id())
 
         else:
-            ob.place_order(SELL, order.price, order.volume, order.client.get_id())
+            ob._place_order(SELL, order.price, order.volume, order.client.get_id())
 
         write_list(ob, fileName, order)
         write_clients(clients, fileName)
