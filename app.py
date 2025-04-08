@@ -1,7 +1,10 @@
+import asyncio
+import json
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
+from fastapi.encoders import jsonable_encoder
 from OrderBook.OrderBook import *
 
 # Initialize the app
@@ -221,8 +224,45 @@ active_connections = []
 
 
 @app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket):
+async def websocket_endpoint(
+    websocket: WebSocket,
+):  # Note: Place some orders before testing this
     await websocket.accept()
-    while True:
-        data = await websocket.receive_text()
-        await websocket.send_text(f"Message text was: {data}")
+    try:
+        ticker = await websocket.receive_text()
+        print(f"Client subscribed to ticker: {ticker}")
+        while True:
+            best_bid = OrderBook.get_best_bid(ticker)
+            best_ask = OrderBook.get_best_ask(ticker)
+            all_bids = OrderBook.get_all_bids(ticker)
+            all_asks = OrderBook.get_all_asks(ticker)
+            summary = {
+                "ticker": ticker,
+                "best_bid": best_bid,
+                "best_ask": best_ask,
+                "all_bids": [
+                    {
+                        "order_id": order_id,
+                        "timestamp": timestamp,
+                        "price": price,
+                        "volume": volume,
+                        "stock_id": stock_id,
+                    }
+                    for order_id, timestamp, price, volume, stock_id in all_bids
+                ],
+                "all_asks": [
+                    {
+                        "order_id": order_id,
+                        "timestamp": timestamp,
+                        "price": price,
+                        "volume": volume,
+                        "stock_id": stock_id,
+                    }
+                    for order_id, timestamp, price, volume, stock_id in all_asks
+                ],
+            }
+            encoded = jsonable_encoder(summary)
+            await websocket.send_text(json.dumps(encoded))
+            await asyncio.sleep(1)  # Updates pushed every second
+    except Exception as e:
+        print(f"WebSocket error: {e}")
