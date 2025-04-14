@@ -1,0 +1,54 @@
+1 - I have an error with the API when trying to call certain functions. Here I just check if I get an error or not, I dont check the output.
+I will list all of them and say what changes I made:
+/root - seems to be working fine
+/api/place_order - BUY seems to be working, but I can put negative price and negative volume
+		 - SELL - I have an error, seems like I try to get the portfolio of a None. I assume the client is not initialized
+		   	Problem comes from the fact that in OrderBook._place_order we create with client, but in the Order class we create with client_id
+			CHANGES: in line 486 we call stock._place_order(side, price, volume, client_id)
+
+		After change:
+		 - BUY when there are no stocks in the portfolio: no error
+		 - SELL when there is no money: no error
+
+
+/api/cancel_order - cancelled_order_id < total_order - no error (I can cancel an order multiple times tho)
+		  - cancelled_order_id > total_order - AttributeError: 'NoneType' object has no attribute 'ticker'
+		  possible CHANGES: if the order does not exist, just return a message in which it says the order does not exist
+
+/api/edit_order - if we try to edit an order which does not exist => error
+		- if we try to edit a cancelled order => no error, it just works (Do we want this?)
+		- if we try to edit an order which exists, it can be active or cancelled => it works
+		possible CHANGES: Return a message in which we say if the editing was successful, if the order was already cancelled or not, if the order exists.
+
+
+/api/get_best_bid - ticker does not exist => error
+		  - ticker exists, but there is no bidder => response = 0
+		  - ticker exists and there is a bidder => correct response
+		  - ticker exists and the previous best_bid has been cancelled => correct responde
+		possible CHANGES: Return a message for the case when the ticker does not exist
+
+
+/api/get_best_ask - ticker does not exist => error
+		  - ticker exists, but there is no bidder => response = 0
+		  - ticker exists and there is a bidder => correct response
+		  - ticker exists and the previous best_bid has been cancelled => correct responde
+		possible CHANGES: Return a message for the case when the ticker does not exist
+
+
+/api/get_best	- there was an error so it wouldn't work when it was supposed to
+		CHANGES: in OrderBook._get_best, return (self._get_best_bid(), self._get_best_ask()) instead of return (self.get_best_bid(), self.get_best_ask())
+
+		After change:
+		- all looks fine except:
+		- I added 2 orders which had the same volume and the same price, but different sides. They should match and cancel each other,
+		  but they are still returned as best_bid and best_ask. This might happen because they are not properly cancelled, but just
+		  deleted from the orderbook? - this applies to the last 3 functions too
+
+
+
+/api/get_volume_at_price	- seems to be working fine; does not include cancelled orders
+
+
+/api/get_all_asks		- works fine
+
+/api/get_all_bids		- works fine

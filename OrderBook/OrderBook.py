@@ -473,11 +473,9 @@ class OrderBook:
         """Class method to place an order with the ticker."""
         match client:
             case int():
-                client = Client.get_client_by_id(
-                    client
-                )  # if client id is entered, replace with client
-            case Client():
                 pass
+            case Client():
+                client = client.get_id()  # if client is entered, replace with client id
             case _:
                 raise TypeError("Client or Client id must be entered")
 
@@ -488,6 +486,10 @@ class OrderBook:
     @staticmethod
     def cancel_order(order_id: int) -> str:
         """Class method to cancel an order with ticker and order id."""
+
+        '''if(order_id > Order.counter):
+            return f"Order {order_id} does not exist"'''
+
         order = Order.get_order_by_id(order_id)
         ticker = order.ticker
         stock = OrderBook.get_book_by_ticker(ticker)
@@ -504,7 +506,7 @@ class OrderBook:
 
     def _get_best(self) -> tuple[float, float]:
         """Returns tuple with (highest bid, lowest ask)."""
-        return (self.get_best_bid(), self.get_best_ask())
+        return (self._get_best_bid(), self._get_best_ask())
 
     @staticmethod
     def get_best_bid(ticker: str) -> float:

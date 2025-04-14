@@ -23,10 +23,12 @@ app.add_middleware(
 order_books = [OrderBook("AAPL")]
 
 # Two example users
-client1 = Client("tapple", "pw", "timcook@aol.com", "Tim", "Cook")
+client1 = Client("tapple", "pw", "timcook@aol.com", "Tim", "Cook", balance=0)
 client2 = Client("goat", "pw", "lbj@nba.com", "LeBron", "James", balance=1_000_000_000)
-client1.buy_stock(0, 0, 100)
+# client1.buy_stock(0, 0, 100)
 
+# print(Client.get_client_by_id(0))
+# print(Client.get_client_by_id(1))
 
 # Serve static files from the "static" folder at root ("/")
 app.mount("/app", StaticFiles(directory="static", html=True), name="static")
@@ -74,6 +76,7 @@ async def cancel_order(order_id: int):
     """
 
     print(f"Cancelling order {order_id}")
+    # print(OrderBook.cancel_order(order_id))
     return OrderBook.cancel_order(order_id)
 
 
@@ -91,7 +94,7 @@ async def edit_order(order_id: int, price: float, volume: int):
     - success message if successful, or an error message.
     """
     print(f"Editing order {order_id}: new price {price}, new volume {volume}")
-    order_book.edit_order(order_id, price, volume)
+    OrderBook.edit_order(order_id, price, volume)
     return "success"  # TODO Placeholder until we decide what to return
 
 
