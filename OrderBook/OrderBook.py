@@ -60,6 +60,13 @@ class Client:
         except:
             return None
 
+    @classmethod
+    def get_client_by_username(cls, username: str):
+        for client in cls._all_clients:
+            if client.username == username:
+                return client
+        return None
+
     def get_id(self) -> int:
         return self.client_id
 

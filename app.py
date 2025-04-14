@@ -6,6 +6,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
 from fastapi.encoders import jsonable_encoder
 from OrderBook.OrderBook import *
+from pydantic import BaseModel
 
 # Initialize the app
 app = FastAPI(title="Stock Market")
@@ -23,7 +24,9 @@ app.add_middleware(
 order_books = [OrderBook("AAPL")]
 
 # Two example users
-client1 = Client("tapple", "pw", "timcook@aol.com", "Tim", "Cook", balance=0)
+client1 = Client(
+    "tapple", "pw", "timcook@aol.com", "Tim", "Cook", balance=1_000_000_000
+)
 client2 = Client("goat", "pw", "lbj@nba.com", "LeBron", "James", balance=1_000_000_000)
 # client1.buy_stock(0, 0, 100)
 
@@ -39,11 +42,17 @@ async def root():
     return RedirectResponse(url="/app")
 
 
+class PlaceOrderRequest(BaseModel):
+    ticker: str
+    side: str
+    price: float
+    volume: int
+    client_user: str
+
+
 # API enpoints
 @app.post("/api/place_order")
-async def place_order(
-    ticker: str, side: str, price: float, volume: int, client_id: int
-):
+async def place_order(order: PlaceOrderRequest):
     """
     Place an order for a stock.
 
@@ -52,15 +61,23 @@ async def place_order(
     - side: The side of the order (buy/sell).
     - price: The price at which to place the order.
     - volume: The number of shares to order.
-    - client_id: The ID of the client placing the order.
+    - client_user: The username of the client placing the order.
 
     Returns:
     - order_id if successful, or an error message.
     """
+    ticker = order.ticker
+    side = order.side
+    price = order.price
+    volume = order.volume
+    client = Client.get_client_by_username(order.client_user)
+
+    if client is None:
+        raise ValueError(f"Client with username {order.client_user} not found.")
 
     print(f"Placing order for stock {ticker}: {side} at {price} for {volume} shares")
     order_side = BUY if side.lower() == "buy" else SELL
-    return OrderBook.place_order(ticker, order_side, price, volume, client_id)
+    return OrderBook.place_order(ticker, order_side, price, volume, client)
 
 
 @app.post("/api/cancel_order")
