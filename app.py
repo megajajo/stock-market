@@ -28,6 +28,10 @@ client1 = Client(
     "tapple", "pw", "timcook@aol.com", "Tim", "Cook", balance=1_000_000_000
 )
 client2 = Client("goat", "pw", "lbj@nba.com", "LeBron", "James", balance=1_000_000_000)
+
+client1.portfolio["AAPL"] = 1000
+client2.portfolio["AAPL"] = 1000
+
 # client1.buy_stock(0, 0, 100)
 
 # print(Client.get_client_by_id(0))

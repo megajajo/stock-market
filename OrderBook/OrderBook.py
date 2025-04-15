@@ -438,6 +438,9 @@ class OrderBook:
             else:  # order.side == SELL
                 trade = Transaction(other_order, order, trade_volume)
 
+            if other_order.get_volume() == 0:
+                opposite_book.remove(other_order)
+
         # an order is added even though it might not be feasible, but it may become feasible in the future
         # this means we should add "active orders" for each client
         if order.volume > 0:
