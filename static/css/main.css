@@ -17,6 +17,8 @@
   --border-radius: 12px;
   --nav-height: 60px;
   --nav-bg: #e0e0e0;
+  --graph-text-color: #8f8f8f; 
+  --graph-tick-color: #666;
 }
 
 /* Dark Theme */
@@ -30,6 +32,8 @@
   --border-radius: 12px;
   --nav-height: 60px;
   --nav-bg: #474D68;
+  --graph-text-color: #8f8f8f; 
+  --graph-tick-color: #666;
 }
 
 
@@ -325,11 +329,11 @@ body {
   display: flex;
   justify-content: space-around;
   align-items: center;
-  background-color: var(--secondary-color);
+  background-color: var(--background-color);
   border-radius: var(--border-radius);
-  margin-top: -10px;  
-  margin-bottom: 20px;      
-  padding: 6px 8px;
+  margin-top: -14px;  
+  margin-bottom: 2px;      
+  padding: 4px 6px;
   box-shadow: var(--card-shadow);
   width: 100%;
   max-width: 100%;
@@ -341,8 +345,8 @@ body {
   background-color: transparent;
   color: white;
   border: none;
-  font-size: 0.9em;
-  padding: 8px 14px;
+  font-size: 0.75em;
+  padding: 4px 8px;
   border-radius: var(--border-radius);
   cursor: pointer;
   transition: all 0.3s ease;
@@ -356,9 +360,104 @@ body {
 }
 
 
+.view-header {
+  position: relative;
+  background: linear-gradient(
+    to top,
+    var(--secondary-color) 0%,
+    transparent 100%
+  );
+  padding: 20px;
+  /* ensure graph fits inside when present */
+  overflow: visible;
+  border-radius: var(--border-radius);
+  margin-bottom: 16px;
+}
+
+.view-header .header-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.balance-large {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: var(--text-color);
+}
+
+.pnl-small {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+.pnl-small.positive { color: #28a745; }
+.pnl-small.negative { color: #dc3545; }
+
+/* make the embedded graph fill its container */
+.view-header .portfolio-graph-container {
+  width: 100%;
+  height: auto;                      /* let its child SVG size it */
+  /* or: height: var(--graph-height); and set --graph-height inline */
+}
 
 
 
+/* Hide the old static stats bar without touching your HTML */
+#portfolio-summary .portfolio-stats {
+  display: none;
+}
+
+.profile-info-header{
+  display:none;
+}
+
+
+/* target all <text> inside your graph */
+.portfolio-graph text {
+  fill: var(--graph-text-color);
+}
+
+/* if you want more fine‑grained control… */
+.portfolio-graph .x-axis text,
+.portfolio-graph .y-axis text {
+  font-size: 0.9rem;
+  /* fill comes from --graph-text-color */
+}
+
+.portfolio-graph .y-grid line {
+  stroke: #ccc;
+  stroke-opacity: 0.2;
+}
+
+:root {
+  --graph-tick-color: #666;
+}
+
+/* tick lines */
+.portfolio-graph .tick line {
+  stroke: var(--graph-tick-color);
+}
+
+/* tick labels */
+.portfolio-graph .tick text {
+  fill: var(--graph-tick-color);
+  
+}
+
+.portfolio-graph .x-axis text{
+  font-size: 0.6rem;
+}
+.portfolio-graph .x-axis path {
+  stroke: var(--graph-tick-color);
+}
+
+/* tick lines */
+.portfolio-graph .x-axis .tick line {
+  stroke: var(--graph-tick-color);
+}
 
 body,
 #portfolio-summary,

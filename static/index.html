@@ -1,36 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <!-- Basic Meta Tags -->
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Stock Exchange Portal</title>
-    
-    <!-- Link to our main CSS file -->
     <link rel="stylesheet" href="css/main.css" />
   </head>
   <body>
-    <!-- Header: Portfolio Summary -->
-    <header id="portfolio-summary">
-      <div class="profile">
-        <!-- Profile picture; replace 'assets/profile.png' with your actual path -->
-        <img src="assets/profile_picture.jpg" alt="Profile Picture" class="profile-pic" />
-        <div class="profile-info">
-          <h1 id="user-name">Your Name</h1>
-        </div>
-      </div>
-      <!-- Portfolio statistics: overall balance and last 24h PnL -->
-      <div class="portfolio-stats">
-        <div class="balance">Balance: $0.00</div>
-        <div class="pnl">24h PnL: +0%</div>
-      </div>
-    </header>
-
-    <!-- Main container for all our views -->
     <main id="view-container">
       <!-- Portfolio View -->
       <section id="portfolio-view" class="view active">
-        <h2>Your Holdings</h2>
+        <div class="view-header">
+          <div class="header-content">
+            <!-- Profile Picture + Name -->
+            <img src="assets/profile_picture.jpg"
+                 alt="Profile"
+                 class="profile-pic header-pic"
+                 id="header-pic" />
+            <div class="profile-info-header">
+              <h1 id="user-name">Your Name</h1>
+            </div>
+
+            <!-- Balance & PnL -->
+            
+            <div class="balance-large" id="balance-header">$0.00</div>
+            <div class="pnl-small" id="pnl-header">+0%</div>
+          </div>
+          <div class="portfolio-graph-container" id="header-graph"></div>
+        </div>
+
         <div class="holdings-grid">
           <!-- Portfolio cards will be dynamically generated here -->
         </div>
@@ -38,22 +36,30 @@
 
       <!-- Search View -->
       <section id="search-view" class="view">
-        <h2>Search Stocks</h2>
+        <div class="view-header">
+          <div class="header-content">
+            <div class="balance-large" id="search-title">Search Stocks</div>
+            <div class="pnl-small" id="search-pnl"></div>
+          </div>
+        </div>
         <div class="stocks-grid">
-          <!-- Stock cards in a bento-box layout will be dynamically inserted here -->
+          <!-- Stock cards will be dynamically generated here -->
         </div>
       </section>
 
       <!-- Settings View -->
       <section id="settings-view" class="view">
-        <h2>Settings</h2>
+        <div class="view-header">
+          <div class="header-content">
+            <div class="balance-large" id="settings-title">Settings</div>
+            <div class="pnl-small" id="settings-pnl"></div>
+          </div>
+        </div>
         <div class="settings-list">
-          <!-- Settings options based on your Figma design -->
           <div class="setting-item">
             <label for="theme-toggle">Dark Mode</label>
             <input type="checkbox" id="theme-toggle" name="theme-toggle" checked />
           </div>
-          <!-- Additional settings options can be added here -->
           <div class="setting-item">
             <button id="logout-btn">Logout</button>
           </div>
@@ -61,18 +67,13 @@
       </section>
     </main>
 
-    <!-- Bottom Navigation Bar (visible on both mobile and desktop) -->
     <nav class="bottom-nav">
-      <button id="nav-portfolio" class="nav-btn" data-view="portfolio-view">Portfolio</button>
-      <button id="nav-search" class="nav-btn" data-view="search-view">Search</button>
-      <button id="nav-settings" class="nav-btn" data-view="settings-view">Settings</button>
+      <button id="nav-portfolio" class="nav-btn active" data-view="portfolio-view">Portfolio</button>
+      <button id="nav-search"    class="nav-btn"        data-view="search-view">Search</button>
+      <button id="nav-settings"  class="nav-btn"        data-view="settings-view">Settings</button>
     </nav>
 
-    <!-- Main JS file that will load all the modules later -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script type="module" src="js/main.js"></script>
-    
-    
-
   </body>
 </html>

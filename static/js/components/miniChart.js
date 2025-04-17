@@ -1,52 +1,55 @@
 
 
-export function drawMiniChart(svgElement, data) {
-  // Use the full data if available or choose a subset
-  // Here we simply use the entire dataset for this stock.
-  const miniData = data; 
+// js/components/miniChart.js
 
-  // Dimensions for the mini chart.
-  const width = 100;
-  const height = 40;
-  const margin = { top: 2, right: 2, bottom: 2, left: 2 };
 
-  // Set the SVG attributes.
-  const svg = d3.select(svgElement)
-    .attr("width", width)
-    .attr("height", height);
+export function drawMiniChart(containerElement, data, config = {}) {
+  // — Configurable dimensions & margins —
+  const width  = config.width  || 100;
+  const height = config.height || 40;
+  const margin = config.margin || { top:2, right:2, bottom:2, left:2 };
+  const yKey   = config.yKey   || 'price';  // matches your stockData
 
-  // Create scales. You can adjust domain if you want to force a reasonable range.
+  // — Clear out any old content —
+  containerElement.innerHTML = '';
+
+  // — Create the SVG —
+  const svg = document.createElementNS("http://www.w3.org/2000/svg","svg");
+  svg.setAttribute("width",  width);
+  svg.setAttribute("height", height);
+  containerElement.appendChild(svg);
+  const d3svg = d3.select(svg);
+
+  // — Sort & prepare data —
+  const miniData = [...data].sort((a,b)=>a.date - b.date);
+
+  // — Scales —
   const xScale = d3.scaleTime()
-    .domain(d3.extent(miniData, d => d.date))
+    .domain(d3.extent(miniData, d=>d.date))
     .range([margin.left, width - margin.right]);
 
   const yScale = d3.scaleLinear()
     .domain([
-      d3.min(miniData, d => d.price),
-      d3.max(miniData, d => d.price)
-    ])
-    .nice()
+      d3.min(miniData, d=>d[yKey]),
+      d3.max(miniData, d=>d[yKey])
+    ]).nice()
     .range([height - margin.bottom, margin.top]);
 
-  // Determine the line color based on performance:
-  // If the last data point is greater than or equal to the first, color green; otherwise red.
-  const firstPrice = miniData[0].price;
-  const lastPrice = miniData[miniData.length - 1].price;
-  const lineColor = (lastPrice >= firstPrice) ? "#28a745" : "#dc3545";
+  // — Line color by performance —
+  const first = miniData[0][yKey], last = miniData[miniData.length-1][yKey];
+  const lineColor = last >= first ? "#28a745" : "#dc3545";
 
-  // Create the line generator without smoothing.
-  const lineGenerator = d3.line()
-    .x(d => xScale(d.date))
-    .y(d => yScale(d.price));
+  // — Line generator —
+  const lineGen = d3.line()
+    .x(d=>xScale(d.date))
+    .y(d=>yScale(d[yKey]));
 
-  // Clear any previous drawing.
-  svg.selectAll("*").remove();
-
-  // Draw the mini chart.
-  svg.append("path")
+  // — Clear & draw —
+  d3svg.selectAll("*").remove();
+  d3svg.append("path")
     .datum(miniData)
-    .attr("fill", "none")
+    .attr("fill","none")
     .attr("stroke", lineColor)
-    .attr("stroke-width", 1.5)
-    .attr("d", lineGenerator);
+    .attr("stroke-width",1.5)
+    .attr("d", lineGen);
 }

@@ -74,7 +74,7 @@ graphContainer.innerHTML = ''; // Clear the placeholder SVG if present
 // Wait for the modal to fully render before drawing the graph.
 setTimeout(() => {
   drawDetailedGraph(graphContainer, stockData[stockName], {
-    height: 250,
+    height: 200,
     yKey: 'price',
     resizeOnWindow: false,
     margin: { top: 20, right: 20, bottom: 40, left: 35 } // <-- reduce left from default 50
