@@ -1,3 +1,5 @@
+//THIS FILE IS ONLY HERE FOR REFEREBCE- IT'S ESSENTIALLY INERT 
+
 const stockData = {
     "AAPL": [
         { date: new Date(2024, 0, 1), price: 100 },
