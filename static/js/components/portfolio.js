@@ -7,7 +7,7 @@ import { drawDetailedGraph } from './graph.js';
 
 export function initPortfolioView() {
   // Fill in header: profile pic, name, balance & PnL
-  document.getElementById('header-pic').src = userData.profilePicUrl || 'assets/profile_picture.jpg';
+  document.getElementById('header-pic').src = userData.profilePicUrl || 'assets/logo.jpg';
   document.getElementById('user-name').textContent = userData.name;
   const pnlValue = userData.pnl;
   const isPositive = pnlValue.startsWith('+');
