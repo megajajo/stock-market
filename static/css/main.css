@@ -1,8 +1,12 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
 /* Global Reset */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  font-family: 'Inter', sans-serif;
 }
 
 /* CSS Variables for easy theming */
@@ -13,7 +17,8 @@
   --background-color: #ffffff;           /* Main background */
   --text-color: #000000;                 /* Main text color */
   --card-bg: #f0f0f0;                    /* Background for cards */
-  --card-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Softer shadow for light */
+  --card-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  --card-highlight: 0 -4px -8px rgba(255, 255, 255, 0.581); /* Softer shadow for light */
   --border-radius: 12px;
   --nav-height: 60px;
   --nav-bg: #e0e0e0;
@@ -23,17 +28,18 @@
 
 /* Dark Theme */
 .dark-mode {
-  --primary-color: #83b5ff;
+  --primary-color: #8f83ff;
   --secondary-color: #2a3135;
   --background-color: #252835;
   --text-color: #ffffff;
-  --card-bg: #495760;
-  --card-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  --border-radius: 12px;
-  --nav-height: 60px;
-  --nav-bg: #474D68;
-  --graph-text-color: #8f8f8f; 
-  --graph-tick-color: #666;
+  --card-bg: #414366;
+  --card-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
+  --card-highlight: -2 -4px 8px rgba(255, 255, 255, 0.581);
+  --border-radius: 20px;
+  --nav-height: 70px;
+  --nav-bg: #2a3135;
+  --graph-text-color: #878787; 
+  --graph-tick-color: #252835;
 }
 
 
@@ -107,7 +113,7 @@ body {
 .stocks-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 15px;
+  gap: 25px;
 }
 
 /* Card Styling for Holdings & Stocks */
@@ -169,32 +175,21 @@ body {
   bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
-  width: 90%;
+  width: 70%;
   max-width: 500px;
   height: var(--nav-height);
   background-color: var(--nav-bg);
-  border-radius: var(--border-radius);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-radius: 30px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: space-around;
   align-items: center;
   z-index: 100;
 }
 
-.nav-btn {
-  background: none;
-  border: none;
-  font-size: 1em;
-  color: var(--text-color);
-  cursor: pointer;
-  flex: 1;
-  padding: 10px 0;
-}
 
-.nav-btn.active {
-  color: var(--primary-color);
-  font-weight: bold;
-}
+
+
 
 /* Modal Styles */
 .modal {
@@ -269,9 +264,7 @@ body {
   transition: background-color 0.15s ease-in-out;
 }
 
-#place-order-btn:hover {
-  background-color: darken(var(--primary-color), 10%);
-}
+
 
 /* Order Book Toggle Button */
 #toggle-order-book-btn {
@@ -343,7 +336,7 @@ body {
 /* Default button style */
 .timeframe-btn {
   background-color: transparent;
-  color: white;
+  color: var(--text-color);
   border: none;
   font-size: 0.75em;
   padding: 4px 8px;
@@ -354,7 +347,7 @@ body {
 
 /* Active button style */
 .timeframe-btn.active {
-  background-color: white;
+  background-color: var(--text-color);
   color: var(--secondary-color);
   font-weight: bold;
 }
@@ -364,7 +357,7 @@ body {
   position: relative;
   background: linear-gradient(
     to top,
-    var(--secondary-color) 0%,
+    var(--card-bg) 0%,
     transparent 100%
   );
   padding: 20px;
@@ -428,13 +421,11 @@ body {
 }
 
 .portfolio-graph .y-grid line {
-  stroke: #ccc;
-  stroke-opacity: 0.2;
+  stroke: var(--background-color);
+  stroke-opacity: 0.9;
 }
 
-:root {
-  --graph-tick-color: #666;
-}
+
 
 /* tick lines */
 .portfolio-graph .tick line {
@@ -443,7 +434,7 @@ body {
 
 /* tick labels */
 .portfolio-graph .tick text {
-  fill: var(--graph-tick-color);
+  fill: var(--graph-text-color);
   
 }
 
@@ -458,6 +449,158 @@ body {
 .portfolio-graph .x-axis .tick line {
   stroke: var(--graph-tick-color);
 }
+
+/* Search Input */
+#search-view .search-input {
+  width: 100%;                       /* Fill horizontal space */
+  max-width: 400px;                  /* Prevent it from stretching too far */
+  padding: 0.6rem 1rem;              /* Comfortable click/tap area */
+  font-size: 1rem;                   /* Match your balance‐large / pnl‑small scale */
+  font-family: inherit;              /* Stay consistent with body text */
+  color: var(--text-color);
+  background-color: var(--card-bg);
+  border: 1px solid var(--graph-tick-color);
+  border-radius: var(--border-radius);
+  box-shadow: var(--card-shadow);
+  box-sizing: border-box;
+  transition: 
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
+  margin: 0 auto;                    /* Center it within the header */
+  display: block;
+}
+
+/* Focus state for better accessibility */
+#search-view .search-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(30,144,255,0.2);  /* Light primary‑color glow */
+}
+
+/* Placeholder styling */
+#search-view .search-input::placeholder {
+  color: var(--graph-text-color);
+  opacity: 1; /* Firefox default is 0.5 */
+}
+
+/* Icon‑only Bottom Nav, using only pre‑defined colors */
+
+.nav-btn {
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: 150%;
+  background: var(--card-bg);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.nav-btn .icon {
+  width: 30px;
+  height: 30px;
+  fill: var(--text-color);
+}
+
+.nav-btn:hover {
+  background: var(--secondary-color);
+}
+
+.nav-btn.active {
+  background: var(--primary-color);
+}
+
+.nav-btn.active .icon {
+  fill: var(--secondary-color);
+}
+
+
+/* Make sure our icon‑buttons are true circles */
+.bottom-nav .nav-btn {
+  /* Undo any leftover flex:1 or padding */
+  flex: none;
+  padding: 0;
+  
+  /* Fixed size */
+  width: 55px;
+  height: 55px;
+  
+  /* Guarantee 1:1 aspect ratio (modern browsers) */
+  aspect-ratio: 1 / 1;
+  
+  /* Keep your existing styles */
+  border: none;
+  border-radius: 150%;
+  background: var(--card-bg);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+/* this will beat any plain .nav-btn rule, wherever it appears */
+.bottom-nav .nav-btn.active {
+  background: var(--primary-color);
+}
+
+.bottom-nav .nav-btn.active .icon {
+  fill: var(--secondary-color);
+}
+
+#logout-btn {
+  
+    background-color: var(--card-bg);
+    color: var(--text-color);
+    border: none;
+    font-size: 1em;
+    padding: 4px 8px;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: all 0.3s ease;
+   
+    
+  
+}
+#help-btn {
+  
+  background-color: var(--card-bg);
+  color: var(--text-color);
+  border: none;
+  font-size: 1em;
+  padding: 4px 8px;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: all 0.3s ease;
+ 
+  
+
+}
+.positions-title{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+
+}
+
+/* Responsive YouTube embed */
+.video-container {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  margin-top: 30px;
+}
+
+.video-container iframe {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  border: none;
+}
+
 
 body,
 #portfolio-summary,

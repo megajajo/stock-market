@@ -6,10 +6,33 @@ import { portfolioPerformanceData } from '../data/portfolioPerformance.js';
 import { drawDetailedGraph } from './graph.js';
 
 export function initPortfolioView() {
-  // Populate the holdings grid
-  const holdingsGrid = document.querySelector('.holdings-grid');
-  holdingsGrid.innerHTML = '';
+  // Fill in header: profile pic, name, balance & PnL
+  document.getElementById('header-pic').src = userData.profilePicUrl || 'assets/profile_picture.jpg';
+  document.getElementById('user-name').textContent = userData.name;
+  const pnlValue = userData.pnl;
+  const isPositive = pnlValue.startsWith('+');
+  document.getElementById('balance-header').textContent = `$${userData.balance.toFixed(2)}`;
+  const pnlEl = document.getElementById('pnl-header');
+  pnlEl.textContent = pnlValue;
+  pnlEl.classList.add(isPositive ? 'positive' : 'negative');
 
+  // Draw the main portfolio graph inside header
+  const graphDiv = document.getElementById('header-graph');
+  drawDetailedGraph(graphDiv, portfolioPerformanceData, {
+    height: 200,
+    yKey: 'value',
+    resizeOnWindow: true
+  });
+
+  // Insert 'Your Positions' title between graph and holdings grid
+  const holdingsGrid = document.querySelector('.holdings-grid');
+  const positionsTitle = document.createElement('h2');
+  positionsTitle.textContent = 'Your Positions';
+  positionsTitle.classList.add('positions-title');
+  holdingsGrid.parentNode.insertBefore(positionsTitle, holdingsGrid);
+
+  // Populate the holdings grid
+  holdingsGrid.innerHTML = '';
   userData.holdings.forEach(holding => {
     const card = document.createElement('div');
     card.classList.add('holding-card');
@@ -29,24 +52,5 @@ export function initPortfolioView() {
       height: 40,
       yKey: 'price'
     });
-  });
-
-  // Fill in header: profile pic, name, balance & PnL
-  document.getElementById('header-pic').src = userData.profilePicUrl || 'assets/profile_picture.jpg';
-  document.getElementById('user-name').textContent = userData.name;
-
-  const pnlValue = userData.pnl;
-  const isPositive = pnlValue.startsWith('+');
-  document.getElementById('balance-header').textContent = `$${userData.balance.toFixed(2)}`;
-  const pnlEl = document.getElementById('pnl-header');
-  pnlEl.textContent = pnlValue;
-  pnlEl.classList.add(isPositive ? 'positive' : 'negative');
-
-  // Draw the main portfolio graph inside header
-  const graphDiv = document.getElementById('header-graph');
-  drawDetailedGraph(graphDiv, portfolioPerformanceData, {
-    height: 200,
-    yKey: 'value',
-    resizeOnWindow: true
   });
 }

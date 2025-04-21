@@ -5,11 +5,13 @@ export const stockData = {
     { date: new Date(2024, 3, 14, 9, 0), price: 100 },
     { date: new Date(2024, 3, 14, 10, 0), price: 102 },
     { date: new Date(2024, 3, 14, 11, 30), price: 105 },
+    { date: new Date(2024, 3, 14, 12, 30), price: 91 },
     { date: new Date(2024, 3, 13), price: 104 },
     { date: new Date(2024, 3, 12), price: 101 },
     { date: new Date(2024, 3, 8), price: 98 },
     { date: new Date(2024, 2, 14), price: 95 },
-    { date: new Date(2024, 1, 14), price: 92 }
+    { date: new Date(2024, 1, 14), price: 92 },
+    
   ],
   "Stock B": [
     { date: new Date(2024, 3, 14, 9, 0), price: 200 },
@@ -28,6 +30,14 @@ export const stockData = {
     { date: new Date(2024, 1, 15), price: 287 }
   ],
   "Stock D": [
+    { date: new Date(2024, 3, 14, 9, 30), price: 400 },
+    { date: new Date(2024, 3, 14, 10, 30), price: 403 },
+    { date: new Date(2024, 3, 14, 11, 30), price: 398 },
+    { date: new Date(2024, 3, 13), price: 396 },
+    { date: new Date(2024, 2, 14), price: 390 },
+    { date: new Date(2024, 1, 14), price: 385 }
+  ],
+  "Stock E": [
     { date: new Date(2024, 3, 14, 9, 30), price: 400 },
     { date: new Date(2024, 3, 14, 10, 30), price: 403 },
     { date: new Date(2024, 3, 14, 11, 30), price: 398 },

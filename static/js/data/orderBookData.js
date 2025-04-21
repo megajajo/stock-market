@@ -43,6 +43,19 @@ export const orderBookData = {
         { price: 404, volume: 110 },
         { price: 405, volume: 110 }
       ]
+    },
+    "Stock E": {
+      bids: [
+        { price: 399, volume: 80 },
+        { price: 398, volume: 120 }
+      ],
+      asks: [
+        { price: 401, volume: 70 },
+        { price: 402, volume: 110 },
+        { price: 403, volume: 110 },
+        { price: 404, volume: 110 },
+        { price: 405, volume: 110 }
+      ]
     }
   };
   

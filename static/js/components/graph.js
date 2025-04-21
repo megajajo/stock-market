@@ -1,4 +1,3 @@
-
 export function drawDetailedGraph(containerElement, data, config = {}) {
   const width = config.width || containerElement.clientWidth || 600;
   const height = config.height || 300;
@@ -25,64 +24,65 @@ export function drawDetailedGraph(containerElement, data, config = {}) {
     btn.dataset.range = tf;
     togglesDiv.appendChild(btn);
   });
-  
 
   // --- Create SVG ---
-  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   svg.classList.add('portfolio-graph');
   containerElement.appendChild(svg);
   containerElement.appendChild(togglesDiv);
+
   // --- Graph render function ---
   function render() {
     const xDomain = getXDomain(currentRange, sortedData);
 
-    d3.select(svg).attr("width", width).attr("height", height);
+    d3.select(svg).attr('width', width).attr('height', height);
     d3svg = d3.select(svg);
 
     if (!xAxisGroup) {
-      xAxisGroup = d3svg.append("g")
-        .attr("class", "x-axis")
-        .attr("transform", `translate(0,${height - margin.bottom})`);
-      yAxisGroup = d3svg.append("g")
-        .attr("class", "y-axis")
-        .attr("transform", `translate(${margin.left},0)`);
-      lineGroup = d3svg.append("g").attr("class", "line-group");
-      gridGroup = d3svg.append("g").attr("class", "y-grid");
+      xAxisGroup = d3svg.append('g')
+        .attr('class', 'x-axis')
+        .attr('transform', 'translate(0,' + (height - margin.bottom) + ')');
+      yAxisGroup = d3svg.append('g')
+        .attr('class', 'y-axis')
+        .attr('transform', 'translate(' + margin.left + ',0)');
+      // Append grid before line so grid lines are underneath
+      gridGroup = d3svg.append('g').attr('class', 'y-grid');
+      lineGroup = d3svg.append('g').attr('class', 'line-group');
     } else {
-      lineGroup.selectAll("*").remove();
-      gridGroup.selectAll("*").remove();
+      lineGroup.selectAll('*').remove();
+      gridGroup.selectAll('*').remove();
     }
 
     // Clip path
-    let clip = d3svg.select("clipPath#clip");
+    let clip = d3svg.select('clipPath#clip');
     if (clip.empty()) {
-      d3svg.append("clipPath").attr("id", "clip")
-        .append("rect")
-        .attr("x", margin.left)
-        .attr("y", margin.top)
-        .attr("width", width - margin.left - margin.right)
-        .attr("height", height - margin.top - margin.bottom);
+      d3svg.append('clipPath').attr('id', 'clip')
+        .append('rect')
+        .attr('x', margin.left)
+        .attr('y', margin.top)
+        .attr('width', width - margin.left - margin.right)
+        .attr('height', height - margin.top - margin.bottom);
     } else {
-      clip.select("rect")
-        .attr("x", margin.left)
-        .attr("y", margin.top)
-        .attr("width", width - margin.left - margin.right)
-        .attr("height", height - margin.top - margin.bottom);
+      clip.select('rect')
+        .attr('x', margin.left)
+        .attr('y', margin.top)
+        .attr('width', width - margin.left - margin.right)
+        .attr('height', height - margin.top - margin.bottom);
     }
-    lineGroup.attr("clip-path", "url(#clip)");
+    lineGroup.attr('clip-path', 'url(#clip)');
 
     // Drag area
     if (!dragRect) {
-      dragRect = d3svg.append("rect")
-        .attr("fill", "transparent")
-        .style("cursor", "move")
-        .call(d3.drag().on("start", dragStart).on("drag", dragMove));
+      dragRect = d3svg.append('rect')
+        .attr('fill', 'transparent')
+        .style('cursor', 'move')
+        .call(d3.drag().on('start', dragStart).on('drag', dragMove));
     }
     dragRect
-      .attr("x", margin.left)
-      .attr("y", margin.top)
-      .attr("width", width - margin.left - margin.right)
-      .attr("height", height - margin.top - margin.bottom);
+      .attr('x', margin.left)
+      .attr('y', margin.top)
+      .attr('width', width - margin.left - margin.right)
+      .attr('height', height - margin.top - margin.bottom);
 
     currentXScale = d3.scaleTime().domain(xDomain).range([margin.left, width - margin.right]);
 
@@ -102,20 +102,20 @@ export function drawDetailedGraph(containerElement, data, config = {}) {
       .x(d => currentXScale(d.date))
       .y(d => globalYScale(d[config.yKey || 'value']));
 
-    lineGroup.append("path")
+    lineGroup.append('path')
       .datum(sortedData)
-      .attr("fill", "none")
-      .attr("stroke", isGain ? "#28a745" : "#dc3545")
-      .attr("stroke-width", 3)
-      .attr("d", lineGenerator);
+      .attr('fill', 'none')
+      .attr('stroke', isGain ? '#28a745' : '#dc3545')
+      .attr('stroke-width', 3)
+      .attr('d', lineGenerator);
 
     const numTicks = width < 400 ? 3 : 6;
     const formatX = d => {
       const range = currentXScale.domain();
       const diff = range[1] - range[0];
-      if (diff < 86400000) return d3.timeFormat("%H:%M")(d);
-      if (diff < 2592000000) return d3.timeFormat("%b %d %H:%M")(d);
-      return d3.timeFormat("%b %d")(d);
+      if (diff < 86400000) return d3.timeFormat('%H:%M')(d);
+      if (diff < 2592000000) return d3.timeFormat('%b %d %H:%M')(d);
+      return d3.timeFormat('%b %d')(d);
     };
 
     const xAxis = d3.axisBottom(currentXScale).ticks(numTicks).tickFormat(formatX);
@@ -123,17 +123,17 @@ export function drawDetailedGraph(containerElement, data, config = {}) {
 
     xAxisGroup.call(xAxis);
     yAxisGroup.call(yAxis);
-    yAxisGroup.select(".domain").remove();
+    yAxisGroup.select('.domain').remove();
 
     // Grid
     const yGrid = d3.axisLeft(globalYScale)
       .ticks(6)
       .tickSize(- (width - margin.left - margin.right))
-      .tickFormat("");
+      .tickFormat('');
 
-    gridGroup.attr("transform", `translate(${margin.left},0)`).call(yGrid);
-    gridGroup.selectAll("line").attr("stroke", "grey").attr("stroke-opacity", 0.2);
-    gridGroup.select("path").remove();
+    gridGroup.attr('transform', 'translate(' + margin.left + ',0)').call(yGrid);
+    gridGroup.selectAll('line').attr('stroke', 'grey').attr('stroke-opacity', 0.2);
+    gridGroup.select('path').remove();
   }
 
   function getXDomain(range, data) {
@@ -163,17 +163,17 @@ export function drawDetailedGraph(containerElement, data, config = {}) {
     ];
     currentXScale.domain(newDomain);
     const updatedTicks = width < 400 ? 3 : 6;
-const updatedXAxis = d3.axisBottom(currentXScale)
-  .ticks(updatedTicks)
-  .tickFormat(d => {
-    const range = currentXScale.domain();
-    const diff = range[1] - range[0];
-    if (diff < 86400000) return d3.timeFormat("%H:%M")(d);
-    if (diff < 2592000000) return d3.timeFormat("%b %d %H:%M")(d);
-    return d3.timeFormat("%b %d")(d);
-  });
+    const updatedXAxis = d3.axisBottom(currentXScale)
+      .ticks(updatedTicks)
+      .tickFormat(d => {
+        const range = currentXScale.domain();
+        const diff = range[1] - range[0];
+        if (diff < 86400000) return d3.timeFormat('%H:%M')(d);
+        if (diff < 2592000000) return d3.timeFormat('%b %d %H:%M')(d);
+        return d3.timeFormat('%b %d')(d);
+      });
 
-xAxisGroup.call(updatedXAxis);
+    xAxisGroup.call(updatedXAxis);
 
     updateYAxisAndLine();
   }
@@ -189,36 +189,36 @@ xAxisGroup.call(updatedXAxis);
     globalYScale.domain([min - pad, max + pad]);
 
     yAxisGroup.call(d3.axisLeft(globalYScale).ticks(6));
-    yAxisGroup.select(".domain").remove();
+    yAxisGroup.select('.domain').remove();
 
     gridGroup.call(
       d3.axisLeft(globalYScale)
         .ticks(6)
         .tickSize(- (width - margin.left - margin.right))
-        .tickFormat("")
+        .tickFormat('')
     );
-    gridGroup.selectAll("line").attr("stroke", "grey").attr("stroke-opacity", 0.2);
-    gridGroup.select("path").remove();
+    gridGroup.selectAll('line').attr('stroke', 'grey').attr('stroke-opacity', 0.2);
+    gridGroup.select('path').remove();
 
     lineGenerator.y(d => globalYScale(d[config.yKey || 'value']));
-    lineGroup.selectAll("path").attr("d", lineGenerator);
+    lineGroup.selectAll('path').attr('d', lineGenerator);
   }
 
   // Activate button logic
-  togglesDiv.querySelectorAll(".timeframe-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
+  togglesDiv.querySelectorAll('.timeframe-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
       currentRange = btn.dataset.range;
-      togglesDiv.querySelectorAll(".timeframe-btn").forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
+      togglesDiv.querySelectorAll('.timeframe-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
       render();
     });
   });
 
   // Set default active state and render initially
-  togglesDiv.querySelector('[data-range="Max"]').classList.add('active');
+  togglesDiv.querySelector('[data-range=\"Max\"]').classList.add('active');
   render();
 
   if (config.resizeOnWindow) {
-    window.addEventListener("resize", render);
+    window.addEventListener('resize', render);
   }
 }
