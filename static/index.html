@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Stock Exchange Portal</title>
     <link rel="stylesheet" href="css/main.css" />
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
   </head>
   <body>
     <main id="view-container">
@@ -22,7 +23,7 @@
             </div>
 
             <!-- Balance & PnL -->
-            
+
             <div class="balance-large" id="balance-header">$0.00</div>
             <div class="pnl-small" id="pnl-header">+0%</div>
           </div>
@@ -71,7 +72,8 @@
             <button id="help-btn">Watch Tutorial</button>
           </div>
           <div class="setting-item">
-            <button id="logout-btn">Logout</button>
+            <div id="g_id_signin"></div>
+            <button id="google-signout">Sign out</button>
           </div>
         </div>
       </section>
@@ -112,7 +114,7 @@
         </svg>
       </button>
     </nav>
-    
+
 
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script type="module" src="js/main.js"></script>
@@ -124,7 +126,7 @@
     <div class="video-container">
       <!-- replace the OiYrAKbTL8o with the video_id-->
       <iframe
-        src="https://www.youtube.com/embed/OiYrAKbTL8o" 
+        src="https://www.youtube.com/embed/OiYrAKbTL8o"
         frameborder="0"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
         allowfullscreen

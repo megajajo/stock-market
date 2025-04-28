@@ -3,6 +3,7 @@
 import { stockData } from '../data/stockData.js';
 import { drawDetailedGraph } from './graph.js';
 import { populateOrderBook } from './orderBook.js';
+import { userData }           from './data/userData.js';
 
 // Function to open the detailed view modal for a given stock.
 export function openStockDetail(stockName) {
@@ -24,7 +25,7 @@ export function openStockDetail(stockName) {
         <div class="order-form-section">
           <h3>Place Order</h3>
           <form id="order-form">
-            <input type="text" id="order-username" placeholder="Enter username" required />
+
             <input type="number" id="order-amount" placeholder="Amount" required />
             <!-- Order Type Toggle (Radio Buttons) -->
             <div class="order-type-toggle">
@@ -79,7 +80,7 @@ setTimeout(() => {
     resizeOnWindow: false,
     margin: { top: 20, right: 20, bottom: 40, left: 35 } // <-- reduce left from default 50
   });
-  
+
 }, 0);
 
 
@@ -122,14 +123,11 @@ setTimeout(() => {
 
 // Function to handle order submission.
 function handleOrder(stock, orderType, modal) {
-  const username = modal.querySelector('#order-username').value.trim();
+  const username = userData.name;
   const amountVal = modal.querySelector('#order-amount').value.trim();
   const limitPriceVal = modal.querySelector('#order-limit-price').value.trim();
 
-  if (!username) {
-    alert("Username cannot be empty!");
-    return;
-  }
+
   if (!amountVal || Number(amountVal) <= 0) {
     alert("Amount must be greater than 0!");
     return;
