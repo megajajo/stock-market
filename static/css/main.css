@@ -22,7 +22,7 @@
   --border-radius: 12px;
   --nav-height: 60px;
   --nav-bg: #e0e0e0;
-  --graph-text-color: #8f8f8f; 
+  --graph-text-color: #8f8f8f;
   --graph-tick-color: #666;
 }
 
@@ -38,7 +38,7 @@
   --border-radius: 20px;
   --nav-height: 70px;
   --nav-bg: #2a3135;
-  --graph-text-color: #878787; 
+  --graph-text-color: #878787;
   --graph-tick-color: #252835;
 }
 
@@ -49,7 +49,10 @@ body {
   background-color: var(--background-color);
   color: var(--text-color);
   line-height: 1.5;
+  max-width: 400px;
+  margin: 0 auto;
 }
+
 
 /* Header: Portfolio Summary */
 #portfolio-summary {
@@ -324,8 +327,8 @@ body {
   align-items: center;
   background-color: var(--background-color);
   border-radius: var(--border-radius);
-  margin-top: -14px;  
-  margin-bottom: 2px;      
+  margin-top: -14px;
+  margin-bottom: 2px;
   padding: 4px 6px;
   box-shadow: var(--card-shadow);
   width: 100%;
@@ -435,7 +438,7 @@ body {
 /* tick labels */
 .portfolio-graph .tick text {
   fill: var(--graph-text-color);
-  
+
 }
 
 .portfolio-graph .x-axis text{
@@ -463,7 +466,7 @@ body {
   border-radius: var(--border-radius);
   box-shadow: var(--card-shadow);
   box-sizing: border-box;
-  transition: 
+  transition:
     border-color 0.3s ease,
     box-shadow 0.3s ease;
   margin: 0 auto;                    /* Center it within the header */
@@ -522,14 +525,14 @@ body {
   /* Undo any leftover flex:1 or padding */
   flex: none;
   padding: 0;
-  
+
   /* Fixed size */
   width: 55px;
   height: 55px;
-  
+
   /* Guarantee 1:1 aspect ratio (modern browsers) */
   aspect-ratio: 1 / 1;
-  
+
   /* Keep your existing styles */
   border: none;
   border-radius: 150%;
@@ -551,7 +554,7 @@ body {
 }
 
 #logout-btn {
-  
+
     background-color: var(--card-bg);
     color: var(--text-color);
     border: none;
@@ -560,12 +563,12 @@ body {
     border-radius: var(--border-radius);
     cursor: pointer;
     transition: all 0.3s ease;
-   
-    
-  
+
+
+
 }
 #help-btn {
-  
+
   background-color: var(--card-bg);
   color: var(--text-color);
   border: none;
@@ -574,8 +577,8 @@ body {
   border-radius: var(--border-radius);
   cursor: pointer;
   transition: all 0.3s ease;
- 
-  
+
+
 
 }
 .positions-title{
@@ -614,7 +617,7 @@ body,
 .modal-content,
 #place-order-btn,
 #toggle-order-book-btn {
-  transition: 
+  transition:
     background-color 0.4s ease,
     color 0.4s ease,
     box-shadow 0.4s ease;
