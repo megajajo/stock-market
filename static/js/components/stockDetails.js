@@ -3,7 +3,7 @@
 import { stockData } from '../data/stockData.js';
 import { drawDetailedGraph } from './graph.js';
 import { populateOrderBook } from './orderBook.js';
-import { userData }           from './data/userData.js';
+import { userData }           from '../data/userData.js';
 
 // Function to open the detailed view modal for a given stock.
 export function openStockDetail(stockName) {
