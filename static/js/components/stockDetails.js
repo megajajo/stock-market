@@ -1,8 +1,8 @@
 // js/components/stockDetails.js
 
-import { stockData } from '../data/stockData.js';
+import { stockData } from '../data/stockData.js'; // to get data from backend
 import { drawDetailedGraph } from './graph.js';
-import { populateOrderBook } from './orderBook.js';
+import { populateOrderBook } from './orderBook.js'; // to get data from backend
 
 // Function to open the detailed view modal for a given stock.
 export function openStockDetail(stockName) {
@@ -70,17 +70,17 @@ export function openStockDetail(stockName) {
 
   // Draw the detailed graph using the modular graph component.
   const graphContainer = modal.querySelector('.graph-container');
-graphContainer.innerHTML = ''; // Clear the placeholder SVG if present
-// Wait for the modal to fully render before drawing the graph.
-setTimeout(() => {
-  drawDetailedGraph(graphContainer, stockData[stockName], {
-    height: 200,
-    yKey: 'price',
-    resizeOnWindow: false,
-    margin: { top: 20, right: 20, bottom: 40, left: 35 } // <-- reduce left from default 50
-  });
-  
-}, 0);
+  graphContainer.innerHTML = ''; // Clear the placeholder SVG if present
+  // Wait for the modal to fully render before drawing the graph.
+  setTimeout(() => {
+    drawDetailedGraph(graphContainer, stockData[stockName], {
+      height: 200,
+      yKey: 'price',
+      resizeOnWindow: false,
+      margin: { top: 20, right: 20, bottom: 40, left: 35 } // <-- reduce left from default 50
+    });
+
+    }, 0);
 
 
   // Set up the order type toggle: show/hide the limit price input.
@@ -112,7 +112,7 @@ setTimeout(() => {
       toggleOrderBookBtn.textContent = 'Hide Order Book';
       // Populate the order book using the modular order book component.
       const orderBookContainer = modal.querySelector('#order-book-container');
-      populateOrderBook(stockName, orderBookContainer);
+      populateOrderBook(stockName, orderBookContainer, stockDataDynamic[stockName]);
     } else {
       orderBookSection.style.display = 'none';
       toggleOrderBookBtn.textContent = 'Show Order Book';
@@ -140,29 +140,71 @@ function handleOrder(stock, orderType, modal) {
   }
 
   const tradeData = {
-    stock,
-    type: orderType,
-    username,
-    amount: Number(amountVal),
-    limitPrice: orderType === 'market' ? null : Number(limitPriceVal),
-    timestamp: new Date().toISOString()
+    ticker: stock,
+    side: orderType == 'limit_buy' ? 'buy' : 'sell',
+    client_user: username,
+    volume: Number(amountVal),
+    price: orderType === 'market' ? null : Number(limitPriceVal)/*,
+    timestamp: new Date().toISOString()*/
   };
 
   console.log("Sending trade data:", tradeData);
 
-  // Example API call (replace the URL with your endpoint).
-  fetch('https://example.com/api/trade', {
+  // API call to place order
+  fetch('/api/place_order', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(tradeData)
+    body: JSON.stringify(tradeData) // Convert the data to JSON format
   })
-  .then(response => response.json())
+  .then(response => {
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return response.json();
+  })
   .then(data => {
+    console.log("Server Response:", data);
     alert("Order placed successfully!");
-    console.log("Server response:", data);
   })
   .catch(error => {
-    alert("Error placing order!");
-    console.error("Order error:", error);
+    console.error("Error:", error);
+    alert("Failed to place the order. Please try again.");
   });
 }
+
+
+// Add WebSocket listeners to get data about the order book
+var socket = new WebSocket("ws://localhost:8000/ws");
+var tickers = ["AAPL"];
+var stockDataDynamic = {};
+var ticker = "AAPL";
+
+    // Handle connection open
+    socket.addEventListener("open", () => {
+        console.log(`Connected to WebSocket for ticker: ${ticker}`);
+        // Send the ticker to subscribe to
+        socket.send(ticker);
+    });
+
+    // Handle incoming messages
+    socket.addEventListener("message", (event) => {
+        const data = JSON.parse(event.data);
+        console.log("Order Book Update:", data);
+        stockDataDynamic[ticker] = data;
+
+        // Example: Update the UI with the received data
+        const orderBookContainer = document.getElementById("order-book-container");
+        if (orderBookContainer) {
+            populateOrderBook(ticker, orderBookContainer, data);
+        }
+    });
+
+    // Handle connection close
+    socket.addEventListener("close", () => {
+        console.log("WebSocket connection closed");
+    });
+
+    // Handle errors
+    socket.addEventListener("error", (error) => {
+        console.error("WebSocket error:", error);
+    });

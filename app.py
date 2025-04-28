@@ -246,7 +246,7 @@ async def get_all_bids(ticker: str):
 # Store active WebSocket connections
 active_connections = []
 
-
+# Websocket used to get information about the orderbook once a second
 @app.websocket("/ws")
 async def websocket_endpoint(
     websocket: WebSocket,

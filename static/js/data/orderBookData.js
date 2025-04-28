@@ -1,14 +1,10 @@
 // js/data/orderBookData.js
 
 export const orderBookData = {
-    "Stock A": {
+    "AAPL": {
       bids: [
-        { price: 99, volume: 150 },
-        { price: 98, volume: 200 }
       ],
       asks: [
-        { price: 101, volume: 120 },
-        { price: 102, volume: 180 }
       ]
     },
     "Stock B": {
@@ -58,4 +54,3 @@ export const orderBookData = {
       ]
     }
   };
-  

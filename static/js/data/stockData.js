@@ -1,7 +1,7 @@
 // js/data/stockData.js
 
 export const stockData = {
-  "Stock A": [
+  "AAPL": [
     { date: new Date(2024, 3, 14, 9, 0), price: 100 },
     { date: new Date(2024, 3, 14, 10, 0), price: 102 },
     { date: new Date(2024, 3, 14, 11, 30), price: 105 },
@@ -11,7 +11,7 @@ export const stockData = {
     { date: new Date(2024, 3, 8), price: 98 },
     { date: new Date(2024, 2, 14), price: 95 },
     { date: new Date(2024, 1, 14), price: 92 },
-    
+
   ],
   "Stock B": [
     { date: new Date(2024, 3, 14, 9, 0), price: 200 },
@@ -46,5 +46,3 @@ export const stockData = {
     { date: new Date(2024, 1, 14), price: 385 }
   ]
 };
-
-  
