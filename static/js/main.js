@@ -12,7 +12,6 @@ function handleCredentialResponse(response) {
   // Update our central model
   userData.name           = payload.name;
   userData.profilePicUrl  = payload.picture;
-  userData.email          = payload.email;  // store email for sign-out
 
   // Update the header if already rendered
   const nameEl = document.getElementById('user-name');
@@ -20,10 +19,8 @@ function handleCredentialResponse(response) {
     nameEl.textContent = userData.name;
     document.getElementById('header-pic').src = userData.profilePicUrl;
   }
-
-  // Toggle buttons: hide sign-in, show sign-out
-  document.getElementById('g_id_signin').style.display    = 'none';
-  document.getElementById('google-signout').style.display = 'block';
+  // Hide the sign-in button now that we're signed in
+  document.getElementById('g_id_signin').style.display = 'none';
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -50,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (target === 'portfolio-view' && !portfolioInitialized) {
         initPortfolioView(); portfolioInitialized = true;
       } else if (target === 'search-view' && !searchInitialized) {
-        initSearchView();    searchInitialized = true;
+        initSearchView(); searchInitialized = true;
       }
     });
   });
@@ -76,6 +73,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // —————— Logout Placeholder ——————
+  const logoutBtn = document.getElementById('logout-btn');
+  if (logoutBtn) logoutBtn.addEventListener('click', () => alert('Logging out...'));
+
   // —————— Google Sign-In ——————
   google.accounts.id.initialize({
     client_id: GOOGLE_CLIENT_ID,
@@ -85,30 +86,9 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('g_id_signin'),
     { theme: 'outline', size: 'large' }
   );
-
-  // —————— Google Sign-Out ——————
-  const signOutBtn = document.getElementById('google-signout');
-  signOutBtn.style.display = 'none';  // ensure hidden initially
-  signOutBtn.addEventListener('click', () => {
-    // disable auto-select on next load
-    google.accounts.id.disableAutoSelect();
-
-    // revoke current session
-    google.accounts.id.revoke(userData.email, () => {
-      // clear our user model
-      userData.name           = '';
-      userData.profilePicUrl  = '';
-      userData.email          = '';
-
-      // reset UI to defaults
-      document.getElementById('user-name').textContent = 'Your Name';
-      document.getElementById('header-pic').src       = 'assets/logo.jpg';
-
-      // toggle buttons
-      signOutBtn.style.display                    = 'none';
-      document.getElementById('g_id_signin').style.display = 'block';
-    });
-  });
+  // Optional: one-tap prompt
+  // google.accounts.id.prompt();
+});
 
   // Optional: one-tap prompt
   // google.accounts.id.prompt();
