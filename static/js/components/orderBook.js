@@ -3,9 +3,6 @@
 export function populateOrderBook(stock, container, data) {
    //const data = orderBookData[stock];
 
-  console.log("Bids:", data.bids);
-  console.log("Asks:", data.asks);
-
   if (!data) return;
 
   // Clear existing content.

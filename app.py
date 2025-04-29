@@ -21,7 +21,7 @@ app.add_middleware(
 )
 
 # Initialize order books
-order_books = [OrderBook("AAPL")]
+order_books = [OrderBook("AAPL"), OrderBook("LMT")]
 
 # Two example users
 client1 = Client(
