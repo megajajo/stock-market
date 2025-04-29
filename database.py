@@ -167,9 +167,10 @@ class Database:
         connection.close()
         return result
 
-    # retrieve_specific_volumn: Takes a user and a specific stock market and returns the number of owned stock
+    # retrieve_specific_stock: Takes a user and a specific stock market and returns the number of owned stock
+    # Pre: N/A
     # Post: total_vol from record with key (user_id, ticker)
-    def retrieve_specific_volumn(self, owner_id, ticker):
+    def retrieve_specific_stock(self, owner_id, ticker):
         connection = sqlite3.connect("stock_market_database.db")
         cursor = connection.cursor()
         cursor.execute(
@@ -197,3 +198,102 @@ class Database:
         connection.commit()
         connection.close()
         return result[0][0]
+
+    # retrieve_transactions_user: Takes a user and returns all transactions they are involved in
+    # Pre: N/A
+    # Post: list of tuples from transactions where client_id is either the bidder or the asker
+    def retrieve_transactions_user(self, client_id):
+        connection = sqlite3.connect("stock_market_database.db")
+        cursor = connection.cursor()
+        cursor.execute(
+            """SELECT * FROM Transactions WHERE bidder_id = ? or asker_id = ?;""",
+            (client_id, client_id),
+        )
+        result = cursor.fetchall()
+        connection.commit()
+        connection.close()
+        return result
+
+    # retrieve_transaction_stock: Takes a ticker and returns all transactions from that market
+    # Pre: N/A
+    # Post: list of tuples from transactions involing trading on ticker
+    def retrieve_transactions_stock(self, ticker):
+        connection = sqlite3.connect("stock_market_database.db")
+        cursor = connection.cursor()
+        cursor.execute("""SELECT * FROM Transactions WHERE ticker = ?;""", (ticker,))
+        result = cursor.fetchall()
+        connection.commit()
+        connection.close()
+        return result
+
+    # is_username_taken: Takes an username and returns if it exists in the database
+    # Pre: N/A
+    # Post: True if username does not belong to Client, False otherwise
+    def is_username_taken(self, username):
+        connection = sqlite3.connect("stock_market_database.db")
+        cursor = connection.cursor()
+        cursor.execute("""SELECT * FROM Client WHERE username = ?;""", (username,))
+        result = cursor.fetchall()
+        connection.commit()
+        connection.close()
+        return len(result) == 0
+
+    # is_email_taken: Takes an email and returns if it exists in the database
+    # Pre: N/A
+    # Post: True if username does not belong to Client, False otherwise
+    def is_email_taken(self, email):
+        connection = sqlite3.connect("stock_market_database.db")
+        cursor = connection.cursor()
+        cursor.execute("""SELECT * FROM Client WHERE email = ?;""", (email,))
+        result = cursor.fetchall()
+        connection.commit()
+        connection.close()
+        return len(result) == 0
+
+    # create_client: Takes a username and email and creates a new entry in the database
+    # Pre: username and email do not exist in the database previously
+    # Post: client_id of the new record or -1 if an error occured
+    def create_client(self, username, email, first_name=None, last_name=None):
+        connection = sqlite3.connect("stock_market_database.db")
+        cursor = connection.cursor()
+        cursor.execute(
+            """INSERT INTO Client(username, email, first_names, last_name) VALUES(?, ?, ?, ?);""",
+            (username, email, first_name, last_name),
+        )
+        result = cursor.lastrowid
+        if cursor.rowcount == 0 or result == None:
+            result = -1
+        connection.commit()
+        connection.close()
+        return result
+
+    # account_from_email: Takes an email and returns the client_id and username associated with the email
+    # Pre: N/A
+    # Post: Associated (client_id, username) or (-1, "") if email is not in database
+    def account_from_email(self, email):
+        connection = sqlite3.connect("stock_market_database.db")
+        cursor = connection.cursor()
+        cursor.execute(
+            """SELECT client_id, username FROM Client WHERE email = ?;""", (email,)
+        )
+        result = cursor.fetchall()
+        if len(result) != 1:
+            result = (-1, "")
+        else:
+            result = result[0]
+        return result
+
+    # retrieve_stock: Takes a user and returns all owned stock details
+    # Pre: N/A
+    # Post: (ticker, average_price, total_vol) from records with user_id
+    def retrieve_stock(self, owner_id):
+        connection = sqlite3.connect("stock_market_database.db")
+        cursor = connection.cursor()
+        cursor.execute(
+            """SELECT ticker, average_price, total_vol FROM OwnedStock WHERE owner_id = ?""",
+            (owner_id,),
+        )
+        result = cursor.fetchall()
+        connection.commit()
+        connection.close()
+        return result
