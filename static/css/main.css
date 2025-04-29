@@ -553,7 +553,7 @@ body {
   fill: var(--secondary-color);
 }
 
-#logout-btn {
+#google-signout {
 
     background-color: var(--card-bg);
     color: var(--text-color);
