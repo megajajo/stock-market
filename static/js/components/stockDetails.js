@@ -3,6 +3,8 @@
 import { stockData } from '../data/stockData.js'; // to get data from backend
 import { drawDetailedGraph } from './graph.js';
 import { populateOrderBook } from './orderBook.js';
+import { loggedIn } from '../main.js';
+import { userData } from '../data/userData.js'; // need to take data from database
 
 // Function to open the detailed view modal for a given stock.
 export function openStockDetail(stockName) {
@@ -122,10 +124,16 @@ setTimeout(() => {
 
 // Function to handle order submission.
 function handleOrder(stock, orderType, modal) {
-  const username = userData.name;
+
+  // check that the user is logged in
+  if(loggedIn == false){
+    alert("You must be signed in before placing any order!!!");
+    return;
+  }
+
+  const username = userData.username;
   const amountVal = modal.querySelector('#order-amount').value.trim();
   const limitPriceVal = modal.querySelector('#order-limit-price').value.trim();
-
 
   if (!amountVal || Number(amountVal) <= 0) {
     alert("Amount must be greater than 0!");
@@ -192,7 +200,7 @@ var ticker = "AAPL";
         // Example: Update the UI with the received data
         const orderBookContainer = document.getElementById("order-book-container");
         if (orderBookContainer) {
-            populateOrderBook(ticker, orderBookContainer, data);
+            populateOrderBook(ticker, orderBookContainer, stockDataDynamic[ticker]);
         }
     });
 

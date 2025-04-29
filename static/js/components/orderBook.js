@@ -37,14 +37,14 @@ export function populateOrderBook(stock, container, data) {
   const bidsTbody = bidsSection.querySelector('tbody');
   const asksTbody = asksSection.querySelector('tbody');
 
-  data.bids.forEach(order => {
+  data.all_bids.forEach(order => {
     const row = document.createElement('tr');
     const amount = order.price * order.volume;
     row.innerHTML = `<td>${order.price}</td><td>${order.volume}</td><td>${amount}</td>`;
     bidsTbody.appendChild(row);
   });
 
-  data.asks.forEach(order => {
+  data.all_asks.forEach(order => {
     const row = document.createElement('tr');
     const amount = order.price * order.volume;
     row.innerHTML = `<td>${order.price}</td><td>${order.volume}</td><td>${amount}</td>`;

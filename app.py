@@ -243,6 +243,56 @@ async def get_all_bids(ticker: str):
     ]
 
 
+@app.get("/api/get_client_by_email")
+async def get_client_by_email(email: str):
+    """
+    Used to get a client from the backend by its email.
+
+    Parameters:
+    - email: The email we are looking for.
+
+    Returns:
+    - The object of the client if it exists or None otherwise.
+    """
+
+    print(f"Getting information for client with email {email}")
+    client = Client.get_client_by_email(email)
+    print(client)
+    return client
+
+
+class ClientData(BaseModel):
+    email: str
+    first_name: str
+    last_name: str
+
+
+# need to add a proper username and a proper password.
+# need to add stock for every ticker !!!!
+@app.post("/api/add_new_client")
+async def add_new_client(client_data: ClientData):
+    """
+    Used to add a new client, if the logged in client does not have an account.
+
+    Parameters:
+    - email, first name and last name
+
+    Returns:
+    - TO DO
+    """
+    dic = {"AAPL": 10}
+    client = Client(
+        "",
+        "pass",
+        client_data.email,
+        client_data.first_name,
+        client_data.last_name,
+        100,
+        dic,
+    )
+    return client
+
+
 # Store active WebSocket connections
 active_connections = []
 

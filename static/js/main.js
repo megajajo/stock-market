@@ -4,6 +4,7 @@ import { initPortfolioView }  from './components/portfolio.js';
 import { initSearchView }     from './components/search.js';
 
 const GOOGLE_CLIENT_ID = '933623916878-ipovfk31uqvoidtvj5pcknkod3ggdter.apps.googleusercontent.com';
+export var loggedIn = false;
 
 function handleCredentialResponse(response) {
   const payload = JSON.parse(atob(response.credential.split('.')[1]));
@@ -13,6 +14,14 @@ function handleCredentialResponse(response) {
   userData.name           = payload.name;
   userData.profilePicUrl  = payload.picture;
   userData.email          = payload.email;  // store email for sign-out
+
+  // Check if a client  with this email address already exists
+  // If it does not exist, create it
+  // Either way, update the userData
+  addClient()
+
+  // Update loggedIn variable
+  loggedIn = true;
 
   // Update the header if already rendered
   const nameEl = document.getElementById('user-name');
@@ -107,6 +116,9 @@ document.addEventListener('DOMContentLoaded', () => {
       // toggle buttons
       signOutBtn.style.display                    = 'none';
       document.getElementById('g_id_signin').style.display = 'block';
+
+      // update loggedIn variable
+      loggedIn = false;
     });
   });
 
@@ -114,3 +126,61 @@ document.addEventListener('DOMContentLoaded', () => {
   // google.accounts.id.prompt();
 });
 
+function addClient(){
+  fetch(`/api/get_client_by_email?email=${userData.email}`, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+  })
+  .then(response => {
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return response.json();
+  })
+  .then(data => {
+    console.log("Server Response:", data);
+    // Create a new client if it does not exist
+    if(data == null){
+      createClient();
+    }
+
+    // Update userData with relevant info
+    //console.log("Update data", data);
+
+  })
+  .catch(error => {
+    console.error("Error:", error);
+    alert(`Failed to get client with mail ${userData.email} from database. Please try again.`);
+  });
+}
+
+
+function createClient(){
+  console.log(typeof userData.name);
+  const clientData = {
+    email: userData.email,
+    first_name: userData.name,
+    last_name: userData.name
+  };
+
+  fetch('/api/add_new_client', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(clientData) // Convert the data to JSON format
+  })
+  .then(response => {
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return response.json();
+  })
+  .then(data => {
+    console.log("Server Response:", data);
+    alert("Client created successfully!");
+  })
+  .catch(error => {
+    console.error("Error:", error);
+    alert("Failed to create the client. Please try again.");
+  });
+
+}

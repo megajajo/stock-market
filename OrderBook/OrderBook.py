@@ -40,6 +40,9 @@ class Client:
         Client._all_clients += [self]
         if username in Client._usernames:
             raise ValueError(f"Username {username} is not available")
+
+        # for now generate a new username for each logged in person
+        username = "user" + str(len(Client._usernames))
         self.username = username
         Client._usernames.add(username)
         self.password = password
@@ -61,9 +64,16 @@ class Client:
             return None
 
     @classmethod
-    def get_client_by_username(cls, username: str):
+    def get_client_by_username(cls, username: str) -> "Client":
         for client in cls._all_clients:
             if client.username == username:
+                return client
+        return None
+
+    @classmethod
+    def get_client_by_email(cls, email: str) -> "Client":
+        for client in cls._all_clients:
+            if client.email == email:
                 return client
         return None
 
@@ -614,28 +624,3 @@ class OrderBook:
         stock = OrderBook.get_book_by_ticker(ticker)
 
         return stock._get_all_bids()
-
-
-if __name__ == "__main__":
-    client1 = Client("tapple", "pw", "timcook@aol.com", "Tim", "Cook")
-    client2 = Client(
-        "goat", "pw", "lbj@nba.com", "LeBron", "James", balance=1_000_000_000
-    )
-
-    # print(client1.portfolio, client2.portfolio)
-
-    order_book = OrderBook("AAPL")
-    client1.buy_stock(0, 0, 100)
-
-    # print(client1.portfolio, client2.portfolio)
-
-    order_book.place_order(SELL, 100.5, 10, 0)
-    # print(order_book.get_best())
-    order_book.place_order(BUY, 101.0, 5, 1)
-    # print(order_book.get_best())
-
-    # print(Order.get_order_by_id(1).volume)
-    print(client1.display_balance())
-    print(client1.display_portfolio())
-    print(client2.display_balance())
-    print(client2.display_portfolio())
