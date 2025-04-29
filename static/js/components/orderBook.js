@@ -1,6 +1,6 @@
 // js/components/orderBook.js
 
-export function populateOrderBook(stock, container, data) {
+export function populateOrderBook(container, data) {
    //const data = orderBookData[stock];
 
   if (!data) return;

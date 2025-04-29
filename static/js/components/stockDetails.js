@@ -114,7 +114,7 @@ setTimeout(() => {
       toggleOrderBookBtn.textContent = 'Hide Order Book';
       // Populate the order book using the modular order book component.
       const orderBookContainer = modal.querySelector('#order-book-container');
-      populateOrderBook(stockName, orderBookContainer, stockDataDynamic[stockName]);
+      populateOrderBook(orderBookContainer, stockDataDynamic[stockName]);
     } else {
       orderBookSection.style.display = 'none';
       toggleOrderBookBtn.textContent = 'Show Order Book';
@@ -200,7 +200,7 @@ var ticker = "AAPL";
         // Example: Update the UI with the received data
         const orderBookContainer = document.getElementById("order-book-container");
         if (orderBookContainer) {
-            populateOrderBook(ticker, orderBookContainer, stockDataDynamic[ticker]);
+            populateOrderBook(orderBookContainer, stockDataDynamic[ticker]);
         }
     });
 
