@@ -2,6 +2,7 @@
 import { userData }           from './data/userData.js';
 import { initPortfolioView }  from './components/portfolio.js';
 import { initSearchView }     from './components/search.js';
+import { populatePortfolio } from './components/portfolio.js';
 
 const GOOGLE_CLIENT_ID = '933623916878-ipovfk31uqvoidtvj5pcknkod3ggdter.apps.googleusercontent.com';
 export var loggedIn = false;
@@ -22,6 +23,9 @@ function handleCredentialResponse(response) {
 
   // Update loggedIn variable
   loggedIn = true;
+
+  // Connect the WebSocket with the updated email
+  connectClientSocket(userData.email);
 
   // Update the header if already rendered
   const nameEl = document.getElementById('user-name');
@@ -56,9 +60,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const target = btn.dataset.view;
       document.getElementById(target).classList.add('active');
 
-      if (target === 'portfolio-view' /*&& !portfolioInitialized*/) {
+      if (target === 'portfolio-view' && !portfolioInitialized) {
         initPortfolioView(); portfolioInitialized = true;
-      } else if (target === 'search-view' /*&& !searchInitialized*/) {
+      } else if (target === 'search-view' && !searchInitialized) {
         initSearchView();    searchInitialized = true;
       }
     });
@@ -126,6 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // google.accounts.id.prompt();
 });
 
+// —————— addClient function used when signing in ——————
 function addClient(){
   const client_data = {
     email: userData.email,
@@ -151,10 +156,59 @@ function addClient(){
     userData.holdings = data.portfolio
     userData.first_name = userData.last_name = data.last_name;
     console.log(userData);
+
     alert("Client has been found!");
   })
   .catch(error => {
     console.error("Error:", error);
     alert("Failed to find the client. Please try again.");
   });
+}
+
+
+
+// —————— WebSocket used to update the client data and the portfolio webpage ——————
+// Add WebSocket listeners to get data about the order book
+
+
+let client_socket; // Declare the WebSocket variable globally
+
+function connectClientSocket(email) {
+    // Close the existing WebSocket connection if it exists
+    if (client_socket) {
+        console.log("Closing existing WebSocket connection...");
+        client_socket.close();
+    }
+
+    // Create a new WebSocket connection
+    client_socket = new WebSocket("ws://localhost:8000/client_info");
+
+    // Handle connection open
+    client_socket.addEventListener("open", () => {
+        console.log(`Connected to Client Info for client with email: ${email}`);
+        // Send the updated email to subscribe to client info
+        client_socket.send(email);
+    });
+
+    // Handle incoming messages
+    client_socket.addEventListener("message", (event) => {
+        const data = JSON.parse(event.data);
+        console.log(`Client ${email} update:`, data);
+        userData.balance = data.balance;
+        userData.holdings = data.portfolio;
+        console.log(userData);
+
+        // Update the portfolio view
+        populatePortfolio();
+    });
+
+    // Handle connection close
+    client_socket.addEventListener("close", () => {
+        console.log("Client Info WebSocket connection closed");
+    });
+
+    // Handle errors
+    client_socket.addEventListener("error", (error) => {
+        console.error("Client Info WebSocket error:", error);
+    });
 }

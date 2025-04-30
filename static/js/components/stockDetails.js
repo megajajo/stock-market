@@ -180,13 +180,12 @@ function handleOrder(stock, orderType, modal) {
 
 // Add WebSocket listeners to get data about the order book
 var socket = new WebSocket("ws://localhost:8000/ws");
-var tickers = ["AAPL"];
 var stockDataDynamic = {};
 var ticker = "AAPL";
 
     // Handle connection open
     socket.addEventListener("open", () => {
-        console.log(`Connected to WebSocket for ticker: ${ticker}`);
+        console.log(`Connected to OrderBook WebSocket for ticker: ${ticker}`);
         // Send the ticker to subscribe to
         socket.send(ticker);
     });
@@ -206,10 +205,10 @@ var ticker = "AAPL";
 
     // Handle connection close
     socket.addEventListener("close", () => {
-        console.log("WebSocket connection closed");
+        console.log("OrderBook WebSocket connection closed");
     });
 
     // Handle errors
     socket.addEventListener("error", (error) => {
-        console.error("WebSocket error:", error);
+        console.error("OrderBook WebSocket error:", error);
     });

@@ -344,4 +344,36 @@ async def websocket_endpoint(
             await websocket.send_text(json.dumps(encoded))
             await asyncio.sleep(1)  # Updates pushed every second
     except Exception as e:
-        print(f"WebSocket error: {e}")
+        print(f"OrderBook WebSocket error: {e}")
+
+
+@app.websocket("/client_info")
+async def client_info_websocket(websocket: WebSocket):
+    """
+    WebSocket endpoint to send client information (balance and portfolio).
+    """
+    await websocket.accept()
+    try:
+        # Receive the client's username from the WebSocket
+        email = await websocket.receive_text()
+        print(f"Client subscribed for information: {email}")
+
+        # Fetch the client object
+        client = Client.get_client_by_email(email)
+        if not client:
+            await websocket.send_text(
+                json.dumps({"error": f"Client with email {email} not found"})
+            )
+            await websocket.close()
+            return
+
+        # Periodically send client information
+        while True:
+            client_info = {
+                "balance": client.balance,
+                "portfolio": client.portfolio,
+            }
+            await websocket.send_text(json.dumps(client_info))
+            await asyncio.sleep(1)  # Send updates every second
+    except Exception as e:
+        print(f"Client Info WebSocket error: {e}")

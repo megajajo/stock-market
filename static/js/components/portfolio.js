@@ -54,3 +54,53 @@ export function initPortfolioView() {
     });
   });
 }
+
+export function populatePortfolio(){
+
+  const pnlValue = userData.pnl;
+  const isPositive = pnlValue.startsWith('+');
+  document.getElementById('balance-header').textContent = `$${userData.balance.toFixed(2)}`;
+  const pnlEl = document.getElementById('pnl-header');
+  pnlEl.textContent = pnlValue;
+  pnlEl.classList.add(isPositive ? 'positive' : 'negative');
+
+
+
+  // Draw the main portfolio graph inside header
+  const graphDiv = document.getElementById('header-graph');
+  drawDetailedGraph(graphDiv, portfolioPerformanceData, {
+    height: 200,
+    yKey: 'value',
+    resizeOnWindow: true
+  });
+
+
+  const holdingsGrid = document.querySelector('.holdings-grid');
+  const positionsTitle = document.getElementsByClassName('positions-title');
+  holdingsGrid.parentNode.insertBefore(positionsTitle, holdingsGrid);
+
+
+    // Populate the holdings grid
+    console.log(userData.holdings);
+    holdingsGrid.innerHTML = '';
+    /*userData.holdings.forEach(holding => {
+      const card = document.createElement('div');
+      card.classList.add('holding-card');
+      card.innerHTML = `
+        <h3 class="holding-stock">${holding.stock}</h3>
+        <div class="mini-chart-container"></div>
+        <div class="holding-amount">Amount: ${holding.amount}</div>
+        <div class="holding-pnl">24h PnL: ${holding.pnl}</div>
+      `;
+      card.addEventListener('click', () => openStockDetail(holding.stock));
+      holdingsGrid.appendChild(card);
+
+      // Draw mini-chart
+      const miniChartContainer = card.querySelector('.mini-chart-container');
+      drawMiniChart(miniChartContainer, stockData[holding.stock], {
+        width: 100,
+        height: 40,
+        yKey: 'price'
+      });
+    });*/
+}
