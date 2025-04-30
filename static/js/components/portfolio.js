@@ -65,8 +65,8 @@ export function initPortfolioView() {
  populatePositions(holdingsGrid, userData.holdings);
 }
 
-export function populatePortfolio(){
-
+export function populatePortfolio() {
+  // Update header numbers
   const pnlValue = userData.pnl;
   const isPositive = pnlValue.startsWith('+');
   document.getElementById('balance-header').textContent = `$${userData.balance.toFixed(2)}`;
@@ -74,21 +74,13 @@ export function populatePortfolio(){
   pnlEl.textContent = pnlValue;
   pnlEl.classList.add(isPositive ? 'positive' : 'negative');
 
-
-
-  // Draw the main portfolio graph inside header
-  const graphDiv = document.getElementById('header-graph');
-  drawDetailedGraph(graphDiv, portfolioPerformanceData, {
-    height: 200,
-    yKey: 'value',
-    resizeOnWindow: true
-  });
-
-
+  // Re-populate positions only (graph was initialized once in initPortfolioView)
   const holdingsGrid = document.querySelector('.holdings-grid');
+  const positionsTitle = document.getElementsByClassName('positions-title');
+  holdingsGrid.parentNode.insertBefore(positionsTitle, holdingsGrid);
 
 
-  // Populate the holdings grid
-  console.log("Populate the holdings", userData.holdings);
-  populatePositions(holdingsGrid, userData.holdings);
+    // Populate the holdings grid
+    console.log(userData.holdings);
+    populatePositions(holdingsGrid, userData.holdings);
 }
