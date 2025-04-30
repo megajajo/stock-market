@@ -12,6 +12,7 @@ import { drawDetailedGraph } from './graph.js';
  */
 function populatePositions(container, holdings) {
   container.innerHTML = '';
+
   holdings.forEach(holding => {
     const card = document.createElement('div');
     card.classList.add('holding-card');
@@ -85,11 +86,9 @@ export function populatePortfolio(){
 
 
   const holdingsGrid = document.querySelector('.holdings-grid');
-  const positionsTitle = document.getElementsByClassName('positions-title');
-  holdingsGrid.parentNode.insertBefore(positionsTitle, holdingsGrid);
 
 
-    // Populate the holdings grid
-    console.log(userData.holdings);
-    populatePositions(holdingsGrid, userData.holdings);
+  // Populate the holdings grid
+  console.log("Populate the holdings", userData.holdings);
+  populatePositions(holdingsGrid, userData.holdings);
 }

@@ -18,7 +18,6 @@ function handleCredentialResponse(response) {
 
   // Check if a client  with this email address already exists
   // If it does not exist, create it
-  // Either way, update the userData
   addClient()
 
   // Update loggedIn variable
@@ -152,11 +151,7 @@ function addClient(){
   })
   .then(data => {
     console.log("Server Response Client Object:", data);
-    userData.balance = data.balance
-    userData.holdings = data.portfolio
-    userData.first_name = userData.last_name = data.last_name;
-    console.log(userData);
-
+    userData.username = data.username;
     alert("Client has been found!");
   })
   .catch(error => {
@@ -194,9 +189,20 @@ function connectClientSocket(email) {
     client_socket.addEventListener("message", (event) => {
         const data = JSON.parse(event.data);
         console.log(`Client ${email} update:`, data);
+
+        // Update userData with balance
         userData.balance = data.balance;
-        userData.holdings = data.portfolio;
-        console.log(userData);
+
+        // Transform portfolio data into holdings array
+        userData.holdings = Object.entries(data.portfolio).map(([stock, amount]) => {
+            return {
+                stock: stock,       // Stock ticker
+                amount: amount,     // Number of shares
+                pnl: "N/A"          // Placeholder for PnL (if not provided by the server)
+            };
+        });
+
+        console.log("Transformed holdings:", userData.holdings);
 
         // Update the portfolio view
         populatePortfolio();
