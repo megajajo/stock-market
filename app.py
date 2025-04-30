@@ -272,25 +272,30 @@ class ClientData(BaseModel):
 @app.post("/api/add_new_client")
 async def add_new_client(client_data: ClientData):
     """
-    Used to add a new client, if the logged in client does not have an account.
+    Used to get information of a client based on its email. If it doesn not exist, create a new client
 
     Parameters:
     - email, first name and last name
 
     Returns:
-    - TO DO
+    - The object of the client
     """
-    dic = {"AAPL": 10}
-    client = Client(
-        "",
-        "pass",
-        client_data.email,
-        client_data.first_name,
-        client_data.last_name,
-        100,
-        dic,
-    )
-    return client
+    queryClient = Client.get_client_by_email(client_data.email)
+
+    if queryClient != None:
+        return queryClient
+    else:
+        dic = {"AAPL": 10}
+        client = Client(
+            "",
+            "pass",
+            client_data.email,
+            client_data.first_name,
+            client_data.last_name,
+            100,
+            dic,
+        )
+        return client
 
 
 # Store active WebSocket connections

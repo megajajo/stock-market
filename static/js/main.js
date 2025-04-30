@@ -56,9 +56,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const target = btn.dataset.view;
       document.getElementById(target).classList.add('active');
 
-      if (target === 'portfolio-view' && !portfolioInitialized) {
+      if (target === 'portfolio-view' /*&& !portfolioInitialized*/) {
         initPortfolioView(); portfolioInitialized = true;
-      } else if (target === 'search-view' && !searchInitialized) {
+      } else if (target === 'search-view' /*&& !searchInitialized*/) {
         initSearchView();    searchInitialized = true;
       }
     });
@@ -127,60 +127,34 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function addClient(){
-  fetch(`/api/get_client_by_email?email=${userData.email}`, {
-    method: 'GET',
-    headers: { 'Content-Type': 'application/json' },
-  })
-  .then(response => {
-    if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    return response.json();
-  })
-  .then(data => {
-    console.log("Server Response:", data);
-    // Create a new client if it does not exist
-    if(data == null){
-      createClient();
-    }
-
-    // Update userData with relevant info
-    //console.log("Update data", data);
-
-  })
-  .catch(error => {
-    console.error("Error:", error);
-    alert(`Failed to get client with mail ${userData.email} from database. Please try again.`);
-  });
-}
-
-
-function createClient(){
-  console.log(typeof userData.name);
-  const clientData = {
+  const client_data = {
     email: userData.email,
     first_name: userData.name,
     last_name: userData.name
-  };
+  }
 
+  // API call to add client
   fetch('/api/add_new_client', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(clientData) // Convert the data to JSON format
+    body: JSON.stringify(client_data) // Convert the data to JSON format
   })
   .then(response => {
     if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
     return response.json();
   })
   .then(data => {
-    console.log("Server Response:", data);
-    alert("Client created successfully!");
+    console.log("Server Response Client Object:", data);
+    userData.balance = data.balance
+    userData.holdings = data.portfolio
+    userData.first_name = userData.last_name = data.last_name;
+    console.log(userData);
+    alert("Client has been found!");
   })
   .catch(error => {
     console.error("Error:", error);
-    alert("Failed to create the client. Please try again.");
+    alert("Failed to find the client. Please try again.");
   });
-
 }
