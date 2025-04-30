@@ -1,6 +1,6 @@
 // js/components/search.js
 import { drawMiniChart } from './miniChart.js';
-import { stockData }       from '../data/stockData.js';
+import { stockDataPrices }       from '../data/stockData.js';
 import { openStockDetail } from './stockDetails.js';
 
 export function initSearchView() {
@@ -20,7 +20,7 @@ export function initSearchView() {
     stocksGrid.innerHTML = '';
 
     // Get all stock names, filter by substring, case‑neutral
-    const names = Object.keys(stockData)
+    const names = Object.keys(stockDataPrices)
       .filter(name => name.toLowerCase().includes(filter));
 
     if (names.length === 0) {
@@ -29,7 +29,7 @@ export function initSearchView() {
     }
 
     for (const stockName of names) {
-      const dataPoints = stockData[stockName];
+      const dataPoints = stockDataPrices[stockName];
       const latestPrice = dataPoints[dataPoints.length - 1].price;
 
       const card = document.createElement('div');

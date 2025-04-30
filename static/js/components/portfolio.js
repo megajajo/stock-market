@@ -1,6 +1,6 @@
 import { userData } from '../data/userData.js';
 import { openStockDetail } from './stockDetails.js';
-import { stockData } from '../data/stockData.js';
+import { stockDataPrices } from '../data/stockData.js';
 import { drawMiniChart } from './miniChart.js';
 import { portfolioPerformanceData } from '../data/portfolioPerformance.js';
 import { drawDetailedGraph } from './graph.js';
@@ -27,7 +27,7 @@ function populatePositions(container, holdings) {
 
     // draw the sparkline
     const miniChartContainer = card.querySelector('.mini-chart-container');
-    drawMiniChart(miniChartContainer, stockData[holding.stock], {
+    drawMiniChart(miniChartContainer, stockDataPrices[holding.stock], {
       width: 100,
       height: 40,
       yKey: 'price'
@@ -76,7 +76,7 @@ export function populatePortfolio() {
 
   // Re-populate positions only (graph was initialized once in initPortfolioView)
   const holdingsGrid = document.querySelector('.holdings-grid');
-  const positionsTitle = document.getElementsByClassName('positions-title');
+  const positionsTitle = document.querySelector('.positions-title');
   holdingsGrid.parentNode.insertBefore(positionsTitle, holdingsGrid);
 
 

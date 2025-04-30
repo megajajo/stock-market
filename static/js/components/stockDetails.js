@@ -1,10 +1,10 @@
 // js/components/stockDetails.js
 
-import { stockData } from '../data/stockData.js'; // to get data from backend
+import { stockDataPrices } from '../data/stockData.js'; // to get data from backend
 import { drawDetailedGraph } from './graph.js';
 import { populateOrderBook } from './orderBook.js';
 import { loggedIn } from '../main.js';
-import { userData } from '../data/userData.js'; // need to take data from database
+import { userData } from '../data/userData.js'; // need to take data from backend
 
 // Function to open the detailed view modal for a given stock.
 export function openStockDetail(stockName) {
@@ -75,7 +75,7 @@ export function openStockDetail(stockName) {
 graphContainer.innerHTML = ''; // Clear the placeholder SVG if present
 // Wait for the modal to fully render before drawing the graph.
 setTimeout(() => {
-  drawDetailedGraph(graphContainer, stockData[stockName], {
+  drawDetailedGraph(graphContainer, stockDataPrices[stockName], {
     height: 200,
     yKey: 'price',
     resizeOnWindow: false,
@@ -195,6 +195,18 @@ var ticker = "AAPL";
         const data = JSON.parse(event.data);
         console.log("Order Book Update:", data);
         stockDataDynamic[ticker] = data;
+
+        // Check if the new data's time is different from the last entry
+        const lastEntry = stockDataPrices[ticker][stockDataPrices[ticker].length - 1];
+        console.log("lastEntry", lastEntry, stockDataPrices[ticker].length);
+        if (lastEntry.date !== data.last_timestamp) {
+            // Add the new data to stockDataPrices[ticker]
+            stockDataPrices[ticker].push({ date: data.last_timestamp, price: data.last_price });
+            console.log(`Added new data to stockDataPrices[${ticker}]:`, { date: data.last_timestamp, price: data.last_price });
+            console.log(stockDataPrices[ticker]);
+        } else {
+            console.log(`Duplicate data ignored for ${ticker}:`, { time: data.last_timestamp, price: data.last_price });
+        }
 
         // Example: Update the UI with the received data
         const orderBookContainer = document.getElementById("order-book-container");

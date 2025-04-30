@@ -315,6 +315,8 @@ async def websocket_endpoint(
             best_ask = OrderBook.get_best_ask(ticker)
             all_bids = OrderBook.get_all_bids(ticker)
             all_asks = OrderBook.get_all_asks(ticker)
+            last_price = OrderBook.get_last_price(ticker)
+            last_timestamp = OrderBook.get_last_timestamp(ticker)
             summary = {
                 "ticker": ticker,
                 "best_bid": best_bid,
@@ -339,6 +341,8 @@ async def websocket_endpoint(
                     }
                     for order_id, timestamp, price, volume, stock_id in all_asks
                 ],
+                "last_price": last_price,
+                "last_timestamp": last_timestamp,
             }
             encoded = jsonable_encoder(summary)
             await websocket.send_text(json.dumps(encoded))

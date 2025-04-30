@@ -194,7 +194,12 @@ class Order:
         return diff
 
     def execute_trade(
-        self, transaction_id: int, price: float, vol: int, side: BuyOrSell
+        self,
+        transaction_id: int,
+        price: float,
+        vol: int,
+        side: BuyOrSell,
+        update_price: bool,
     ):
         """Update state to execute trade."""
         if self.volume < vol:
@@ -221,6 +226,10 @@ class Order:
 
         if self.volume == 0:
             self.terminated = True
+
+        if update_price:
+            stock.last_price = price
+            stock.last_timestamp = datetime.now(timezone.utc)
 
     def get_client(self) -> Client:
         return self.client
@@ -307,8 +316,9 @@ class Transaction:
         self.stock_id = stock_id
 
         # update the state of the orders to reflect the transaction
-        bid.execute_trade(self.transaction_id, price, vol, BUY)
-        ask.execute_trade(self.transaction_id, price, vol, SELL)
+        update_price = self.bidder != self.asker
+        bid.execute_trade(self.transaction_id, price, vol, BUY, update_price)
+        ask.execute_trade(self.transaction_id, price, vol, SELL, update_price)
 
         # log transaction
         print(self)
@@ -373,6 +383,10 @@ class OrderBook:
         OrderBook._tickers[ticker] = self
         self.bids = SortedList(key=lambda o: (-o.price, o.timestamp))
         self.asks = SortedList(key=lambda o: (o.price, o.timestamp))
+        self.last_price = 0  # the last price of a transaction
+        self.last_timestamp = datetime.now(
+            timezone.utc
+        )  # last date and time when a transaction has been made
 
     def get_ticker(self):
         return self.ticker
@@ -624,3 +638,23 @@ class OrderBook:
         stock = OrderBook.get_book_by_ticker(ticker)
 
         return stock._get_all_bids()
+
+    def _get_last_price(self) -> float:
+        return self.last_price
+
+    @staticmethod
+    def get_last_price(ticker: str) -> float:
+        """Returns the last price of the stock identified by ticker."""
+        stock = OrderBook.get_book_by_ticker(ticker)
+
+        return stock._get_last_price()
+
+    def _get_last_timestamp(self) -> datetime:
+        return self.last_timestamp
+
+    @staticmethod
+    def get_last_timestamp(ticker: str) -> datetime:
+        """Returns the last price of the stock identified by ticker."""
+        stock = OrderBook.get_book_by_ticker(ticker)
+
+        return stock._get_last_timestamp()

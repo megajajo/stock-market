@@ -2,7 +2,7 @@
 
 export var portfolioPerformanceData = [
     // Today (April 14, 2025) – hourly precision
-    /*{ date: new Date('2025-04-14T09:00:00'), value: 1200 },
+    { date: new Date('2025-04-14T09:00:00'), value: 1200 },
     { date: new Date('2025-04-14T10:00:00'), value: 1210 },
     { date: new Date('2025-04-14T11:00:00'), value: 1205 },
     { date: new Date('2025-04-14T12:00:00'), value: 1215 },
@@ -46,5 +46,5 @@ export var portfolioPerformanceData = [
     { date: new Date('2023-10-01T10:00:00'), value: 850 },
     { date: new Date('2023-07-01T10:00:00'), value: 800 },
     { date: new Date('2023-04-01T10:00:00'), value: 750 },
-    { date: new Date('2023-01-01T10:00:00'), value: 700 }*/
+    { date: new Date('2023-01-01T10:00:00'), value: 700 }
   ];

@@ -1,15 +1,15 @@
 // js/data/stockData.js
 
-export const stockData = {
+export var stockDataPrices = {
   "AAPL": [
-    { date: new Date(2024, 3, 14, 9, 0), price: 100 },
+    /*{ date: new Date(2024, 3, 14, 9, 0), price: 100 },
     { date: new Date(2024, 3, 14, 10, 0), price: 102 },
     { date: new Date(2024, 3, 14, 11, 30), price: 105 },
     { date: new Date(2024, 3, 14, 12, 30), price: 91 },
     { date: new Date(2024, 3, 13), price: 104 },
     { date: new Date(2024, 3, 12), price: 101 },
     { date: new Date(2024, 3, 8), price: 98 },
-    { date: new Date(2024, 2, 14), price: 95 },
+    { date: new Date(2024, 2, 14), price: 95 },*/
     { date: new Date(2024, 1, 14), price: 92 },
 
   ],
