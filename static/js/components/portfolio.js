@@ -5,6 +5,35 @@ import { drawMiniChart } from './miniChart.js';
 import { portfolioPerformanceData } from '../data/portfolioPerformance.js';
 import { drawDetailedGraph } from './graph.js';
 
+/**
+ * Clears out and re-renders the .holdings-grid
+ * @param {HTMLElement} container  the <div class="holdings-grid">
+ * @param {Array} holdings         userData.holdings
+ */
+function populatePositions(container, holdings) {
+  container.innerHTML = '';
+  holdings.forEach(holding => {
+    const card = document.createElement('div');
+    card.classList.add('holding-card');
+    card.innerHTML = `
+      <h3 class="holding-stock">${holding.stock}</h3>
+      <div class="mini-chart-container"></div>
+      <div class="holding-amount">Amount: ${holding.amount}</div>
+      <div class="holding-pnl">24h PnL: ${holding.pnl}</div>
+    `;
+    card.addEventListener('click', () => openStockDetail(holding.stock));
+    container.appendChild(card);
+
+    // draw the sparkline
+    const miniChartContainer = card.querySelector('.mini-chart-container');
+    drawMiniChart(miniChartContainer, stockData[holding.stock], {
+      width: 100,
+      height: 40,
+      yKey: 'price'
+    });
+  });
+}
+
 export function initPortfolioView() {
   // Fill in header: profile pic, name, balance & PnL
   document.getElementById('header-pic').src = userData.profilePicUrl || 'assets/logo.jpg';
@@ -31,28 +60,8 @@ export function initPortfolioView() {
   positionsTitle.classList.add('positions-title');
   holdingsGrid.parentNode.insertBefore(positionsTitle, holdingsGrid);
 
-  // Populate the holdings grid
-  holdingsGrid.innerHTML = '';
-  userData.holdings.forEach(holding => {
-    const card = document.createElement('div');
-    card.classList.add('holding-card');
-    card.innerHTML = `
-      <h3 class="holding-stock">${holding.stock}</h3>
-      <div class="mini-chart-container"></div>
-      <div class="holding-amount">Amount: ${holding.amount}</div>
-      <div class="holding-pnl">24h PnL: ${holding.pnl}</div>
-    `;
-    card.addEventListener('click', () => openStockDetail(holding.stock));
-    holdingsGrid.appendChild(card);
-
-    // Draw mini-chart
-    const miniChartContainer = card.querySelector('.mini-chart-container');
-    drawMiniChart(miniChartContainer, stockData[holding.stock], {
-      width: 100,
-      height: 40,
-      yKey: 'price'
-    });
-  });
+ // Populate via helper
+ populatePositions(holdingsGrid, userData.holdings);
 }
 
 export function populatePortfolio(){
@@ -82,25 +91,5 @@ export function populatePortfolio(){
 
     // Populate the holdings grid
     console.log(userData.holdings);
-    holdingsGrid.innerHTML = '';
-    /*userData.holdings.forEach(holding => {
-      const card = document.createElement('div');
-      card.classList.add('holding-card');
-      card.innerHTML = `
-        <h3 class="holding-stock">${holding.stock}</h3>
-        <div class="mini-chart-container"></div>
-        <div class="holding-amount">Amount: ${holding.amount}</div>
-        <div class="holding-pnl">24h PnL: ${holding.pnl}</div>
-      `;
-      card.addEventListener('click', () => openStockDetail(holding.stock));
-      holdingsGrid.appendChild(card);
-
-      // Draw mini-chart
-      const miniChartContainer = card.querySelector('.mini-chart-container');
-      drawMiniChart(miniChartContainer, stockData[holding.stock], {
-        width: 100,
-        height: 40,
-        yKey: 'price'
-      });
-    });*/
+    + populatePositions(holdingsGrid, userData.holdings);
 }
