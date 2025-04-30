@@ -91,5 +91,5 @@ export function populatePortfolio(){
 
     // Populate the holdings grid
     console.log(userData.holdings);
-    + populatePositions(holdingsGrid, userData.holdings);
+    populatePositions(holdingsGrid, userData.holdings);
 }
