@@ -38,7 +38,12 @@ function populatePositions(container, holdings) {
 
 export function initPortfolioView() {
   // Fill in header: profile pic, name, balance & PnL
-  document.getElementById('header-pic').src = userData.profilePicUrl || 'assets/logo.jpg';
+  const img = document.getElementById('header-pic');
+img.src = userData.profilePicUrl || 'assets/logo.jpg';
+img.onerror = () => {
+  img.src = 'assets/logo.jpg';
+};
+
   document.getElementById('user-name').textContent = userData.name;
   const pnlValue = userData.pnl;
   const isPositive = pnlValue.startsWith('+');
@@ -85,3 +90,4 @@ export function populatePortfolio() {
     console.log(userData.holdings);
     populatePositions(holdingsGrid, userData.holdings);
 }
+
