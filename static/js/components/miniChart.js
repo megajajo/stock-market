@@ -4,6 +4,7 @@
 
 
 export function drawMiniChart(containerElement, data, config = {}) {
+  console.log("MINI CHART", data);
   // — Configurable dimensions & margins —
   const width  = config.width  || 100;
   const height = config.height || 40;

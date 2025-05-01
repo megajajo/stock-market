@@ -27,6 +27,7 @@ function populatePositions(container, holdings) {
 
     // draw the sparkline
     const miniChartContainer = card.querySelector('.mini-chart-container');
+    console.log("data for drawing minichart:", stockDataPrices[holding.stock], holding.stock, stockDataPrices);
     drawMiniChart(miniChartContainer, stockDataPrices[holding.stock], {
       width: 100,
       height: 40,

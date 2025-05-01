@@ -196,16 +196,18 @@ var ticker = "AAPL";
         console.log("Order Book Update:", data);
         stockDataDynamic[ticker] = data;
 
+        const lastDate = new Date(data.last_timestamp);
         // Check if the new data's time is different from the last entry
         const lastEntry = stockDataPrices[ticker][stockDataPrices[ticker].length - 1];
         console.log("lastEntry", lastEntry, stockDataPrices[ticker].length);
-        if (lastEntry.date !== data.last_timestamp) {
+        console.log(typeof stockDataPrices[ticker], Array.isArray(stockDataPrices[ticker]));
+        if (Date.parse(lastEntry.date) != Date.parse(lastDate)) {
             // Add the new data to stockDataPrices[ticker]
-            stockDataPrices[ticker].push({ date: data.last_timestamp, price: data.last_price });
-            console.log(`Added new data to stockDataPrices[${ticker}]:`, { date: data.last_timestamp, price: data.last_price });
+            stockDataPrices[ticker].push({ date: lastDate, price: data.last_price });
+            console.log(`Added new data to stockDataPrices[${ticker}]:`, { date: lastDate, price: data.last_price });
             console.log(stockDataPrices[ticker]);
         } else {
-            console.log(`Duplicate data ignored for ${ticker}:`, { time: data.last_timestamp, price: data.last_price });
+            console.log(`Duplicate data ignored for ${ticker}:`, { time: lastDate, price: data.last_price });
         }
 
         // Example: Update the UI with the received data

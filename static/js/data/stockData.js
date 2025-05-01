@@ -10,8 +10,10 @@ export var stockDataPrices = {
     { date: new Date(2024, 3, 12), price: 101 },
     { date: new Date(2024, 3, 8), price: 98 },
     { date: new Date(2024, 2, 14), price: 95 },*/
-    { date: new Date(2024, 1, 14), price: 92 },
-
+    { date: new Date(2025, 4, 1, 15, 0, 24, 0), price: 100},
+    { date: new Date(2025, 4, 1, 15, 0, 24, 6), price: 0 },
+    { date: new Date(2025, 4, 1, 15, 0, 24, 9), price: 90},
+    { date: new Date(2025, 4, 1, 15, 0, 25, 0), price: 150}
   ],
   "Stock B": [
     { date: new Date(2024, 3, 14, 9, 0), price: 200 },

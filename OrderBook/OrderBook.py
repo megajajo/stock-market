@@ -383,7 +383,7 @@ class OrderBook:
         OrderBook._tickers[ticker] = self
         self.bids = SortedList(key=lambda o: (-o.price, o.timestamp))
         self.asks = SortedList(key=lambda o: (o.price, o.timestamp))
-        self.last_price = 0  # the last price of a transaction
+        self.last_price = 1  # the last price of a transaction
         self.last_timestamp = datetime.now(
             timezone.utc
         )  # last date and time when a transaction has been made
