@@ -136,12 +136,18 @@ class Order:
     _all_orders: list[Self] = []
 
     def __init__(
-        self, stock_id: int, side: BuyOrSell, price: float, volume: int, client_id: int
+        self,
+        stock_id: int,
+        side: BuyOrSell,
+        price: float,
+        volume: int,
+        client_id: int,
+        is_market_order: bool = False,
     ):
         self.order_id = Order.counter
         Order.counter += 1
-        self.terminated = False
         Order._all_orders += [self]
+
         self.timestamp = datetime.now(timezone.utc)
         self.stock_id = stock_id
         self.stock: OrderBook = OrderBook.get_book_by_id(stock_id)
@@ -151,6 +157,14 @@ class Order:
         self.volume = volume  # this is volume left to trade
         self.client_id = client_id
         self.client: Client = Client.get_client_by_id(client_id)
+        self.terminated = False
+
+        self.is_market_order = is_market_order
+        if self.is_market_order:
+            if not self.side == BUY:
+                raise ValueError("Market order must be buy side")
+            self.price = float("inf")  # override price for market orders to be infinite
+
         self._total_volume = volume  # constant keeping track of total volume
         self.transaction_ids: list[int] = []
 
@@ -174,7 +188,8 @@ class Order:
         return self.price
 
     def set_price(self, price: float):
-        self.price = price
+        if not self.is_market_order:
+            self.price = price
 
     def get_volume(self) -> int:
         return self.volume
@@ -388,7 +403,7 @@ class OrderBook:
             timezone.utc
         )  # last date and time when a transaction has been made
 
-    def get_ticker(self):
+    def get_ticker(self) -> str:
         return self.ticker
 
     @classmethod
@@ -425,8 +440,12 @@ class OrderBook:
 
         # while a trade is feasible, try to execute one
         while order.is_executable() and opposite_book:
-            other_order = opposite_book[0]
-            trade_price = other_order.get_price()
+            other_order: Order = opposite_book[0]
+            trade_price = (
+                order.get_price()
+                if other_order.is_market_order
+                else other_order.get_price()
+            )
 
             # if all trades at feasible prices have been executed, no more trades are executable
             if order.side == SELL and trade_price < order.get_price():
@@ -458,9 +477,9 @@ class OrderBook:
             )
 
             if order.side == BUY:
-                trade = Transaction(order, other_order, trade_volume)
+                Transaction(order, other_order, trade_volume)
             else:  # order.side == SELL
-                trade = Transaction(other_order, order, trade_volume)
+                Transaction(other_order, order, trade_volume)
 
             if other_order.get_volume() == 0:
                 opposite_book.remove(other_order)
@@ -493,16 +512,26 @@ class OrderBook:
         return "Order removed from book"  # if not cancelling
 
     def _place_order(
-        self, side: BuyOrSell, price: float, volume: int, client: Client
+        self,
+        side: BuyOrSell,
+        price: float,
+        volume: int,
+        client: Client,
+        is_market: bool,
     ) -> int:
         """Place order directly with the information entered."""
-        order = Order(self.stock_id, side, price, volume, client)
+        order = Order(self.stock_id, side, price, volume, client, is_market)
         self._add_order(order)
         return order.order_id
 
     @staticmethod
     def place_order(
-        ticker: str, side: BuyOrSell, price: float, volume: int, client: int | Client
+        ticker: str,
+        side: BuyOrSell,
+        price: float,
+        volume: int,
+        client: int | Client,
+        is_market: bool = False,
     ) -> int:
         """Class method to place an order with the ticker."""
         match client:
@@ -515,7 +544,7 @@ class OrderBook:
 
         stock = OrderBook.get_book_by_ticker(ticker)
 
-        return stock._place_order(side, price, volume, client)
+        return stock._place_order(side, price, volume, client, is_market)
 
     @staticmethod
     def cancel_order(order_id: int) -> str:
