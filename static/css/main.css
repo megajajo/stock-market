@@ -662,6 +662,33 @@ body {
   margin-left: 16px;       /* optional padding from the very left */
 }
 
+/* make header-main a positioned container with some extra height */
+.header-main {
+  position: relative;
+  width: 100%;
+  height: 80px;          /* give yourself room to play with */
+}
+
+/* absolutely center the balance both horizontally and vertically */
+.balance-large {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  margin: 0;             /* ensure no leftover margins */
+}
+
+/* pull the profile-pic up and to the very left */
+.profile-pic {
+  position: absolute;
+  top: 0;                /* sits at the very top of .header-main */
+  left: 16px;            /* 16px from the left edge—adjust as needed */
+  width: 60px;           /* ensure size stays consistent */
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
 
 body,
 #portfolio-summary,
