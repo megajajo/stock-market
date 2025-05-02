@@ -633,12 +633,7 @@ body {
   margin: 0 auto;          /* centering in a flex row */
 }
 
-/* 4) Profile pic stays at the left edge */
-.profile-pic {
-  /* no auto margin here, it will sit flush at the start */
-  /* you can give it a bit of padding if you like: */
-  padding-left: 1rem;
-}
+
 
 /* 5) Ensure title and PnL text remain centered */
 .portfolio-title,
