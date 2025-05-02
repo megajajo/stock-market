@@ -640,6 +640,27 @@ body {
 .pnl-small {
   text-align: center;
 }
+/* Make the flex-row full width and establish a relative positioning context */
+.header-main {
+  position: relative;
+  width: 100%;
+  display: flex;           /* you can keep align-items: center here */
+  align-items: center;
+}
+
+/* Remove the auto-margins and absolutely center it in .header-main */
+.balance-large {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;               /* kill the old margin:0 auto */
+}
+
+/* Profile picture stays at the left edge by default */
+.profile-pic {
+  /* no change needed — it remains in normal flow at the start */
+  margin-left: 16px;       /* optional padding from the very left */
+}
 
 
 body,
