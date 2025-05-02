@@ -67,7 +67,7 @@ if (loggedIn) {
   titleEl.textContent = 'Your portfolio value:';
 }
 
-  document.getElementById('user-name').textContent = userData.name;
+  
   const pnlValue = userData.pnl;
   const isPositive = pnlValue.startsWith('+');
   document.getElementById('balance-header').textContent = `$${userData.balance.toFixed(2)}`;
