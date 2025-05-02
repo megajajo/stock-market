@@ -1,228 +1,215 @@
 // js/components/stockDetails.js
 
-import { stockDataPrices } from '../data/stockData.js'; // to get data from backend
-import { drawDetailedGraph } from './graph.js';
-import { populateOrderBook } from './orderBook.js';
-import { loggedIn } from '../main.js';
-import { userData } from '../data/userData.js'; // need to take data from backend
+import { stockDataPrices } from '../data/stockData.js';       // historic price data
+import { drawDetailedGraph } from './graph.js';              // to draw the stock chart
+import { populateOrderBook } from './orderBook.js';          // to render order book
+import { loggedIn } from '../main.js';                       // login flag
+import { userData } from '../data/userData.js';              // current user info
 
-// Function to open the detailed view modal for a given stock.
+// Opens a modal showing detailed info & order form for a given stock
 export function openStockDetail(stockName) {
-  // Create the modal container.
+  // Create the modal container
   const modal = document.createElement('div');
   modal.classList.add('modal');
-
-  // Set the inner HTML for the modal.
   modal.innerHTML = `
     <div class="modal-content">
       <span class="close-button">&times;</span>
       <h2>${stockName} Details</h2>
       <div class="modal-body">
-        <!-- Graph Section -->
-        <div class="graph-container">
-          <svg class="detailed-chart"></svg>
-        </div>
-        <!-- Order Form Section -->
+        <!-- Graph -->
+        <div class="graph-container"></div>
+
+        <!-- Order Form -->
         <div class="order-form-section">
           <h3>Place Order</h3>
           <form id="order-form">
-
             <input type="number" id="order-amount" placeholder="Amount" required />
-            <!-- Order Type Toggle (Radio Buttons) -->
+
             <div class="order-type-toggle">
               <label>
-                <input type="radio" name="order-type" value="market" checked> Market
+                <input type="radio" name="order-type" value="market_buy" checked>
+                Market Buy
               </label>
               <label>
-                <input type="radio" name="order-type" value="limit_buy"> Limit Buy
+                <input type="radio" name="order-type" value="market_sell">
+                Market Sell
               </label>
               <label>
-                <input type="radio" name="order-type" value="limit_sell"> Limit Sell
+                <input type="radio" name="order-type" value="limit_buy">
+                Limit Buy
+              </label>
+              <label>
+                <input type="radio" name="order-type" value="limit_sell">
+                Limit Sell
               </label>
             </div>
-            <!-- Limit Price Field: visible only for limit orders -->
-            <input type="number" id="order-limit-price" placeholder="Limit Price" style="display: none;" required />
+
+            <input
+              type="number"
+              id="order-limit-price"
+              placeholder="Limit Price"
+              style="display: none;"
+              required
+            />
+
             <button type="button" id="place-order-btn">Place Order</button>
           </form>
         </div>
-        <!-- Order Book Toggle & Section -->
+
+        <!-- Order Book -->
         <button id="toggle-order-book-btn">Show Order Book</button>
-        <div class="order-book-section" style="display:none;">
+        <div class="order-book-section" style="display: none;">
           <div id="order-book-container"></div>
         </div>
       </div>
     </div>
   `;
 
-  // Append the modal to the body.
   document.body.appendChild(modal);
 
-  // Close modal when clicking the close button.
-  const closeButton = modal.querySelector('.close-button');
-  closeButton.addEventListener('click', () => {
+  // Close handlers
+  modal.querySelector('.close-button').addEventListener('click', () => {
     document.body.removeChild(modal);
   });
-
-  // Optional: close modal if clicking outside the modal content.
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) {
+  modal.addEventListener('click', e => {
+    if (e.target === modal)
       document.body.removeChild(modal);
-    }
   });
 
-  // Draw the detailed graph using the modular graph component.
+  // Draw the chart once modal is in DOM
   const graphContainer = modal.querySelector('.graph-container');
-graphContainer.innerHTML = ''; // Clear the placeholder SVG if present
-// Wait for the modal to fully render before drawing the graph.
-setTimeout(() => {
-  drawDetailedGraph(graphContainer, stockDataPrices[stockName], {
-    height: 200,
-    yKey: 'price',
-    resizeOnWindow: false,
-    margin: { top: 20, right: 20, bottom: 40, left: 35 } // <-- reduce left from default 50
-  });
+  setTimeout(() => {
+    drawDetailedGraph(
+      graphContainer,
+      stockDataPrices[stockName],
+      {
+        height: 200,
+        yKey: 'price',
+        resizeOnWindow: false,
+        margin: { top: 20, right: 20, bottom: 40, left: 35 }
+      }
+    );
+  }, 0);
 
-}, 0);
-
-
-  // Set up the order type toggle: show/hide the limit price input.
+  // Show/hide limit price input on order-type change
   const orderTypeInputs = modal.querySelectorAll('input[name="order-type"]');
-  const orderLimitPriceInput = modal.querySelector('#order-limit-price');
+  const limitPriceInput  = modal.querySelector('#order-limit-price');
   orderTypeInputs.forEach(input => {
     input.addEventListener('change', () => {
-      if (input.value === 'limit_buy' || input.value === 'limit_sell') {
-        orderLimitPriceInput.style.display = 'block';
-      } else {
-        orderLimitPriceInput.style.display = 'none';
-      }
+      limitPriceInput.style.display = input.value.startsWith('limit')
+        ? 'block'
+        : 'none';
     });
   });
 
-  // Handle order placement when the "Place Order" button is clicked.
+  // Place order button
   modal.querySelector('#place-order-btn').addEventListener('click', () => {
-    // Get the selected order type.
-    const selectedOrderType = modal.querySelector('input[name="order-type"]:checked').value;
-    handleOrder(stockName, selectedOrderType, modal);
+    const selected = modal.querySelector('input[name="order-type"]:checked').value;
+    handleOrder(stockName, selected, modal);
   });
 
-  // Set up the order book toggle.
-  const toggleOrderBookBtn = modal.querySelector('#toggle-order-book-btn');
+  // Toggle order book section
+  const toggleBtn        = modal.querySelector('#toggle-order-book-btn');
   const orderBookSection = modal.querySelector('.order-book-section');
-  toggleOrderBookBtn.addEventListener('click', () => {
-    if (orderBookSection.style.display === 'none') {
-      orderBookSection.style.display = 'block';
-      toggleOrderBookBtn.textContent = 'Hide Order Book';
-      // Populate the order book using the modular order book component.
-      const orderBookContainer = modal.querySelector('#order-book-container');
-      populateOrderBook(orderBookContainer, stockDataDynamic[stockName]);
-    } else {
-      orderBookSection.style.display = 'none';
-      toggleOrderBookBtn.textContent = 'Show Order Book';
+  const bookContainer    = modal.querySelector('#order-book-container');
+
+  toggleBtn.addEventListener('click', () => {
+    const showing = orderBookSection.style.display === 'block';
+    orderBookSection.style.display = showing ? 'none' : 'block';
+    toggleBtn.textContent = showing ? 'Show Order Book' : 'Hide Order Book';
+
+    if (!showing) {
+      // populate with the latest dynamic data
+      populateOrderBook(bookContainer, stockDataDynamic[stockName]);
     }
   });
 }
 
-// Function to handle order submission.
-function handleOrder(stock, orderType, modal) {
-
-  // check that the user is logged in
-  if(loggedIn == false){
-    alert("You must be signed in before placing any order!!!");
+// Handles sending the order to the backend API
+function handleOrder(stockName, orderType, modal) {
+  if (!loggedIn) {
+    alert("You must be signed in before placing any order!");
     return;
   }
 
-  const username = userData.username;
-  const amountVal = modal.querySelector('#order-amount').value.trim();
-  const limitPriceVal = modal.querySelector('#order-limit-price').value.trim();
+  const username     = userData.username;
+  const amountVal    = modal.querySelector('#order-amount').value.trim();
+  const limitVal     = modal.querySelector('#order-limit-price').value.trim();
 
   if (!amountVal || Number(amountVal) <= 0) {
     alert("Amount must be greater than 0!");
     return;
   }
-  if ((orderType === 'limit_buy' || orderType === 'limit_sell') && (!limitPriceVal || Number(limitPriceVal) <= 0)) {
+  if (orderType.startsWith('limit') && (!limitVal || Number(limitVal) <= 0)) {
     alert("Please enter a valid limit price!");
     return;
   }
 
+  const isBuy = orderType.endsWith('_buy');
+  const price = orderType.startsWith('limit') ? Number(limitVal) : null;
+
   const tradeData = {
-    ticker: stock,
-    side: orderType == 'limit_buy' ? 'buy' : 'sell',
+    ticker:      stockName,
+    side:        isBuy ? 'buy' : 'sell',
     client_user: username,
-    volume: Number(amountVal),
-    price: orderType === 'market' ? null : Number(limitPriceVal)/*,
-    timestamp: new Date().toISOString()*/
+    volume:      Number(amountVal),
+    price:       price
   };
 
   console.log("Sending trade data:", tradeData);
 
-  // API call to place order
   fetch('/api/place_order', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(tradeData) // Convert the data to JSON format
+    body: JSON.stringify(tradeData)
   })
-  .then(response => {
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    return response.json();
-  })
-  .then(data => {
-    console.log("Server Response:", data);
-    alert("Order placed successfully!");
-  })
-  .catch(error => {
-    console.error("Error:", error);
-    alert("Failed to place the order. Please try again.");
-  });
+    .then(res => {
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.json();
+    })
+    .then(data => {
+      console.log("Server Response:", data);
+      alert("Order placed successfully!");
+    })
+    .catch(err => {
+      console.error(err);
+      alert("Failed to place the order. Please try again.");
+    });
 }
 
+// WebSocket for live order book updates
+const socket = new WebSocket("ws://localhost:8000/ws");
+const stockDataDynamic = {};
+let ticker = "AAPL";
 
-// Add WebSocket listeners to get data about the order book
-var socket = new WebSocket("ws://localhost:8000/ws");
-var stockDataDynamic = {};
-var ticker = "AAPL";
+socket.addEventListener("open", () => {
+  console.log(`Connected to OrderBook WebSocket for ticker: ${ticker}`);
+  socket.send(ticker);
+});
 
-    // Handle connection open
-    socket.addEventListener("open", () => {
-        console.log(`Connected to OrderBook WebSocket for ticker: ${ticker}`);
-        // Send the ticker to subscribe to
-        socket.send(ticker);
-    });
+socket.addEventListener("message", event => {
+  const data = JSON.parse(event.data);
+  stockDataDynamic[ticker] = data;
 
-    // Handle incoming messages
-    socket.addEventListener("message", (event) => {
-        const data = JSON.parse(event.data);
-        console.log("Order Book Update:", data);
-        stockDataDynamic[ticker] = data;
+  // Append to historic prices if timestamp is new
+  const lastDate  = new Date(data.last_timestamp);
+  const history   = stockDataPrices[ticker];
+  const lastEntry = history[history.length - 1];
 
-        const lastDate = new Date(data.last_timestamp);
-        // Check if the new data's time is different from the last entry
-        const lastEntry = stockDataPrices[ticker][stockDataPrices[ticker].length - 1];
-        console.log("lastEntry", lastEntry, stockDataPrices[ticker].length);
-        console.log(typeof stockDataPrices[ticker], Array.isArray(stockDataPrices[ticker]));
-        if (Date.parse(lastEntry.date) != Date.parse(lastDate)) {
-            // Add the new data to stockDataPrices[ticker]
-            stockDataPrices[ticker].push({ date: lastDate, price: data.last_price });
-            console.log(`Added new data to stockDataPrices[${ticker}]:`, { date: lastDate, price: data.last_price });
-            console.log(stockDataPrices[ticker]);
-        } else {
-            console.log(`Duplicate data ignored for ${ticker}:`, { time: lastDate, price: data.last_price });
-        }
+  if (Date.parse(lastEntry.date) !== lastDate.getTime()) {
+    history.push({ date: lastDate, price: data.last_price });
+  }
 
-        // Example: Update the UI with the received data
-        const orderBookContainer = document.getElementById("order-book-container");
-        if (orderBookContainer) {
-            populateOrderBook(orderBookContainer, stockDataDynamic[ticker]);
-        }
-    });
+  // If order book is visible, refresh it
+  const bookContainer = document.getElementById("order-book-container");
+  if (bookContainer) {
+    populateOrderBook(bookContainer, stockDataDynamic[ticker]);
+  }
+});
 
-    // Handle connection close
-    socket.addEventListener("close", () => {
-        console.log("OrderBook WebSocket connection closed");
-    });
-
-    // Handle errors
-    socket.addEventListener("error", (error) => {
-        console.error("OrderBook WebSocket error:", error);
-    });
+socket.addEventListener("close", () => {
+  console.log("OrderBook WebSocket connection closed");
+});
+socket.addEventListener("error", err => {
+  console.error("OrderBook WebSocket error:", err);
+});
