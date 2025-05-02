@@ -612,6 +612,30 @@ body {
   text-align: center;
 }
 
+/* 1) Stack title, main, and PnL vertically */
+.view-header .header-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;             /* space between the three rows */
+}
+
+/* 2) Only the middle row is a horizontal flex */
+.header-main {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;            /* space between picture and balance */
+}
+
+/* 3) (Optional) Tweak margins for visual polish */
+.portfolio-title {
+  margin-bottom: 4px;
+}
+.pnl-small {
+  margin-top: 4px;
+}
+
 body,
 #portfolio-summary,
 .portfolio-stats > div,
