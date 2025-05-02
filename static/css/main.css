@@ -612,29 +612,40 @@ body {
   text-align: center;
 }
 
-/* 1) Stack title, main, and PnL vertically */
+
+/* 1) Make the header-content span the full width, stacking top/middle/bottom */
 .view-header .header-content {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 8px;             /* space between the three rows */
+  align-items: stretch;    /* let children be as wide as the container */
+  width: 100%;
 }
 
-/* 2) Only the middle row is a horizontal flex */
+/* 2) Have the middle row fill 100% width */
 .header-main {
   display: flex;
-  flex-direction: row;
   align-items: center;
-  gap: 12px;            /* space between picture and balance */
+  width: 100%;
 }
 
-/* 3) (Optional) Tweak margins for visual polish */
-.portfolio-title {
-  margin-bottom: 4px;
+/* 3) Push the balance into the horizontal center */
+.balance-large {
+  margin: 0 auto;          /* centering in a flex row */
 }
+
+/* 4) Profile pic stays at the left edge */
+.profile-pic {
+  /* no auto margin here, it will sit flush at the start */
+  /* you can give it a bit of padding if you like: */
+  padding-left: 1rem;
+}
+
+/* 5) Ensure title and PnL text remain centered */
+.portfolio-title,
 .pnl-small {
-  margin-top: 4px;
+  text-align: center;
 }
+
 
 body,
 #portfolio-summary,
