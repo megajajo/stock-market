@@ -681,8 +681,8 @@ body {
 /* pull the profile-pic up and to the very left */
 .profile-pic {
   position: absolute;
-  top: -10px;                /* sits at the very top of .header-main */
-  right: 16px;            /* 16px from the left edge—adjust as needed */
+  top: -20px;                /* sits at the very top of .header-main */
+  left: -16px;            /* 16px from the left edge—adjust as needed */
   width: 60px;           /* ensure size stays consistent */
   height: 60px;
   border-radius: 50%;
