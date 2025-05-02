@@ -26,12 +26,12 @@ function handleCredentialResponse(response) {
   // Connect the WebSocket with the updated email
   connectClientSocket(userData.email);
 
-  // Update the header if already rendered
-  const nameEl = document.getElementById('user-name');
-  if (nameEl) {
-    nameEl.textContent = userData.name;
-    document.getElementById('header-pic').src = userData.profilePicUrl;
-  }
+  // // Update the header if already rendered
+  // const nameEl = document.getElementById('user-name');
+  // if (nameEl) {
+  //   nameEl.textContent = userData.name;
+  //   document.getElementById('header-pic').src = userData.profilePicUrl;
+  // }
 
   // Toggle buttons: hide sign-in, show sign-out
   document.getElementById('g_id_signin').style.display    = 'none';
