@@ -12,24 +12,22 @@
       <!-- Portfolio View -->
       <section id="portfolio-view" class="view active">
         <div class="view-header">
-          <div class="header-content">
-            <!-- Profile Picture + Name -->
-            <div id="portfolio-title" class="portfolio-title"></div>
-            <img src="assets/logo.jpg"
-                 alt="Profile"
-                 class="profile-pic header-pic"
-                 id="header-pic" />
-            <div class="profile-info-header">
-              <h1 id="user-name">Your Name</h1>
-            </div>
+  <div class="header-content">
+    <!-- Top row: title -->
+    <div id="portfolio-title" class="portfolio-title"></div>
 
-            <!-- Balance & PnL -->
+    <!-- Middle row: picture + balance -->
+    <div class="header-main">
+      <img id="header-pic" class="profile-pic header-pic" />
+      <div class="balance-large" id="balance-header"></div>
+    </div>
 
-            <div class="balance-large" id="balance-header">$0.00</div>
-            <div class="pnl-small" id="pnl-header">+0%</div>
-          </div>
-          <div class="portfolio-graph-container" id="header-graph"></div>
-        </div>
+    <!-- Bottom row: PnL -->
+    <div class="pnl-small" id="pnl-header"></div>
+  </div>
+
+  <div class="portfolio-graph-container" id="header-graph"></div>
+</div>
 
         <div class="holdings-grid">
           <!-- Portfolio cards will be dynamically generated here -->
