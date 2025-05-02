@@ -73,7 +73,7 @@ body {
   height: 60px;
   border-radius: 50%;
   object-fit: cover;
-  margin-right: 15px;
+  margin-right: 0px;
   border: 2px solid var(--primary-color);
 }
 
@@ -370,12 +370,12 @@ body {
   margin-bottom: 16px;
 }
 
-.view-header .header-content {
+/* .view-header .header-content {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 12px;
-}
+} */
 
 .balance-large {
   font-size: 2.5rem;
