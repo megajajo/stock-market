@@ -659,7 +659,7 @@ body {
 /* Profile picture stays at the left edge by default */
 .profile-pic {
   /* no change needed — it remains in normal flow at the start */
-  margin-left: 16px;       /* optional padding from the very left */
+  margin-left: 8px;       /* optional padding from the very left */
 }
 
 /* make header-main a positioned container with some extra height */
