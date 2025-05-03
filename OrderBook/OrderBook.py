@@ -21,6 +21,15 @@ BUY = BuyOrSell.BUY
 SELL = BuyOrSell.SELL
 
 
+class OrderType(Enum):
+    MARKET = "market"
+    LIMIT = "limit"
+
+
+MARKET = OrderType.MARKET
+LIMIT = OrderType.LIMIT
+
+
 class Client:
     counter = 0
     _all_clients: list[Self] = []
@@ -160,11 +169,7 @@ class Order:
         self.client: Client = Client.get_client_by_id(client_id)
         self.terminated = False
 
-        self.is_market_order = is_market_order
-        if self.is_market_order:
-            if not self.side == BUY:
-                raise ValueError("Market order must be buy side")
-            self.price = float("inf")  # override price for market orders to be infinite
+        self.type = MARKET if is_market_order else LIMIT
 
         self._total_volume = volume  # constant keeping track of total volume
         self.transaction_ids: list[int] = []
@@ -189,8 +194,7 @@ class Order:
         return self.price
 
     def set_price(self, price: float):
-        if not self.is_market_order:
-            self.price = price
+        self.price = price
 
     def get_volume(self) -> int:
         return self.volume
@@ -260,14 +264,14 @@ class Order:
         return self.ticker
 
     def terminate(self) -> str:
-        """Terminate an order."""
+        """Terminate an order and return a log after the termination."""
         self.terminated = True
 
         # log termination
         return f"Order[{self.order_id}] terminated after {self.get_executed_volume()}/{self._total_volume} shares executed"
 
     def is_executable(self) -> bool:
-        """Returns whether order is executable (potentially with volume 0)."""
+        """Returns whether order is executable at desired price."""
         if self.terminated:  # order isn't executable if terminated
             return False
 
@@ -277,8 +281,8 @@ class Order:
                 return self.client.portfolio[ticker] > 0
             elif not ticker in self.client.portfolio:
                 return False
-
-        return True
+        else:  # self.side == BUY
+            return self.client.balance // self.price > 0
 
     def executable_volume(self, price=None) -> int:
         """
@@ -355,6 +359,9 @@ class Transaction:
     def __str__(self):
         return f"TRANSACTION: {str(self.asker)} sold {str(self.bidder)} {self.vol} shares of {OrderBook.get_ticker_by_id(self.stock_id)} @ {self.price}"
 
+    def get_price(self):
+        return self.price
+
     @classmethod
     def get_transaction_by_id(cls, id: int) -> Self:
         try:
@@ -366,9 +373,30 @@ class Transaction:
     def get_all_transactions(cls) -> dict[int, tuple[datetime, float, int, int]]:
         """Returns all transactions as a dictionary { transaction_id -> (timestamp, price, volume, stock_id) }."""
         return {
-            t.transaction_id: (t.timestamp, t.price, t.volume, t.stock_id)
+            t.transaction_id: (t.timestamp, t.price, t.vol, t.stock_id)
             for t in cls._all_transactions
         }
+
+    @classmethod
+    def get_transactions_of_stock(
+        cls, ticker: str
+    ) -> dict[int, tuple[datetime, float, int, int]]:
+        """Returns all transactions of a given stock."""
+        stock = OrderBook.get_book_by_ticker(ticker)
+        return {
+            t.transaction_id: (t.timestamp, t.price, t.vol, t.stock_id)
+            for t in cls._all_transactions
+            if t.stock_id == stock.stock_id
+        }
+
+    @staticmethod
+    def last_before(ticker: str, timestamp: datetime = datetime.now) -> Self:
+        """Returns last transaction before a given time."""
+        all = Transaction.get_transactions_of_stock(ticker)
+        before = {k: v for k, v in all.items if v[0] >= timestamp}
+
+        # return the transaction before the time with highest ID (which must be the latest)
+        return Transaction.get_transaction_by_id(max(before))
 
 
 """
@@ -448,18 +476,17 @@ class OrderBook:
 
     # object as parameter, NOT IDs
     def _add_order(self, order: Order):
-        """Add an order to the order book and execute trades if feasible."""
+        """Add a limit order to the order book and execute trades if feasible."""
+        if order.type is not LIMIT:
+            raise ValueError("Only limit orders can be added to limit order book.")
+
         opposite_book = self.asks if order.side == BUY else self.bids
         same_book = self.bids if order.side == BUY else self.asks
 
         # while a trade is feasible, try to execute one
         while order.is_executable() and opposite_book:
             other_order: Order = opposite_book[0]
-            trade_price = (
-                order.get_price()
-                if other_order.is_market_order
-                else other_order.get_price()
-            )
+            trade_price = other_order.get_price()
 
             # if all trades at feasible prices have been executed, no more trades are executable
             if order.side == SELL and trade_price < order.get_price():
@@ -472,17 +499,9 @@ class OrderBook:
                 break
 
             # if the other order can't trade at this price, skip it
-            if other_order.executable_volume(trade_price) == 0:
-                if (
-                    not other_order.is_executable()  # THIS DOESNT REMOVE UNFEASIBLE BUY ORDERS, but removes unfeasible sell orders
-                ):  # if the other order isn't executable, remove it
-                    self._remove_order(other_order, cancelling=True)
-                    continue
-                elif other_order.side == BUY:
-                    self._remove_order(other_order, cancelling=True)
-                    continue
-                else:  # if we dont remove it, then we would always try to match the same orders
-                    break
+            if not other_order.is_executable():
+                self._remove_order(other_order, cancelling=True)
+                continue
 
             # otherwise, a positive number of shares can be traded
             trade_volume = min(
@@ -503,6 +522,43 @@ class OrderBook:
         if order.volume > 0:
             # all possible trades have been executed, so store the remaining order in the book
             same_book.add(order)
+
+    def _market_order(self, order: Order):
+        """Add a market order to the order book."""
+        if order.type is not MARKET:
+            raise ValueError("Non-market order cannot be executed as a market order")
+
+        opposite_book = self.asks if order.side == BUY else self.bids
+
+        # while a trade is feasible, try to execute one
+        while order.is_executable() and opposite_book:
+            other_order: Order = opposite_book[0]
+            trade_price = other_order.get_price()
+
+            # if order is executable, but has 0 volume, no more trades would be currently feasible
+            if order.executable_volume(trade_price) == 0:
+                break
+
+            # if the other order can't trade at this price, remove it from the order book and skip it
+            if not other_order.is_executable():
+                self._remove_order(other_order, cancelling=True)
+                continue
+
+            # otherwise, a positive number of shares can be traded
+            trade_volume = min(
+                order.executable_volume(trade_price),
+                other_order.executable_volume(trade_price),
+            )
+
+            if order.side == BUY:
+                Transaction(bid=order, ask=other_order, volume=trade_volume)
+            else:  # order.side == SELL
+                Transaction(bid=other_order, ask=order, volume=trade_volume)
+
+            if other_order.get_volume() == 0:
+                opposite_book.remove(other_order)
+
+        return order.terminate()
 
     # object as parameter, NOT IDs
     def _remove_order(self, order: Order, cancelling=False) -> str:
@@ -535,8 +591,20 @@ class OrderBook:
     ) -> int:
         """Place order directly with the information entered."""
         order = Order(self.stock_id, side, price, volume, client, is_market)
-        self._add_order(order)
+        self._add_order(order) if not is_market else self._market_order(order)
         return order.order_id
+
+    @staticmethod
+    def calculate_pnl(ticker: str, timestamp: datetime) -> float:
+        """Calculates the percent profit or loss of a stock with given ticker from a given time."""
+        if timestamp > datetime.now:
+            raise ValueError("Cannot calculate pnl with respect to a future time.")
+
+        stock = OrderBook.get_book_by_ticker(ticker)
+
+        old_price = Transaction.last_before(stock.ticker, timestamp).get_price()
+
+        return (stock.last_price - old_price) / old_price * 100
 
     @staticmethod
     def place_order(
@@ -547,7 +615,7 @@ class OrderBook:
         client: int | Client,
         is_market: bool = False,
     ) -> int:
-        """Class method to place an order with the ticker."""
+        """Static method to place an order with the ticker."""
         match client:
             case int():
                 pass
@@ -562,7 +630,7 @@ class OrderBook:
 
     @staticmethod
     def cancel_order(order_id: int) -> str:
-        """Class method to cancel an order with ticker and order id."""
+        """Static method to cancel an order with ticker and order id."""
 
         '''if(order_id > Order.counter):
             return f"Order {order_id} does not exist"'''
