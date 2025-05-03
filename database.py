@@ -297,3 +297,16 @@ class Database:
         connection.commit()
         connection.close()
         return result
+
+    # create_owned_stock: Takes a user and ticker and creates an owned stock record
+    # Pre: owner_id belongs to database, vol > 0
+    # Post: N/A
+    def create_owned_stock(self, owner_id, ticker, vol):
+        connection = sqlite3.connect("stock_market_database.db")
+        cursor = connection.cursor()
+        cursor.execute(
+            """INSERT INTO OwnedStock(owner_id, ticker, average_price, total_vol) VALUES(?, ?, 0.01, ?);""",
+            (owner_id, ticker, vol),
+        )
+        connection.commit()
+        connection.close()

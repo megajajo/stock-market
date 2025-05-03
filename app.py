@@ -7,6 +7,7 @@ from fastapi.responses import RedirectResponse
 from fastapi.encoders import jsonable_encoder
 from OrderBook.OrderBook import *
 from pydantic import BaseModel
+from database import Database
 
 # Initialize the app
 app = FastAPI(title="Stock Market")
@@ -285,16 +286,39 @@ async def add_new_client(client_data: ClientData):
     if queryClient != None:
         return queryClient
     else:
-        dic = {"AAPL": 10}
-        client = Client(
-            "",
-            "pass",
-            client_data.email,
-            client_data.first_name,
-            client_data.last_name,
-            100,
-            dic,
-        )
+        if not Database().is_email_taken(client_data.email):
+            details = Database().account_from_email(client_data.email)
+            stocks = Database().retrieve_stock(details[0])
+            dic = {}
+            for stock in stocks:
+                dic[stock[0]] = stock[2]
+            client = Client(
+                details[1],
+                "pass",
+                client_data.email,
+                client_data.first_name,
+                client_data.last_name,
+                Database().retrieve_balance(details[0]),
+                dic,
+            )
+        else:
+            dic = {"AAPL": 10}
+            client = Client(
+                "",
+                "pass",
+                client_data.email,
+                client_data.first_name,
+                client_data.last_name,
+                100,
+                dic,
+            )
+            id = Database().create_client(
+                client_data.email,
+                client_data.email,
+                client_data.first_name,
+                client_data.last_name,
+            )
+            Database().create_owned_stock(id, "AAPL", 10)
         return client
 
 

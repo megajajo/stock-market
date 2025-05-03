@@ -3,6 +3,7 @@ from typing import Self
 
 from datetime import datetime, timezone
 from sortedcontainers import SortedList
+from database import Database
 
 
 class BuyOrSell(Enum):
@@ -255,6 +256,9 @@ class Order:
     def get_executed_volume(self) -> int:
         return self._total_volume - self.volume
 
+    def get_ticker(self) -> int:
+        return self.ticker
+
     def terminate(self) -> str:
         """Terminate an order."""
         self.terminated = True
@@ -302,7 +306,6 @@ class Order:
 
 
 class Transaction:
-    counter = 0
     _all_transactions: list[Self] = []
 
     # object as parameter, NOT IDs
@@ -313,10 +316,6 @@ class Transaction:
             )  # precondition: bid and ask have same stock
         else:
             stock_id = bid.get_stock_id()
-
-        self.transaction_id = Transaction.counter
-        Transaction.counter += 1
-        Transaction._all_transactions += [self]
 
         self.timestamp = datetime.now(timezone.utc)
         self.bidder = bid.get_client()
@@ -329,6 +328,21 @@ class Transaction:
         self.price = price
         self.vol = vol
         self.stock_id = stock_id
+
+        # Add transaction to the database
+        bidder_db_id = Database().account_from_email(self.bidder.email)[0]
+        asker_db_id = Database().account_from_email(self.asker.email)[0]
+        self.transaction_id = Database().create_transaction(
+            bidder_db_id,
+            self.bid_price,
+            asker_db_id,
+            self.ask_price,
+            self.vol,
+            bid.get_ticker(),
+            price,
+        )
+
+        Transaction._all_transactions += [self]
 
         # update the state of the orders to reflect the transaction
         update_price = self.bidder != self.asker
