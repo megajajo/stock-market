@@ -311,6 +311,7 @@ class Order:
 
 class Transaction:
     _all_transactions: list[Self] = []
+    _transaction_offset = -10
 
     # object as parameter, NOT IDs
     def __init__(self, bid: Order, ask: Order, vol: int):
@@ -345,7 +346,9 @@ class Transaction:
             bid.get_ticker(),
             price,
         )
-
+        # If first transaction in the system
+        if Transaction._all_transactions == []:
+            Transaction._transaction_offset = self.transaction_id
         Transaction._all_transactions += [self]
 
         # update the state of the orders to reflect the transaction
@@ -365,7 +368,7 @@ class Transaction:
     @classmethod
     def get_transaction_by_id(cls, id: int) -> Self:
         try:
-            return cls._all_transactions[id]
+            return cls._all_transactions[id - Transaction._transaction_offset]
         except:
             return None
 
