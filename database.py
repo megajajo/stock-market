@@ -10,7 +10,7 @@
 #   balance REAL NOT NULL CHECK(balance >= 0.00) DEFAULT 100.00,
 #   first_names TEXT,
 #   last_name TEXT);
-
+#
 # CREATE TABLE OwnedStock(
 #   owner_id INTEGER,
 #   ticker TEXT,
@@ -21,7 +21,7 @@
 #       REFERENCES Client (client_id)
 #       ON DELETE CASCADE
 #       ON UPDATE NO ACTION);
-
+#
 # CREATE TABLE Transactions(
 #   transaction_id INTEGER PRIMARY KEY,
 #   bidder_id INTEGER NOT NULL,
@@ -41,6 +41,8 @@
 #       REFERENCES Client (client_id)
 #       ON DELETE CASCADE
 #       ON UPDATE NO ACTION); """
+#
+# CREATE INDEX email_index On Client(email);
 # ----------------------------------------------------------------------------------------------------------------------------------------
 import sqlite3
 from datetime import datetime
@@ -156,7 +158,7 @@ class Database:
             ),
         )
         result = cursor.lastrowid
-        if cursor.rowcount == 0 or result == None:
+        if cursor.rowcount == 0 or result == None or success == False:
             success = False
             result = -1
         if success:
@@ -197,7 +199,10 @@ class Database:
         result = cursor.fetchall()
         connection.commit()
         connection.close()
-        return result[0][0]
+        if len(result) == 0:
+            return 0
+        else:
+            return result[0][0]
 
     # retrieve_transactions_user: Takes a user and returns all transactions they are involved in
     # Pre: N/A
@@ -299,8 +304,8 @@ class Database:
         return result
 
     # create_owned_stock: Takes a user and ticker and creates an owned stock record
-    # Pre: owner_id belongs to database, vol > 0
-    # Post: N/A
+    # Pre: owner_id belongs to database, vol > 0, owner_id does not own stock in ticker
+    # Post: True if added, False if not
     def create_owned_stock(self, owner_id, ticker, vol):
         connection = sqlite3.connect("stock_market_database.db")
         cursor = connection.cursor()
@@ -308,5 +313,11 @@ class Database:
             """INSERT INTO OwnedStock(owner_id, ticker, average_price, total_vol) VALUES(?, ?, 0.01, ?);""",
             (owner_id, ticker, vol),
         )
+        result = cursor.lastrowid
+        if cursor.rowcount == 0 or result == None:
+            result = False
+        else:
+            result = True
         connection.commit()
         connection.close()
+        return result

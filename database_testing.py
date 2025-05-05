@@ -1,10 +1,17 @@
 # --------------------------------------------------------------------------------------------------------------
 # database.py
-# Last modified: 29/4/25                        By: Kirsten Else
+# Last modified: 5/5/25                        By: Kirsten Else
 # Module to test database functions
-# Key test info:    Clients - 1. A = Seller, 2. B = Buyer, 3. C, 4. D, 5. E, 6.F
+# Key test info:    Clients - 1. A = Seller, 2. B = Buyer, 3. C, 4. D, 5. F, 8. X
 #                   OwnedStock - Seller owns A, C owns 10 C, D owns 10 A and 10 C
 #                   Transactions - A bidder C asker once, D bider A asker, E bidder and asker once each - All on market C
+# Notes on invalid tests - Cannot create a test to check the below as these are errors from the database
+#   ownedStock is successfully inserted, deleted or updated on lines 76, 84, 98, 110
+#   balance is successfully updated on lines 131, 138
+#   transactions are inserted on lines 145
+#   duplicate email or usernames are used in create_client due to database errors at execution
+#   duplicate (owner_id, ticker) are used in create_owned_stock due to database errors at execution
+#   invalid owner_id in create_owned_stock due to database errors at execution
 # --------------------------------------------------------------------------------------------------------------
 import unittest, sqlite3
 from database import Database
@@ -141,6 +148,28 @@ class TestDatabase(unittest.TestCase):
         connection.commit()
         connection.close()
 
+    # stock does not exist
+    def test_add_transaction_invalid_1(self):
+        result = Database().create_transaction(
+            2, 2, 1, 1, 5, "PleaseDoNotUseThisStock", 1
+        )
+        self.assertEqual(-1, result)
+
+    # asker_id does not exist
+    def test_add_transaction_invalid_2(self):
+        result = Database().create_transaction(2, 2, 100000, 1, 5, "B", 1)
+        self.assertEqual(-1, result)
+
+    # asker_id does not own stock
+    def test_add_transaction_invalid_3(self):
+        result = Database().create_transaction(2, 2, 8, 1, 5, "B", 1)
+        self.assertEqual(-1, result)
+
+    # bidder_id does not exist
+    def test_add_transaction_invalid_4(self):
+        result = Database().create_transaction(2000000, 2, 1, 1, 5, "B", 1)
+        self.assertEqual(-1, result)
+
     # retrieve_specific_volumn tests
 
     # Return the specific stock owned by a user when user owns stock in that exchange
@@ -169,6 +198,11 @@ class TestDatabase(unittest.TestCase):
     def test_retrieve_balance_valid(self):
         result = Database().retrieve_balance(3)
         self.assertEqual(result, 100.0)
+
+    # user does not exist
+    def test_retrieve_balance_invalid(self):
+        result = Database().retrieve_balance(10000000)
+        self.assertEqual(result, 0)
 
     # is_username_taken tests
 
@@ -319,7 +353,12 @@ class TestDatabase(unittest.TestCase):
 
     # Test that the database returns no records when the client has performed no transactions
     def test_retrieve_transactions_user_valid_4(self):
-        result = Database().retrieve_transactions_user(6)
+        result = Database().retrieve_transactions_user(8)
+        self.assertEqual(result, [])
+
+    # No transactions returns for an invalid client
+    def test_retrieve_transactions_user_invalid(self):
+        result = Database().retrieve_transactions_user(10000000000)
         self.assertEqual(result, [])
 
     # retrieve_stock tests
@@ -343,6 +382,29 @@ class TestDatabase(unittest.TestCase):
     def test_retrieve_stock_valid_3(self):
         result = Database().retrieve_stock(2)
         self.assertEqual(result, [])
+
+    # Tests that the database retuns no records when the user does not exist
+    def test_retrieve_stock_invalid(self):
+        result = Database().retrieve_stock(10000000000)
+        self.assertEqual(result, [])
+
+    # create_owned_stock tests
+
+    # Tests that stock is created
+    def test_create_owned_stock_valid(self):
+        result = Database().create_owned_stock(1, "B", 10)
+        self.assertTrue(result)
+        connection = sqlite3.connect("stock_market_database.db")
+        cursor = connection.cursor()
+        cursor.execute(
+            """SELECT * FROM ownedStock WHERE owner_id = 1 AND ticker = 'B' AND total_vol = 10;""",
+        )
+        self.assertEqual(1, len(cursor.fetchall()))
+        cursor.execute(
+            """DELETE FROM ownedStock WHERE owner_id = 1 AND ticker = 'B'""",
+        )
+        connection.commit()
+        connection.close()
 
 
 if __name__ == "__main__":
