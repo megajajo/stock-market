@@ -43,7 +43,7 @@ container.appendChild(cashCard);
 
     // draw the sparkline
     const miniChartContainer = card.querySelector('.mini-chart-container');
-    console.log("data for drawing minichart:", stockDataPrices[holding.stock], holding.stock, stockDataPrices);
+    // console.log("data for drawing minichart:", stockDataPrices[holding.stock], holding.stock, stockDataPrices);
     drawMiniChart(miniChartContainer, stockDataPrices[holding.stock], {
       width: 100,
       height: 40,
@@ -67,7 +67,7 @@ if (loggedIn) {
   titleEl.textContent = 'Your portfolio value:';
 }
 
-  
+
   const pnlValue = userData.pnl;
   const isPositive = pnlValue.startsWith('+');
   document.getElementById('balance-header').textContent = `$${userData.balance.toFixed(2)}`;
@@ -113,4 +113,3 @@ export function populatePortfolio() {
     console.log(userData.holdings);
     populatePositions(holdingsGrid, userData.holdings);
 }
-
