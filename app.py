@@ -8,6 +8,7 @@ from fastapi.encoders import jsonable_encoder
 from OrderBook.OrderBook import *
 from pydantic import BaseModel
 from database import Database
+import new_user_portfolio as new_user
 
 # Initialize the app
 app = FastAPI(title="Stock Market")
@@ -22,7 +23,7 @@ app.add_middleware(
 )
 
 # Initialize order books
-order_books = [OrderBook("AAPL"), OrderBook("LMT")]
+order_books = [OrderBook("AAPL"), OrderBook("Stock1"), OrderBook("Stock2")]
 
 # Two example users
 client1 = Client(
@@ -302,23 +303,24 @@ async def add_new_client(client_data: ClientData):
                 dic,
             )
         else:
-            dic = {"AAPL": 10}
             client = Client(
                 "",
                 "pass",
                 client_data.email,
                 client_data.first_name,
                 client_data.last_name,
-                100,
-                dic,
+                new_user.money,
+                new_user.stocks,
             )
             id = Database().create_client(
                 client_data.email,
                 client_data.email,
                 client_data.first_name,
                 client_data.last_name,
+                new_user.money,
             )
-            Database().create_owned_stock(id, "AAPL", 10)
+            for stock, volume in new_user.stocks.items():
+                Database().create_owned_stock(id, stock, volume)
         return client
 
 
@@ -332,42 +334,44 @@ async def websocket_endpoint(
 ):  # Note: Place some orders before testing this
     await websocket.accept()
     try:
-        ticker = await websocket.receive_text()
-        print(f"Client subscribed to ticker: {ticker}")
+        tickers = ["AAPL", "Stock1", "Stock2"]
+        summary = dict()
+        print(f"Client subscribed to order book")
         while True:
-            best_bid = OrderBook.get_best_bid(ticker)
-            best_ask = OrderBook.get_best_ask(ticker)
-            all_bids = OrderBook.get_all_bids(ticker)
-            all_asks = OrderBook.get_all_asks(ticker)
-            last_price = OrderBook.get_last_price(ticker)
-            last_timestamp = OrderBook.get_last_timestamp(ticker)
-            summary = {
-                "ticker": ticker,
-                "best_bid": best_bid,
-                "best_ask": best_ask,
-                "all_bids": [
-                    {
-                        "order_id": order_id,
-                        "timestamp": timestamp,
-                        "price": price,
-                        "volume": volume,
-                        "stock_id": stock_id,
-                    }
-                    for order_id, timestamp, price, volume, stock_id in all_bids
-                ],
-                "all_asks": [
-                    {
-                        "order_id": order_id,
-                        "timestamp": timestamp,
-                        "price": price,
-                        "volume": volume,
-                        "stock_id": stock_id,
-                    }
-                    for order_id, timestamp, price, volume, stock_id in all_asks
-                ],
-                "last_price": last_price,
-                "last_timestamp": last_timestamp,
-            }
+            for ticker in tickers:
+                best_bid = OrderBook.get_best_bid(ticker)
+                best_ask = OrderBook.get_best_ask(ticker)
+                all_bids = OrderBook.get_all_bids(ticker)
+                all_asks = OrderBook.get_all_asks(ticker)
+                last_price = OrderBook.get_last_price(ticker)
+                last_timestamp = OrderBook.get_last_timestamp(ticker)
+                summary[ticker] = {
+                    "ticker": ticker,
+                    "best_bid": best_bid,
+                    "best_ask": best_ask,
+                    "all_bids": [
+                        {
+                            "order_id": order_id,
+                            "timestamp": timestamp,
+                            "price": price,
+                            "volume": volume,
+                            "stock_id": stock_id,
+                        }
+                        for order_id, timestamp, price, volume, stock_id in all_bids
+                    ],
+                    "all_asks": [
+                        {
+                            "order_id": order_id,
+                            "timestamp": timestamp,
+                            "price": price,
+                            "volume": volume,
+                            "stock_id": stock_id,
+                        }
+                        for order_id, timestamp, price, volume, stock_id in all_asks
+                    ],
+                    "last_price": last_price,
+                    "last_timestamp": last_timestamp,
+                }
             encoded = jsonable_encoder(summary)
             await websocket.send_text(json.dumps(encoded))
             await asyncio.sleep(1)  # Updates pushed every second

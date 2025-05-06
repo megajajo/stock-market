@@ -59,7 +59,7 @@ export function openStockDetail(stockName) {
         <!-- Order Book -->
         <button id="toggle-order-book-btn">Show Order Book</button>
         <div class="order-book-section" style="display: none;">
-          <div id="order-book-container"></div>
+          <div id="order-book-${stockName}-container"></div>
         </div>
       </div>
     </div>
@@ -180,31 +180,32 @@ function handleOrder(stockName, orderType, modal) {
 // WebSocket for live order book updates
 const socket = new WebSocket("ws://localhost:8000/ws");
 const stockDataDynamic = {};
-let ticker = "AAPL";
 
 socket.addEventListener("open", () => {
-  console.log(`Connected to OrderBook WebSocket for ticker: ${ticker}`);
-  socket.send(ticker);
+  console.log(`Connected to OrderBook WebSocket`);
 });
 
 socket.addEventListener("message", event => {
   const data = JSON.parse(event.data);
-  stockDataDynamic[ticker] = data;
+  let tickers = ['AAPL', 'Stock1', 'Stock2'];
+  tickers.forEach(ticker => {
+    stockDataDynamic[ticker] = data[ticker];
 
-  // Append to historic prices if timestamp is new
-  const lastDate  = new Date(data.last_timestamp);
-  const history   = stockDataPrices[ticker];
-  const lastEntry = history[history.length - 1];
+    // Append to historic prices if timestamp is new
+    const lastDate  = new Date(data.last_timestamp);
+    const history   = stockDataPrices[ticker];
+    const lastEntry = history[history.length - 1];
 
-  if (Date.parse(lastEntry.date) !== lastDate.getTime()) {
-    history.push({ date: lastDate, price: data.last_price });
-  }
+    if (Date.parse(lastEntry.date) !== lastDate.getTime()) {
+      history.push({ date: lastDate, price: data.last_price });
+    }
 
-  // If order book is visible, refresh it
-  const bookContainer = document.getElementById("order-book-container");
-  if (bookContainer) {
-    populateOrderBook(bookContainer, stockDataDynamic[ticker]);
-  }
+    // If order book is visible, refresh it
+    const bookContainer = document.getElementById(`order-book-${ticker}-container`);
+    if (bookContainer) {
+      populateOrderBook(bookContainer, stockDataDynamic[ticker]);
+    }
+  });
 });
 
 socket.addEventListener("close", () => {

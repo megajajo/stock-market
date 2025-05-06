@@ -6,51 +6,17 @@ export const orderBookData = {
       ],
       asks: [
       ]
-    },
-    "Stock B": {
+  },
+  "Stock1": {
       bids: [
-        { price: 199, volume: 130 },
-        { price: 198, volume: 170 }
       ],
       asks: [
-        { price: 201, volume: 110 },
-        { price: 202, volume: 160 }
       ]
-    },
-    "Stock C": {
+  },
+  "Stock2": {
       bids: [
-        { price: 299, volume: 100 },
-        { price: 298, volume: 150 }
       ],
       asks: [
-        { price: 301, volume: 90 },
-        { price: 302, volume: 140 }
       ]
-    },
-    "Stock D": {
-      bids: [
-        { price: 399, volume: 80 },
-        { price: 398, volume: 120 }
-      ],
-      asks: [
-        { price: 401, volume: 70 },
-        { price: 402, volume: 110 },
-        { price: 403, volume: 110 },
-        { price: 404, volume: 110 },
-        { price: 405, volume: 110 }
-      ]
-    },
-    "Stock E": {
-      bids: [
-        { price: 399, volume: 80 },
-        { price: 398, volume: 120 }
-      ],
-      asks: [
-        { price: 401, volume: 70 },
-        { price: 402, volume: 110 },
-        { price: 403, volume: 110 },
-        { price: 404, volume: 110 },
-        { price: 405, volume: 110 }
-      ]
-    }
+  },
   };
