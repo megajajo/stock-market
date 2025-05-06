@@ -2,9 +2,9 @@
 # database.py
 # Last modified: 5/5/25                        By: Kirsten Else
 # Module to test database functions
-# Key test info:    Clients - 1. A = Seller, 2. B = Buyer, 3. C, 4. D, 5. F, 8. X
-#                   OwnedStock - Seller owns A, C owns 10 C, D owns 10 A and 10 C
-#                   Transactions - A bidder C asker once, D bider A asker, E bidder and asker once each - All on market C
+# To set up before tests:    Clients - 1. A = Seller, 2. B = Buyer, 3. C, 4. D, 5. F, 6.E, 8. X
+#                            OwnedStock - Seller owns A, C owns 10 C, D owns 10 A and 10 C
+#                            Transactions - A bidder C asker once, D bider A asker, E bidder and asker once each - All on market C
 # Notes on invalid tests - Cannot create a test to check the below as these are errors from the database
 #   ownedStock is successfully inserted, deleted or updated on lines 76, 84, 98, 110
 #   balance is successfully updated on lines 131, 138

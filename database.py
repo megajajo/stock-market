@@ -43,6 +43,7 @@
 #       ON UPDATE NO ACTION); """
 #
 # CREATE INDEX email_index On Client(email);
+# CREATE INDEX ticker_index On Transactions(ticker);
 # ----------------------------------------------------------------------------------------------------------------------------------------
 import sqlite3
 from datetime import datetime
