@@ -74,18 +74,31 @@ class Client:
             return None
 
     @classmethod
-    def get_client_by_username(cls, username: str) -> "Client":
+    def get_client_by_username(cls, username: str) -> Self:
         for client in cls._all_clients:
             if client.username == username:
                 return client
         return None
 
     @classmethod
-    def get_client_by_email(cls, email: str) -> "Client":
+    def get_client_by_email(cls, email: str) -> Self:
         for client in cls._all_clients:
             if client.email == email:
                 return client
         return None
+
+    @classmethod
+    def resolve(client_info) -> Self | None:
+        """Resolve a client's id, username, or reference to the client."""
+        match client_info:
+            case int():
+                return Client.get_client_by_id(client_info)
+            case str():
+                return Client.get_client_by_username(client_info)
+            case Client():
+                return client_info  # if client is entered, replace with client id
+            case _:
+                raise TypeError("Client or Client id must be entered")
 
     def get_id(self) -> int:
         return self.client_id
@@ -138,7 +151,10 @@ class Client:
         return res
 
     def display_balance(self) -> str:
-        return f"Balance of {str(self)}:\t  {self.balance}"
+        return f"Cash balance of {str(self)}:\t  {self.balance}"
+
+
+ClientInfo = Client | int | str
 
 
 class Order:
@@ -383,14 +399,9 @@ class Transaction:
     @classmethod
     def get_transactions_of_stock(
         cls, ticker: str
-    ) -> dict[int, tuple[datetime, float, int, int]]:
+    ) -> list[tuple[int, int, float, int, float, int, str, str, float]]:
         """Returns all transactions of a given stock."""
-        stock = OrderBook.get_book_by_ticker(ticker)
-        return {
-            t.transaction_id: (t.timestamp, t.price, t.vol, t.stock_id)
-            for t in cls._all_transactions
-            if t.stock_id == stock.stock_id
-        }
+        return Database().retrieve_transactions_stock(ticker)
 
     @staticmethod
     def last_before(ticker: str, timestamp: datetime = datetime.now) -> Self:
@@ -615,17 +626,11 @@ class OrderBook:
         side: BuyOrSell,
         price: float,
         volume: int,
-        client: int | Client,
+        client_info: ClientInfo,
         is_market: bool = False,
     ) -> int:
         """Static method to place an order with the ticker."""
-        match client:
-            case int():
-                pass
-            case Client():
-                client = client.get_id()  # if client is entered, replace with client id
-            case _:
-                raise TypeError("Client or Client id must be entered")
+        client = Client.resolve(client_info)
 
         stock = OrderBook.get_book_by_ticker(ticker)
 
@@ -772,3 +777,18 @@ class OrderBook:
         stock = OrderBook.get_book_by_ticker(ticker)
 
         return stock._get_last_timestamp()
+
+    @staticmethod
+    def portfolio_value(client_info: ClientInfo) -> float:
+        """Returns the total value of a given client's portfolio."""
+        client: Client = Client.resolve(client_info)
+
+        cash_value = client.get_balance()
+        stock_value = 0
+        for ticker in client.portfolio:
+            # the value from a given stock is volume * price
+            stock_value += client.portfolio[ticker] * OrderBook.get_book_by_ticker(
+                ticker
+            )
+
+        return cash_value + stock_value
