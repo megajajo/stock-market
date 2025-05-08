@@ -62,6 +62,7 @@ class Client:
 
         self.balance = balance
         self.portfolio = portfolio if portfolio is not None else {}
+        self._daily_portfolio_value = OrderBook.portfolio_value(self)
 
     def __str__(self):
         return f"{self.first_names} {self.last_name} ({self.username})"
@@ -157,6 +158,18 @@ class Client:
 
     def display_balance(self) -> str:
         return f"Cash balance of {str(self)}:\t  {self.balance}"
+
+    def get_daily_portfolio_value(self) -> float:
+        return self._daily_portfolio_value
+
+    def update_daily_portfolio_value(self) -> float:
+        """
+        Update and return the daily portfolio value.
+
+        NOTE: Should only be called at the start of each trading day.
+        """
+        self._daily_portfolio_value = OrderBook.portfolio_value(self)
+        return self._daily_portfolio_value
 
 
 ClientInfo = Client | int | str
@@ -437,7 +450,7 @@ class Transaction:
         return Database().retrieve_transactions_stock(ticker)
 
     @staticmethod
-    def last_before_price(ticker: str, timestamp: datetime = datetime.now()) -> Self:
+    def last_before(ticker: str, timestamp: datetime = datetime.now) -> "Transaction":
         """Returns last transaction before a given time."""
         all = Transaction.get_transactions_of_stock(ticker)
 
@@ -679,8 +692,16 @@ class OrderBook:
             raise ValueError("Cannot calculate pnl with respect to a future time.")"""
 
         stock = OrderBook.get_book_by_ticker(ticker)
-        old_price = Transaction.last_before_price(stock.ticker, timestamp)
-        return (stock.last_price - old_price) / old_price * 100
+
+        old_price = Transaction.last_before(stock.ticker, timestamp).get_price()
+        new_price = stock.last_price
+
+        if old_price == 0:
+            raise AssertionError(
+                "Previous portfolio value is 0. Please report this error to the maintainer."
+            )
+
+        return (new_price - old_price) / old_price * 100
 
     @staticmethod
     def calculate_pnl_24h(ticker: str) -> float:
@@ -877,15 +898,29 @@ class OrderBook:
     @staticmethod
     def portfolio_value(client_info: ClientInfo) -> float:
         """Returns the total value of a given client's portfolio."""
-        client: Client = Client.resolve(client_info)
+        client = Client.resolve(client_info)
 
         cash_value = client.get_balance()
         stock_value = 0
         for ticker in client.portfolio:
-            # the value from a given stock is volume * price
-            stock_value += (
-                client.portfolio[ticker]
-                * OrderBook.get_book_by_ticker(ticker).last_price
-            )
+            # the value from a given stock is price * volume
+            price = OrderBook.get_book_by_ticker(ticker).last_price
+            volume = client.portfolio[ticker]
+            stock_value += price * volume
 
         return cash_value + stock_value
+
+    @staticmethod
+    def portfolio_pnl(client_info: ClientInfo) -> float:
+        """Returns the percent pnl of the given client's portfolio, calculated relative to their portfolio value at market open."""
+        client = Client.resolve(client_info)
+
+        current_value = OrderBook.portfolio_value(client_info)
+        previous_value = client._daily_portfolio_value
+
+        if previous_value == 0:
+            raise AssertionError(
+                "Previous portfolio value is 0. Please report this error to the maintainer."
+            )
+
+        return (current_value - previous_value) / previous_value * 100
