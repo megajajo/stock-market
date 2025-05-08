@@ -133,48 +133,80 @@ function handleOrder(stockName, orderType, modal) {
   }
 
   const username     = userData.username;
-  const amountVal    = modal.querySelector('#order-amount').value.trim();
-  const limitVal     = modal.querySelector('#order-limit-price').value.trim();
+  const amountVal    = modal.querySelector('#order-amount').value.trim(); // volume of order
+  const limitVal     = modal.querySelector('#order-limit-price').value.trim(); // price of limit order
+
+  const isLimit = orderType.startsWith('limit');
+  const isBuy = orderType.endsWith('_buy');
 
   if (!amountVal || Number(amountVal) <= 0) {
     alert("Amount must be greater than 0!");
     return;
   }
-  if (orderType.startsWith('limit') && (!limitVal || Number(limitVal) <= 0)) {
-    alert("Please enter a valid limit price!");
-    return;
+  if (isLimit) {
+    if (!limitVal || Number(limitVal) <= 0){
+      alert("Please enter a valid limit price!");
+      return;
+    }
+
+    const price = Number(limitVal);
+
+    const tradeData = {
+      ticker:      stockName,
+      side:        isBuy ? 'buy' : 'sell',
+      client_user: username,
+      volume:      Number(amountVal),
+      price:       price
+    };
+
+    console.log("Sending trade data:", tradeData);
+
+    fetch('/api/place_order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(tradeData)
+    })
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then(data => {
+        console.log("Server Response:", data);
+        alert("Order placed successfully!");
+      })
+      .catch(err => {
+        console.error(err);
+        alert("Failed to place the order. Please try again.");
+      });
+  } else { // market order
+
+    const tradeData = {
+      ticker:      stockName,
+      side:        isBuy ? 'buy' : 'sell',
+      client_user: username,
+      volume:      Number(amountVal),
+    };
+
+    console.log("Sending trade data:", tradeData);
+
+    fetch('/api/market_order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(tradeData)
+    })
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then(data => {
+        console.log("Server Response:", data);
+        alert("Order placed successfully!");
+      })
+      .catch(err => {
+        console.error(err);
+        alert("Failed to place the order. Please try again.");
+      });
   }
-
-  const isBuy = orderType.endsWith('_buy');
-  const price = orderType.startsWith('limit') ? Number(limitVal) : null;
-
-  const tradeData = {
-    ticker:      stockName,
-    side:        isBuy ? 'buy' : 'sell',
-    client_user: username,
-    volume:      Number(amountVal),
-    price:       price
-  };
-
-  console.log("Sending trade data:", tradeData);
-
-  fetch('/api/place_order', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(tradeData)
-  })
-    .then(res => {
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      return res.json();
-    })
-    .then(data => {
-      console.log("Server Response:", data);
-      alert("Order placed successfully!");
-    })
-    .catch(err => {
-      console.error(err);
-      alert("Failed to place the order. Please try again.");
-    });
 }
 
 // WebSocket for live order book updates
