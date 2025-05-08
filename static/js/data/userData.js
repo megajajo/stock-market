@@ -10,5 +10,6 @@ export var userData = {
       { stock: "Stock1", amount: 0, pnl: "+0.5%" },
       { stock: "Stock2", amount: 0, pnl: "-0.8%" },
     ],
-    username: "user0"
+    username: "user0",
+    portfolioValue: 0
   };
