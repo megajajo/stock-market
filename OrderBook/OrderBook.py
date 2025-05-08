@@ -615,7 +615,7 @@ class OrderBook:
     ) -> int:
         """Place order directly with the information entered."""
         print(
-            "client info in __place_order",
+            "client info in _place_order",
             client.balance,
             client.client_id,
             client.email,
@@ -626,7 +626,7 @@ class OrderBook:
         )
 
         order = Order(self.stock_id, side, price, volume, client.client_id, is_market)
-        print("order info in __place_order", order.price, order.client, order.price)
+        print("order info in _place_order", order.price, order.client, order.price)
         self._add_order(order) if not is_market else self._market_order(order)
         return order.order_id
 
@@ -652,12 +652,7 @@ class OrderBook:
 
     @staticmethod
     def place_order(
-        ticker: str,
-        side: BuyOrSell,
-        price: float,
-        volume: int,
-        client_info: ClientInfo,
-        is_market: bool = False,
+        ticker: str, side: BuyOrSell, price: float, volume: int, client_info: ClientInfo
     ) -> int:
         """Static method to place an order with the ticker."""
         client = Client.resolve(client_info)
@@ -674,7 +669,30 @@ class OrderBook:
             client.username,
         )
 
-        return stock._place_order(side, price, volume, client, is_market)
+        return stock._place_order(side, price, volume, client, is_market=False)
+
+    @staticmethod
+    def market_order(
+        ticker: str, side: BuyOrSell, volume: int, client_info: ClientInfo
+    ) -> int:
+        """Static method to place an order with the ticker."""
+        client = Client.resolve(client_info)
+
+        stock = OrderBook.get_book_by_ticker(ticker)
+        print(
+            "client info in place_order",
+            client.balance,
+            client.client_id,
+            client.email,
+            client.first_names,
+            client.last_name,
+            client.portfolio,
+            client.username,
+        )
+
+        price = 0  # placeholder price for input to _place_order
+
+        return stock._place_order(side, price, volume, client, is_market=True)
 
     @staticmethod
     def cancel_order(order_id: int) -> str:

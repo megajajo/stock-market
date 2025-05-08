@@ -61,7 +61,7 @@ class PlaceOrderRequest(BaseModel):
 @app.post("/api/place_order")
 async def place_order(order: PlaceOrderRequest):
     """
-    Place an order for a stock.
+    Place a limit order for a stock.
 
     Parameters:
     - ticker: The ticker of the order book.
@@ -85,6 +85,42 @@ async def place_order(order: PlaceOrderRequest):
     print(f"Placing order for stock {ticker}: {side} at {price} for {volume} shares")
     order_side = BUY if side.lower() == "buy" else SELL
     return OrderBook.place_order(ticker, order_side, price, volume, client)
+
+
+class MarketOrderRequest(BaseModel):
+    ticker: str
+    side: str
+    volume: int
+    client_user: str
+
+
+@app.post("/api/market_order")
+async def market_order(order: MarketOrderRequest):
+    """
+    Place a market order for a stock.
+
+    Parameters:
+    - ticker: The ticker of the order book.
+    - side: The side of the order (buy/sell).
+    - volume: The number of shares to order.
+    - client_user: The username of the client placing the order.
+
+    Returns:
+    - order_id if successful, or an error message.
+    """
+    ticker = order.ticker
+    side = order.side
+    volume = order.volume
+    client = Client.get_client_by_username(order.client_user)
+
+    if client is None:
+        raise ValueError(f"Client with username {order.client_user} not found.")
+
+    print(
+        f"Placing order for stock {ticker}: {side} at market price for {volume} shares"
+    )
+    order_side = BUY if side.lower() == "buy" else SELL
+    return OrderBook.market_order(ticker, order_side, volume, client)
 
 
 @app.post("/api/cancel_order")
