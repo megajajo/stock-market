@@ -16,19 +16,19 @@ export var stockDataPrices = {
     { date: new Date(2025, 4, 1, 15, 0, 25, 0), price: 150}
   ],
   "Stock1": [
+    { date: new Date(2024, 2, 14), price: 190 },
+    { date: new Date(2024, 3, 12), price: 193 },
+    { date: new Date(2024, 3, 13), price: 196 },
     { date: new Date(2024, 3, 14, 9, 0), price: 200 },
     { date: new Date(2024, 3, 14, 10, 0), price: 198 },
     { date: new Date(2024, 3, 14, 11, 0), price: 195 },
-    { date: new Date(2024, 3, 13), price: 196 },
-    { date: new Date(2024, 3, 12), price: 193 },
-    { date: new Date(2024, 2, 14), price: 190 }
   ],
   "Stock2": [
+    { date: new Date(2024, 1, 15), price: 287 },
+    { date: new Date(2024, 2, 28), price: 290 },
+    { date: new Date(2024, 3, 13), price: 295 },
     { date: new Date(2024, 3, 14, 9, 0), price: 300 },
     { date: new Date(2024, 3, 14, 10, 15), price: 302 },
     { date: new Date(2024, 3, 14, 11, 30), price: 304 },
-    { date: new Date(2024, 3, 13), price: 295 },
-    { date: new Date(2024, 2, 28), price: 290 },
-    { date: new Date(2024, 1, 15), price: 287 }
   ],
 };

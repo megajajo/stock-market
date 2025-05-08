@@ -188,16 +188,17 @@ socket.addEventListener("open", () => {
 socket.addEventListener("message", event => {
   const data = JSON.parse(event.data);
   let tickers = ['AAPL', 'Stock1', 'Stock2'];
+  console.log("Data from OrderBook socket", data);
   tickers.forEach(ticker => {
     stockDataDynamic[ticker] = data[ticker];
 
     // Append to historic prices if timestamp is new
-    const lastDate  = new Date(data.last_timestamp);
+    const lastDate  = new Date(stockDataDynamic[ticker].last_timestamp);
     const history   = stockDataPrices[ticker];
     const lastEntry = history[history.length - 1];
 
-    if (Date.parse(lastEntry.date) !== lastDate.getTime()) {
-      history.push({ date: lastDate, price: data.last_price });
+    if (Date.parse(lastEntry.date) != Date.parse(lastDate)) {
+      history.push({ date: lastDate, price: stockDataDynamic[ticker].last_price });
     }
 
     // If order book is visible, refresh it

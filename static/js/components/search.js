@@ -32,6 +32,8 @@ export function initSearchView() {
       const dataPoints = stockDataPrices[stockName];
       const latestPrice = dataPoints[dataPoints.length - 1].price;
 
+      console.log(stockName, dataPoints);
+
       const card = document.createElement('div');
       card.classList.add('stock-card');
       card.innerHTML = `

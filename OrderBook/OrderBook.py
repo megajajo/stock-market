@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Self
 
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from sortedcontainers import SortedList
 from database import Database
 
@@ -396,7 +396,12 @@ class Transaction:
     def last_before(ticker: str, timestamp: datetime = datetime.now) -> Self:
         """Returns last transaction before a given time."""
         all = Transaction.get_transactions_of_stock(ticker)
-        before = {k: v for k, v in all.items if v[0] >= timestamp}
+        before = {}
+
+        for key in all:
+            value = all[key]
+            if value[0] < timestamp:
+                before.add(key)
 
         # return the transaction before the time with highest ID (which must be the latest)
         return Transaction.get_transaction_by_id(max(before))
@@ -600,14 +605,22 @@ class OrderBook:
     @staticmethod
     def calculate_pnl(ticker: str, timestamp: datetime) -> float:
         """Calculates the percent profit or loss of a stock with given ticker from a given time."""
+        """
+        !!!! > not supported between instances of datetime.datetime and builtin_function_or_method
         if timestamp > datetime.now:
-            raise ValueError("Cannot calculate pnl with respect to a future time.")
+            raise ValueError("Cannot calculate pnl with respect to a future time.")"""
 
         stock = OrderBook.get_book_by_ticker(ticker)
 
         old_price = Transaction.last_before(stock.ticker, timestamp).get_price()
 
         return (stock.last_price - old_price) / old_price * 100
+
+    @staticmethod
+    def calculate_pnl_24h(ticker: str) -> float:
+        return OrderBook.calculate_pnl(
+            ticker, datetime.now(timezone.utc) + timedelta(hours=-24)
+        )
 
     @staticmethod
     def place_order(

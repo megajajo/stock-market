@@ -9,6 +9,7 @@ from OrderBook.OrderBook import *
 from pydantic import BaseModel
 from database import Database
 import new_user_portfolio as new_user
+from datetime import datetime, timezone, timedelta
 
 # Initialize the app
 app = FastAPI(title="Stock Market")
@@ -345,6 +346,7 @@ async def websocket_endpoint(
                 all_asks = OrderBook.get_all_asks(ticker)
                 last_price = OrderBook.get_last_price(ticker)
                 last_timestamp = OrderBook.get_last_timestamp(ticker)
+                # pnl = OrderBook.calculate_pnl_24h(ticker)
                 summary[ticker] = {
                     "ticker": ticker,
                     "best_bid": best_bid,
@@ -371,6 +373,7 @@ async def websocket_endpoint(
                     ],
                     "last_price": last_price,
                     "last_timestamp": last_timestamp,
+                    # "pnl": pnl
                 }
             encoded = jsonable_encoder(summary)
             await websocket.send_text(json.dumps(encoded))
