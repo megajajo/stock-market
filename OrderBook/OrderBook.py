@@ -263,7 +263,9 @@ class Order:
 
             ticker = stock.get_ticker()
             if self.volume > 0 and ticker not in self.client.portfolio:
-                stock.cancel_order(self)  # cancel the order if seller ran out of stock
+                stock.cancel_order(
+                    self.order_id
+                )  # cancel the order if seller ran out of stock
 
         if self.volume == 0:
             self.terminated = True
@@ -298,6 +300,9 @@ class Order:
         """Returns whether order is executable at desired price."""
         if self.terminated:  # order isn't executable if terminated
             return False
+
+        if self.type == MARKET:
+            return True
 
         if self.side == SELL:
             ticker = OrderBook.get_ticker_by_id(self.stock_id)
@@ -597,9 +602,9 @@ class OrderBook:
             )
 
             if order.side == BUY:
-                Transaction(bid=order, ask=other_order, volume=trade_volume)
+                Transaction(order, other_order, trade_volume)
             else:  # order.side == SELL
-                Transaction(bid=other_order, ask=order, volume=trade_volume)
+                Transaction(other_order, order, trade_volume)
 
             if other_order.get_volume() == 0:
                 opposite_book.remove(other_order)
