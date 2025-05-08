@@ -196,14 +196,16 @@ function connectClientSocket(email) {
         // Update userData with portfolioValue
         userData.portfolioValue = data.portfolioValue;
 
-        // Transform portfolio data into holdings array
-        userData.holdings = Object.entries(data.portfolio).map(([stock, amount]) => {
-            return {
-                stock: stock,       // Stock ticker
-                amount: amount,     // Number of shares
-                pnl: "N/A"          // Placeholder for PnL (if not provided by the server)
-            };
-        });
+        userData.holdings = []
+        for (const [key, value] of Object.entries(data.portfolio)) {
+          const newHolding = {
+            stock: key,
+            amount: value,
+            pnl: data.pnlInfo[key].toFixed(2).concat("%")
+          };
+
+          userData.holdings.push(newHolding);
+        }
 
         console.log("Transformed holdings:", userData.holdings);
 

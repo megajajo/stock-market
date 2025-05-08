@@ -382,7 +382,7 @@ async def websocket_endpoint(
                 all_asks = OrderBook.get_all_asks(ticker)
                 last_price = OrderBook.get_last_price(ticker)
                 last_timestamp = OrderBook.get_last_timestamp(ticker)
-                # pnl = OrderBook.calculate_pnl_24h(ticker)
+                pnl = OrderBook.calculate_pnl_24h(ticker)
                 summary[ticker] = {
                     "ticker": ticker,
                     "best_bid": best_bid,
@@ -409,7 +409,7 @@ async def websocket_endpoint(
                     ],
                     "last_price": last_price,
                     "last_timestamp": last_timestamp,
-                    # "pnl": pnl
+                    "pnl": pnl,
                 }
             encoded = jsonable_encoder(summary)
             await websocket.send_text(json.dumps(encoded))
@@ -441,10 +441,15 @@ async def client_info_websocket(websocket: WebSocket):
         # Periodically send client information
         while True:
             pval = OrderBook.portfolio_value(client)
+            pnl = {}
+            tickers = ["AAPL", "Stock1", "Stock2"]
+            for ticker in tickers:
+                pnl[ticker] = OrderBook.calculate_pnl_24h(ticker)
             client_info = {
                 "balance": client.balance,
                 "portfolio": client.portfolio,
                 "portfolioValue": pval,
+                "pnlInfo": pnl,
             }
             await websocket.send_text(json.dumps(client_info))
             await asyncio.sleep(1)  # Send updates every second

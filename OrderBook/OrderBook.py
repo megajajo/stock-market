@@ -399,6 +399,7 @@ class Transaction:
 
     @classmethod
     def get_transaction_by_id(cls, id: int) -> Self:
+        # print(id, Transaction._transaction_offset)
         try:
             return cls._all_transactions[id - Transaction._transaction_offset]
         except:
@@ -436,18 +437,30 @@ class Transaction:
         return Database().retrieve_transactions_stock(ticker)
 
     @staticmethod
-    def last_before(ticker: str, timestamp: datetime = datetime.now) -> Self:
+    def last_before_price(ticker: str, timestamp: datetime = datetime.now()) -> Self:
         """Returns last transaction before a given time."""
         all = Transaction.get_transactions_of_stock(ticker)
-        before = {}
 
-        for key in all:
-            value = all[key]
-            if value[0] < timestamp:
-                before.add(key)
+        timestamp = timestamp.strftime("%Y-%m-%d %H:%M:%S.%f")
+        timestamp = datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S.%f")
 
-        # return the transaction before the time with highest ID (which must be the latest)
-        return Transaction.get_transaction_by_id(max(before))
+        # If there is nothing, just return 1 as the old price
+        if len(all) == 0:
+            return 1
+
+        max_before = all[0]
+        for val in all:
+            # print(timestamp, datetime.strptime(val[7], '%Y-%m-%d %H:%M:%S.%f'))
+            if (
+                datetime.strptime(val[7], "%Y-%m-%d %H:%M:%S.%f") < timestamp
+                and val[0] > max_before[0]
+            ):
+                max_before = val
+
+        if datetime.strptime(max_before[7], "%Y-%m-%d %H:%M:%S.%f") > timestamp:
+            return 1
+
+        return max_before[8]
 
 
 """
@@ -666,9 +679,7 @@ class OrderBook:
             raise ValueError("Cannot calculate pnl with respect to a future time.")"""
 
         stock = OrderBook.get_book_by_ticker(ticker)
-
-        old_price = Transaction.last_before(stock.ticker, timestamp).get_price()
-
+        old_price = Transaction.last_before_price(stock.ticker, timestamp)
         return (stock.last_price - old_price) / old_price * 100
 
     @staticmethod
