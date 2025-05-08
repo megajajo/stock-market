@@ -70,7 +70,7 @@ if (loggedIn) {
 
   const pnlValue = userData.pnl;
   const isPositive = pnlValue.startsWith('+');
-  document.getElementById('balance-header').textContent = `$${userData.balance.toFixed(2)}`;
+  document.getElementById('balance-header').textContent = `$${userData.portfolioValue.toFixed(2)}`;
   const pnlEl = document.getElementById('pnl-header');
   pnlEl.textContent = pnlValue;
   pnlEl.classList.add(isPositive ? 'positive' : 'negative');
@@ -98,7 +98,7 @@ export function populatePortfolio() {
   // Update header numbers
   const pnlValue = userData.pnl;
   const isPositive = pnlValue.startsWith('+');
-  document.getElementById('balance-header').textContent = `$${userData.balance.toFixed(2)}`;
+  document.getElementById('balance-header').textContent = `$${userData.portfolioValue.toFixed(2)}`;
   const pnlEl = document.getElementById('pnl-header');
   pnlEl.textContent = pnlValue;
   pnlEl.classList.add(isPositive ? 'positive' : 'negative');

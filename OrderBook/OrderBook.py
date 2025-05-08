@@ -609,7 +609,19 @@ class OrderBook:
         is_market: bool,
     ) -> int:
         """Place order directly with the information entered."""
-        order = Order(self.stock_id, side, price, volume, client, is_market)
+        print(
+            "client info in __place_order",
+            client.balance,
+            client.client_id,
+            client.email,
+            client.first_names,
+            client.last_name,
+            client.portfolio,
+            client.username,
+        )
+
+        order = Order(self.stock_id, side, price, volume, client.client_id, is_market)
+        print("order info in __place_order", order.price, order.client, order.price)
         self._add_order(order) if not is_market else self._market_order(order)
         return order.order_id
 
@@ -646,6 +658,16 @@ class OrderBook:
         client = Client.resolve(client_info)
 
         stock = OrderBook.get_book_by_ticker(ticker)
+        print(
+            "client info in place_order",
+            client.balance,
+            client.client_id,
+            client.email,
+            client.first_names,
+            client.last_name,
+            client.portfolio,
+            client.username,
+        )
 
         return stock._place_order(side, price, volume, client, is_market)
 
