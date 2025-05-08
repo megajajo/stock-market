@@ -278,6 +278,9 @@ class Order:
     def get_stock_id(self) -> int:
         return self.stock_id
 
+    def get_stock(self) -> "OrderBook":
+        return self.stock
+
     def get_executed_volume(self) -> int:
         return self._total_volume - self.volume
 
@@ -342,12 +345,15 @@ class Transaction:
             )  # precondition: bid and ask have same stock
         else:
             stock_id = bid.get_stock_id()
+            stock = bid.get_stock()
 
         self.timestamp = datetime.now(timezone.utc)
+
+        # price of market order is set to the price of the counterparty's limit order
         self.bidder = bid.get_client()
-        self.bid_price = bid.get_price()
+        self.bid_price = bid.get_price() if bid.type == LIMIT else ask.get_price()
         self.asker = ask.get_client()
-        self.ask_price = ask.get_price()
+        self.ask_price = ask.get_price() if ask.type == LIMIT else bid.get_price()
 
         # trade is executed at the price of the order with earlier timestamp
         price = bid.get_price() if bid.timestamp < ask.timestamp else ask.get_price()
@@ -405,7 +411,23 @@ class Transaction:
     def get_transactions_of_stock(
         cls, ticker: str
     ) -> list[tuple[int, int, float, int, float, int, str, str, float]]:
-        """Returns all transactions of a given stock."""
+        """
+        Returns all transactions of a given stock from the database, as a list of tuples.
+
+        Parameters:
+        - ticker: The ticker of the order book.
+
+        Returns a list of tuples with entries:
+        - transaction_id (int)
+        - bidder_id (int)
+        - bid_price (float)
+        - asker_id (int)
+        - ask_price (float)
+        - vol (int)
+        - ticker (str)
+        - time_stamp (str)
+        - transaction_price (float)
+        """
         return Database().retrieve_transactions_stock(ticker)
 
     @staticmethod
