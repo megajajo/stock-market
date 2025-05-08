@@ -316,9 +316,9 @@ async def add_new_client(client_data: ClientData):
             id = Database().create_client(
                 client_data.email,
                 client_data.email,
+                new_user.money,
                 client_data.first_name,
                 client_data.last_name,
-                new_user.money,
             )
             for stock, volume in new_user.stocks.items():
                 Database().create_owned_stock(id, stock, volume)

@@ -259,11 +259,13 @@ class Database:
     # create_client: Takes a username and email and creates a new entry in the database
     # Pre: username and email do not exist in the database previously
     # Post: client_id of the new record or -1 if an error occured
-    def create_client(self, username, email, balance, first_name=None, last_name=None):
+    def create_client(
+        self, username, email, balance=100, first_name=None, last_name=None
+    ):
         connection = sqlite3.connect("stock_market_database.db")
         cursor = connection.cursor()
         cursor.execute(
-            """INSERT INTO Client(username, email, first_names, last_name, balance) VALUES(?, ?, ?, ?, ?);""",
+            """INSERT INTO Client(username, email, balance, first_names, last_name) VALUES(?, ?, ?, ?, ?);""",
             (username, email, balance, first_name, last_name),
         )
         result = cursor.lastrowid
