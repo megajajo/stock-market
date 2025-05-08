@@ -193,6 +193,9 @@ function connectClientSocket(email) {
         // Update userData with balance
         userData.balance = data.balance;
 
+        // Update userData with portfolioValue
+        //userData.portfolioValue = data.portfolioValue;
+
         // Transform portfolio data into holdings array
         userData.holdings = Object.entries(data.portfolio).map(([stock, amount]) => {
             return {

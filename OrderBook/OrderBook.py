@@ -800,8 +800,9 @@ class OrderBook:
         stock_value = 0
         for ticker in client.portfolio:
             # the value from a given stock is volume * price
-            stock_value += client.portfolio[ticker] * OrderBook.get_book_by_ticker(
-                ticker
+            stock_value += (
+                client.portfolio[ticker]
+                * OrderBook.get_book_by_ticker(ticker).last_price
             )
 
         return cash_value + stock_value

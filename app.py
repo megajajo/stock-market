@@ -404,9 +404,11 @@ async def client_info_websocket(websocket: WebSocket):
 
         # Periodically send client information
         while True:
+            pval = OrderBook.portfolio_value(client)
             client_info = {
                 "balance": client.balance,
                 "portfolio": client.portfolio,
+                # "portfolioValue": pval
             }
             await websocket.send_text(json.dumps(client_info))
             await asyncio.sleep(1)  # Send updates every second
