@@ -450,7 +450,7 @@ class Transaction:
         return Database().retrieve_transactions_stock(ticker)
 
     @staticmethod
-    def last_before(ticker: str, timestamp: datetime = datetime.now) -> "Transaction":
+    def last_price_before(ticker: str, timestamp: datetime = datetime.now) -> float:
         """Returns last transaction before a given time."""
         all = Transaction.get_transactions_of_stock(ticker)
 
@@ -693,7 +693,7 @@ class OrderBook:
 
         stock = OrderBook.get_book_by_ticker(ticker)
 
-        old_price = Transaction.last_before(stock.ticker, timestamp).get_price()
+        old_price = Transaction.last_price_before(stock.ticker, timestamp)
         new_price = stock.last_price
 
         if old_price == 0:
