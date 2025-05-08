@@ -88,17 +88,22 @@ class Client:
         return None
 
     @classmethod
-    def resolve(cls, client_info) -> Self | None:
+    def resolve(cls, client_info) -> Self:
         """Resolve a client's id, username, or reference to the client."""
         match client_info:
             case int():
-                return Client.get_client_by_id(client_info)
+                client = Client.get_client_by_id(client_info)
             case str():
-                return Client.get_client_by_username(client_info)
+                client = Client.get_client_by_username(client_info)
             case Client():
-                return client_info  # if client is entered, replace with client id
+                client = client_info  # if client is entered, replace with client id
             case _:
-                raise TypeError("Client or Client id must be entered")
+                raise TypeError("Client, Client id, or Client username must be entered")
+
+        if client is None:
+            raise ValueError("Input client info does not correspond to a valid client")
+
+        return client
 
     def get_id(self) -> int:
         return self.client_id
