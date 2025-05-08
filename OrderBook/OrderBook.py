@@ -88,7 +88,7 @@ class Client:
         return None
 
     @classmethod
-    def resolve(client_info) -> Self | None:
+    def resolve(cls, client_info) -> Self | None:
         """Resolve a client's id, username, or reference to the client."""
         match client_info:
             case int():
