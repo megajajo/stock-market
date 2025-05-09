@@ -219,6 +219,11 @@ function connectClientSocket(email) {
         // Update userData with portfolioValue
         userData.portfolioValue = data.portfolioValue;
 
+        // Update userData with pnl value
+        userData.pnl = data.portfolioPnl.toFixed(2).concat("%");
+        if (data.portfolioPnl >= 0)
+          userData.pnl = "+".concat(userData.pnl);
+
         userData.holdings = []
         for (const [key, value] of Object.entries(data.portfolio)) {
           const newHolding = {
@@ -230,7 +235,7 @@ function connectClientSocket(email) {
           userData.holdings.push(newHolding);
         }
 
-        console.log("Transformed holdings:", userData.holdings);
+        console.log("userData info", userData);
 
         // Update the portfolio view
         populatePortfolio();

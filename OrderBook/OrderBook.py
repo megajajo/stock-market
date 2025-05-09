@@ -171,6 +171,11 @@ class Client:
         self._daily_portfolio_value = OrderBook.portfolio_value(self)
         return self._daily_portfolio_value
 
+    @staticmethod
+    def update_all_daily_portfolio():
+        for client in Client._all_clients:
+            client.update_daily_portfolio_value()
+
 
 ClientInfo = Client | int | str
 
@@ -451,7 +456,7 @@ class Transaction:
 
     @staticmethod
     def last_price_before(ticker: str, timestamp: datetime = datetime.now) -> float:
-        """Returns last transaction before a given time."""
+        """Returns the price of the last transaction before a given time."""
         all = Transaction.get_transactions_of_stock(ticker)
 
         timestamp = timestamp.strftime("%Y-%m-%d %H:%M:%S.%f")
@@ -924,3 +929,8 @@ class OrderBook:
             )
 
         return (current_value - previous_value) / previous_value * 100
+
+    @staticmethod
+    def update_all_last_times(date: datetime):
+        for book in OrderBook._all_books:
+            book.last_timestamp = date
