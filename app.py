@@ -399,7 +399,7 @@ async def websocket_endpoint(
                 all_asks = OrderBook.get_all_asks(ticker)
                 last_price = OrderBook.get_last_price(ticker)
                 last_timestamp = OrderBook.get_last_timestamp(ticker)
-                # pnl = OrderBook.calculate_pnl_24h(ticker)
+                pnl = OrderBook.calculate_pnl_24h(ticker)
                 summary[ticker] = {
                     "ticker": ticker,
                     "best_bid": best_bid,
@@ -426,7 +426,7 @@ async def websocket_endpoint(
                     ],
                     "last_price": last_price,
                     "last_timestamp": last_timestamp,
-                    # "pnl": pnl
+                    "pnl": pnl,
                 }
             encoded = jsonable_encoder(summary)
             await websocket.send_text(json.dumps(encoded))
@@ -458,15 +458,50 @@ async def client_info_websocket(websocket: WebSocket):
         # Periodically send client information
         while True:
             pval = OrderBook.portfolio_value(client)
+            pnl = {}
+            portfolioPnl = OrderBook.portfolio_pnl(client)
+            tickers = ["AAPL", "Stock1", "Stock2"]
+            for ticker in tickers:
+                pnl[ticker] = OrderBook.calculate_pnl_24h(ticker)
             client_info = {
                 "balance": client.balance,
                 "portfolio": client.portfolio,
                 "portfolioValue": pval,
+                "pnlInfo": pnl,
+                "portfolioPnl": portfolioPnl,
             }
             await websocket.send_text(json.dumps(client_info))
             await asyncio.sleep(1)  # Send updates every second
     except Exception as e:
         print(f"Client Info WebSocket error: {e}")
+
+
+async def update_hourly_stock_data():
+    while True:
+        now = datetime.now()
+        next_hour = (now + timedelta(hours=1)).replace(
+            minute=0, second=0, microsecond=0
+        )
+        sleep_seconds = (next_hour - now).total_seconds()
+        await asyncio.sleep(sleep_seconds)
+        OrderBook.update_all_last_times(next_hour)
+
+
+async def update_daily_portfolio_value():
+    while True:
+        now = datetime.now()
+        next_day = (now + timedelta(days=1)).replace(
+            hour=0, minute=0, second=0, microsecond=0
+        )
+        sleep_seconds = (next_day - now).total_seconds()
+        await asyncio.sleep(sleep_seconds)
+        Client.update_all_daily_portfolio()
+
+
+@app.on_event("startup")
+async def startup_event():
+    asyncio.create_task(update_hourly_stock_data())
+    asyncio.create_task(update_daily_portfolio_value())
 
 
 # # *** Code for AR(1) price model

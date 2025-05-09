@@ -13,6 +13,15 @@ import { loggedIn } from '../main.js';
  * @param {Array} holdings         userData.holdings
  */
 function populatePositions(container, holdings) {
+
+    // Draw the main portfolio graph inside header
+    const graphDiv = document.getElementById('header-graph');
+    drawDetailedGraph(graphDiv, portfolioPerformanceData, {
+      height: 200,
+      yKey: 'value',
+      resizeOnWindow: true
+    });
+
   container.innerHTML = '';
 
 
@@ -73,7 +82,10 @@ if (loggedIn) {
   document.getElementById('balance-header').textContent = `$${userData.portfolioValue.toFixed(2)}`;
   const pnlEl = document.getElementById('pnl-header');
   pnlEl.textContent = pnlValue;
+  pnlEl.classList.remove('positive', 'negative');
   pnlEl.classList.add(isPositive ? 'positive' : 'negative');
+
+  // console.log("userData", userData);
 
   // Draw the main portfolio graph inside header
   const graphDiv = document.getElementById('header-graph');
@@ -101,6 +113,7 @@ export function populatePortfolio() {
   document.getElementById('balance-header').textContent = `$${userData.portfolioValue.toFixed(2)}`;
   const pnlEl = document.getElementById('pnl-header');
   pnlEl.textContent = pnlValue;
+  pnlEl.classList.remove('positive', 'negative');
   pnlEl.classList.add(isPositive ? 'positive' : 'negative');
 
   // Re-populate positions only (graph was initialized once in initPortfolioView)

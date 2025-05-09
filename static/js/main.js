@@ -3,6 +3,7 @@ import { userData }           from './data/userData.js';
 import { initPortfolioView }  from './components/portfolio.js';
 import { initSearchView }     from './components/search.js';
 import { populatePortfolio } from './components/portfolio.js';
+import { portfolioPerformanceData } from './data/portfolioPerformance.js';
 
 const GOOGLE_CLIENT_ID = '933623916878-ipovfk31uqvoidtvj5pcknkod3ggdter.apps.googleusercontent.com';
 export var loggedIn = false;
@@ -175,14 +176,37 @@ function connectClientSocket(email) {
         client_socket.close();
     }
 
+    // Define the primary and fallback WebSocket addresse
+    const primaryAddress = "ws://localhost:8000/client_info";
+    const fallbackAddress = "ws://mtomecki.pl:8000/client_info";
+
     // Create a new WebSocket connection
-    client_socket = new WebSocket("ws://localhost:8000/client_info");
+    client_socket = new WebSocket(primaryAddress);
 
     // Handle connection open
     client_socket.addEventListener("open", () => {
         console.log(`Connected to Client Info for client with email: ${email}`);
         // Send the updated email to subscribe to client info
         client_socket.send(email);
+    });
+
+     // Handle errors
+     client_socket.addEventListener("error", (error) => {
+      console.error(`Failed to connect to ${primaryAddress}:`, error);
+      console.log("Attempting to connect to fallback WebSocket address...");
+
+      // Try connecting to the fallback address
+      client_socket = new WebSocket(fallbackAddress);
+
+      client_socket.addEventListener("open", () => {
+          console.log(`Connected to Client Info at ${fallbackAddress} for client with email: ${email}`);
+          client_socket.send(email); // Send the updated email to subscribe to client info
+      });
+
+      client_socket.addEventListener("error", (error) => {
+          console.error(`Failed to connect to ${fallbackAddress}:`, error);
+          alert("Unable to connect to the WebSocket server. Please try again later.");
+      });
     });
 
     // Handle incoming messages
@@ -196,16 +220,36 @@ function connectClientSocket(email) {
         // Update userData with portfolioValue
         userData.portfolioValue = data.portfolioValue;
 
-        // Transform portfolio data into holdings array
-        userData.holdings = Object.entries(data.portfolio).map(([stock, amount]) => {
-            return {
-                stock: stock,       // Stock ticker
-                amount: amount,     // Number of shares
-                pnl: "N/A"          // Placeholder for PnL (if not provided by the server)
-            };
-        });
+        // Update userData with pnl value
+        userData.pnl = data.portfolioPnl.toFixed(2).concat("%");
+        if (data.portfolioPnl >= 0)
+          userData.pnl = "+".concat(userData.pnl);
 
-        console.log("Transformed holdings:", userData.holdings);
+        // Update portfolio performance with portfolio pnl value and current timestamp
+        const currentDate = new Date(Date.now());
+        const lastEntry = portfolioPerformanceData[portfolioPerformanceData.length - 1];
+
+        const diffMs = currentDate.getTime() - lastEntry.date.getTime();  // Difference in milliseconds
+        const diffMinutes = diffMs / (1000 * 60);  // Convert to minutes
+
+        if(lastEntry.value != userData.portfolioValue || diffMinutes >= 5){
+          portfolioPerformanceData.push({date: currentDate, value: userData.portfolioValue});
+          console.log("new portfolio data", {date: currentDate, value: userData.portfolioValue});
+          console.log(portfolioPerformanceData);
+        }
+
+        userData.holdings = []
+        for (const [key, value] of Object.entries(data.portfolio)) {
+          const newHolding = {
+            stock: key,
+            amount: value,
+            pnl: data.pnlInfo[key].toFixed(2).concat("%")
+          };
+
+          userData.holdings.push(newHolding);
+        }
+
+        console.log("userData info", userData);
 
         // Update the portfolio view
         populatePortfolio();

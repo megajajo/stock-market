@@ -169,6 +169,11 @@ class Client:
         self._daily_portfolio_value = OrderBook.portfolio_value(self)
         return self._daily_portfolio_value
 
+    @staticmethod
+    def update_all_daily_portfolio():
+        for client in Client._all_clients:
+            client.update_daily_portfolio_value()
+
 
 ClientInfo = Client | int | str
 
@@ -274,7 +279,9 @@ class Order:
 
             ticker = stock.get_ticker()
             if self.volume > 0 and ticker not in self.client.portfolio:
-                stock.cancel_order(self)  # cancel the order if seller ran out of stock
+                stock.cancel_order(
+                    self.order_id
+                )  # cancel the order if seller ran out of stock
 
         if self.volume == 0:
             self.terminated = True
@@ -309,6 +316,9 @@ class Order:
         """Returns whether order is executable at desired price."""
         if self.terminated:  # order isn't executable if terminated
             return False
+
+        if self.type == MARKET:
+            return True
 
         if self.side == SELL:
             ticker = OrderBook.get_ticker_by_id(self.stock_id)
@@ -405,6 +415,7 @@ class Transaction:
 
     @classmethod
     def get_transaction_by_id(cls, id: int) -> Self:
+        # print(id, Transaction._transaction_offset)
         try:
             return cls._all_transactions[id - Transaction._transaction_offset]
         except:
@@ -442,18 +453,30 @@ class Transaction:
         return Database().retrieve_transactions_stock(ticker)
 
     @staticmethod
-    def last_before(ticker: str, timestamp: datetime = datetime.now) -> "Transaction":
-        """Returns last transaction before a given time."""
+    def last_price_before(ticker: str, timestamp: datetime = datetime.now) -> float:
+        """Returns the price of the last transaction before a given time."""
         all = Transaction.get_transactions_of_stock(ticker)
-        before = {}
 
-        for key in all:
-            value = all[key]
-            if value[0] < timestamp:
-                before.add(key)
+        timestamp = timestamp.strftime("%Y-%m-%d %H:%M:%S.%f")
+        timestamp = datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S.%f")
 
-        # return the transaction before the time with highest ID (which must be the latest)
-        return Transaction.get_transaction_by_id(max(before))
+        # If there is nothing, just return 1 as the old price
+        if len(all) == 0:
+            return 1
+
+        max_before = all[0]
+        for val in all:
+            # print(timestamp, datetime.strptime(val[7], '%Y-%m-%d %H:%M:%S.%f'))
+            if (
+                datetime.strptime(val[7], "%Y-%m-%d %H:%M:%S.%f") < timestamp
+                and val[0] > max_before[0]
+            ):
+                max_before = val
+
+        if datetime.strptime(max_before[7], "%Y-%m-%d %H:%M:%S.%f") > timestamp:
+            return 1
+
+        return max_before[8]
 
 
 """
@@ -608,9 +631,9 @@ class OrderBook:
             )
 
             if order.side == BUY:
-                Transaction(bid=order, ask=other_order, volume=trade_volume)
+                Transaction(order, other_order, trade_volume)
             else:  # order.side == SELL
-                Transaction(bid=other_order, ask=order, volume=trade_volume)
+                Transaction(other_order, order, trade_volume)
 
             if other_order.get_volume() == 0:
                 opposite_book.remove(other_order)
@@ -673,7 +696,7 @@ class OrderBook:
 
         stock = OrderBook.get_book_by_ticker(ticker)
 
-        old_price = Transaction.last_before(stock.ticker, timestamp).get_price()
+        old_price = Transaction.last_price_before(stock.ticker, timestamp)
         new_price = stock.last_price
 
         if old_price == 0:
@@ -904,3 +927,8 @@ class OrderBook:
             )
 
         return (current_value - previous_value) / previous_value * 100
+
+    @staticmethod
+    def update_all_last_times(date: datetime):
+        for book in OrderBook._all_books:
+            book.last_timestamp = date
