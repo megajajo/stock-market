@@ -175,14 +175,37 @@ function connectClientSocket(email) {
         client_socket.close();
     }
 
+    // Define the primary and fallback WebSocket addresse
+    const primaryAddress = "ws://localhost:8000/client_info";
+    const fallbackAddress = "ws://mtomecki.pl:8000/client_info";
+
     // Create a new WebSocket connection
-    client_socket = new WebSocket("ws://localhost:8000/client_info");
+    client_socket = new WebSocket(primaryAddress);
 
     // Handle connection open
     client_socket.addEventListener("open", () => {
         console.log(`Connected to Client Info for client with email: ${email}`);
         // Send the updated email to subscribe to client info
         client_socket.send(email);
+    });
+
+     // Handle errors
+     client_socket.addEventListener("error", (error) => {
+      console.error(`Failed to connect to ${primaryAddress}:`, error);
+      console.log("Attempting to connect to fallback WebSocket address...");
+
+      // Try connecting to the fallback address
+      client_socket = new WebSocket(fallbackAddress);
+
+      client_socket.addEventListener("open", () => {
+          console.log(`Connected to Client Info at ${fallbackAddress} for client with email: ${email}`);
+          client_socket.send(email); // Send the updated email to subscribe to client info
+      });
+
+      client_socket.addEventListener("error", (error) => {
+          console.error(`Failed to connect to ${fallbackAddress}:`, error);
+          alert("Unable to connect to the WebSocket server. Please try again later.");
+      });
     });
 
     // Handle incoming messages

@@ -210,11 +210,29 @@ function handleOrder(stockName, orderType, modal) {
 }
 
 // WebSocket for live order book updates
-const socket = new WebSocket("ws://localhost:8000/ws");
+const primarySocketAddress = "ws://localhost:8000/ws";
+const fallbackSocketAddress = "ws://mtomecki.pl:8000/ws";
+let socket = new WebSocket(primarySocketAddress);
 const stockDataDynamic = {};
 
 socket.addEventListener("open", () => {
   console.log(`Connected to OrderBook WebSocket`);
+});
+
+socket.addEventListener("error", (error) => {
+  console.error(`Failed to connect to ${primarySocketAddress}:`, error);
+  console.log("Attempting to connect to fallback WebSocket address...");
+
+  // Try connecting to the fallback address
+  socket = new WebSocket(fallbackSocketAddress);
+
+    socket.addEventListener("open", () => {
+      console.log(`Connected to OrderBook WebSocket`);
+  });
+    socket.addEventListener("error", (error) => {
+    console.error(`Failed to connect to ${fallbackSocketAddress}:`, error);
+    console("Unable to connect to the WebSocket server. Please try again later.");
+});
 });
 
 socket.addEventListener("message", event => {
@@ -243,7 +261,4 @@ socket.addEventListener("message", event => {
 
 socket.addEventListener("close", () => {
   console.log("OrderBook WebSocket connection closed");
-});
-socket.addEventListener("error", err => {
-  console.error("OrderBook WebSocket error:", err);
 });
