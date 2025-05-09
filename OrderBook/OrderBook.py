@@ -51,8 +51,6 @@ class Client:
         if username in Client._usernames:
             raise ValueError(f"Username {username} is not available")
 
-        # for now generate a new username for each logged in person
-        username = "user" + str(len(Client._usernames))
         self.username = username
         Client._usernames.add(username)
         self.password = password

@@ -31,17 +31,37 @@ client1 = Client(
     "tapple", "pw", "timcook@aol.com", "Tim", "Cook", balance=1_000_000_000
 )
 client2 = Client("goat", "pw", "lbj@nba.com", "LeBron", "James", balance=1_000_000_000)
+bot = Client(
+    "market_maker",
+    "pw",
+    "market_maker@gmail.com",
+    "Market",
+    "Maker",
+    balance=1_000_000_000,
+)
+bot2 = Client(
+    "market_maker2",
+    "pw",
+    "market_maker2@gmail.com",
+    "Market",
+    "Maker2",
+    balance=1_000_000_000,
+)
 
 client1.portfolio["AAPL"] = 1000
 client2.portfolio["AAPL"] = 1000
-
+bot.portfolio["AAPL"] = 1000
+bot2.portfolio["AAPL"] = 1000
 # client1.buy_stock(0, 0, 100)
 
 # print(Client.get_client_by_id(0))
 # print(Client.get_client_by_id(1))
 
+
 # Serve static files from the "static" folder at root ("/")
 app.mount("/app", StaticFiles(directory="static", html=True), name="static")
+
+# asyncio.create_task(price_feed_loop())
 
 # Redirect root ("/") to the static files
 @app.get("/")
@@ -57,7 +77,7 @@ class PlaceOrderRequest(BaseModel):
     client_user: str
 
 
-# API enpoints
+# API endpoints
 @app.post("/api/place_order")
 async def place_order(order: PlaceOrderRequest):
     """
@@ -361,9 +381,6 @@ async def add_new_client(client_data: ClientData):
         return client
 
 
-# Store active WebSocket connections
-active_connections = []
-
 # Websocket used to get information about the orderbook once a second
 @app.websocket("/ws")
 async def websocket_endpoint(
@@ -450,3 +467,45 @@ async def client_info_websocket(websocket: WebSocket):
             await asyncio.sleep(1)  # Send updates every second
     except Exception as e:
         print(f"Client Info WebSocket error: {e}")
+
+
+# # *** Code for AR(1) price model
+# import numpy as np
+# # AR(1) parameters
+# PHI         = 0.97
+# SIGMA       = 0.3
+# MIDS        = {"AAPL":180.0, "Stock1":50.0, "Stock2":12.0}
+# SPREAD_BPS  = 20
+# TICK_SECONDS = 0.5
+# _last_price   = {ob.ticker: MIDS[ob.ticker] for ob in order_books}
+# _gen_orders   = {ob.ticker: [] for ob in order_books}
+# MM_CLIENT     = bot2
+
+# # AR(1) price model
+# async def price_feed_loop():
+#     while True:
+#         for ob in order_books:
+#             sym = ob.ticker
+#             prev      = _last_price[sym]
+#             shock     = np.random.normal(0, SIGMA)
+#             mid       = MIDS[sym] + PHI * (prev - MIDS[sym]) + shock
+#             _last_price[sym] = mid
+
+#             for oid in _gen_orders[sym]:
+#                 try:
+#                     OrderBook.cancel_order(oid)
+#                 except Exception:
+#                     pass
+#             _gen_orders[sym] = []
+
+#             half_spread = mid * SPREAD_BPS / 10_000
+#             bid_px      = round(mid - half_spread, 2)
+#             ask_px      = round(mid + half_spread, 2)
+
+#             bid_id = OrderBook.place_order(sym, BUY,  bid_px, 9_999, MM_CLIENT)
+#             ask_id = OrderBook.place_order(sym, SELL, ask_px, 9_999, MM_CLIENT)
+#             _gen_orders[sym] = [bid_id, ask_id]
+
+#         await asyncio.sleep(TICK_SECONDS)
+
+# asyncio.create_task(price_feed_loop())
