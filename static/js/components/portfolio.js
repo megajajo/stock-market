@@ -13,6 +13,15 @@ import { loggedIn } from '../main.js';
  * @param {Array} holdings         userData.holdings
  */
 function populatePositions(container, holdings) {
+
+    // Draw the main portfolio graph inside header
+    const graphDiv = document.getElementById('header-graph');
+    drawDetailedGraph(graphDiv, portfolioPerformanceData, {
+      height: 200,
+      yKey: 'value',
+      resizeOnWindow: true
+    });
+
   container.innerHTML = '';
 
 

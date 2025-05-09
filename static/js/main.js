@@ -3,6 +3,7 @@ import { userData }           from './data/userData.js';
 import { initPortfolioView }  from './components/portfolio.js';
 import { initSearchView }     from './components/search.js';
 import { populatePortfolio } from './components/portfolio.js';
+import { portfolioPerformanceData } from './data/portfolioPerformance.js';
 
 const GOOGLE_CLIENT_ID = '933623916878-ipovfk31uqvoidtvj5pcknkod3ggdter.apps.googleusercontent.com';
 export var loggedIn = false;
@@ -223,6 +224,19 @@ function connectClientSocket(email) {
         userData.pnl = data.portfolioPnl.toFixed(2).concat("%");
         if (data.portfolioPnl >= 0)
           userData.pnl = "+".concat(userData.pnl);
+
+        // Update portfolio performance with portfolio pnl value and current timestamp
+        const currentDate = new Date(Date.now());
+        const lastEntry = portfolioPerformanceData[portfolioPerformanceData.length - 1];
+
+        const diffMs = currentDate.getTime() - lastEntry.date.getTime();  // Difference in milliseconds
+        const diffMinutes = diffMs / (1000 * 60);  // Convert to minutes
+
+        if(lastEntry.value != userData.portfolioValue || diffMinutes >= 5){
+          portfolioPerformanceData.push({date: currentDate, value: userData.portfolioValue});
+          console.log("new portfolio data", {date: currentDate, value: userData.portfolioValue});
+          console.log(portfolioPerformanceData);
+        }
 
         userData.holdings = []
         for (const [key, value] of Object.entries(data.portfolio)) {
