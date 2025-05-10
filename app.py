@@ -361,7 +361,7 @@ async def add_new_client(client_data: ClientData):
             )
         else:
             client = Client(
-                "",
+                client_data.email,
                 "pass",
                 client_data.email,
                 client_data.first_name,
