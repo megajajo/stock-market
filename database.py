@@ -234,7 +234,7 @@ class Database:
 
     # is_username_taken: Takes an username and returns if it exists in the database
     # Pre: N/A
-    # Post: True if username does not belong to Client, False otherwise
+    # Post: False if username does not belong to Client, True otherwise
     def is_username_taken(self, username):
         connection = sqlite3.connect("stock_market_database.db")
         cursor = connection.cursor()
@@ -242,7 +242,7 @@ class Database:
         result = cursor.fetchall()
         connection.commit()
         connection.close()
-        return len(result) == 0
+        return len(result) != 0
 
     # is_email_taken: Takes an email and returns if it exists in the database
     # Pre: N/A
@@ -254,7 +254,7 @@ class Database:
         result = cursor.fetchall()
         connection.commit()
         connection.close()
-        return len(result) == 0
+        return len(result) != 0
 
     # create_client: Takes a username and email and creates a new entry in the database
     # Pre: username and email do not exist in the database previously
