@@ -246,7 +246,7 @@ class Database:
 
     # is_email_taken: Takes an email and returns if it exists in the database
     # Pre: N/A
-    # Post: True if username does not belong to Client, False otherwise
+    # Post: False if username does not belong to Client, True otherwise
     def is_email_taken(self, email):
         connection = sqlite3.connect("stock_market_database.db")
         cursor = connection.cursor()

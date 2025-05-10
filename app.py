@@ -344,7 +344,7 @@ async def add_new_client(client_data: ClientData):
     if queryClient != None:
         return queryClient
     else:
-        if not Database().is_email_taken(client_data.email):
+        if Database().is_email_taken(client_data.email):
             details = Database().account_from_email(client_data.email)
             stocks = Database().retrieve_stock(details[0])
             dic = {}
