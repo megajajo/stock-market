@@ -367,7 +367,7 @@ async def add_new_client(client_data: ClientData):
                 client_data.first_name,
                 client_data.last_name,
                 new_user.money,
-                new_user.stocks,
+                {stock: volume for stock, volume in new_user.stocks.items()},
             )
             id = Database().create_client(
                 client_data.email,
