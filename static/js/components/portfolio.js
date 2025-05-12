@@ -14,29 +14,29 @@ import { loggedIn } from '../main.js';
  */
 function populatePositions(container, holdings) {
 
-    // Draw the main portfolio graph inside header
-    const graphDiv = document.getElementById('header-graph');
-    drawDetailedGraph(graphDiv, portfolioPerformanceData, {
-      height: 200,
-      yKey: 'value',
-      resizeOnWindow: true
-    });
+  // Draw the main portfolio graph inside header
+  const graphDiv = document.getElementById('header-graph');
+  drawDetailedGraph(graphDiv, portfolioPerformanceData, {
+    height: 200,
+    yKey: 'value',
+    resizeOnWindow: true
+  });
 
   container.innerHTML = '';
 
 
-// --- CASH CARD ---
-const cashCard = document.createElement('div');
-cashCard.classList.add('holding-card');
-cashCard.innerHTML = `
-  <h3 class="holding-stock">Cash</h3>
-  <div class="holding-amount">Amount: $${userData.balance.toFixed(2)}</div>
-`;
-cashCard.addEventListener('click', () => {
-  // you could open a cash-detail modal here if you want
-});
-container.appendChild(cashCard);
-// ------------------
+  // --- CASH CARD ---
+  const cashCard = document.createElement('div');
+  cashCard.classList.add('holding-card');
+  cashCard.innerHTML = `
+    <h3 class="holding-stock">Cash</h3>
+    <div class="holding-amount">Amount: $${userData.balance.toFixed(2)}</div>
+  `;
+  cashCard.addEventListener('click', () => {
+    // you could open a cash-detail modal here if you want
+  });
+  container.appendChild(cashCard);
+  // ------------------
 
   holdings.forEach(holding => {
     const card = document.createElement('div');
@@ -64,17 +64,17 @@ container.appendChild(cashCard);
 export function initPortfolioView() {
   // Fill in header: profile pic, name, balance & PnL
   const img = document.getElementById('header-pic');
-img.src = userData.profilePicUrl || 'assets/logo.jpg';
-img.onerror = () => {
-  img.src = 'assets/logo.jpg';
-};
+  img.src = userData.profilePicUrl || 'assets/logo.jpg';
+  img.onerror = () => {
+    img.src = 'assets/logo.jpg';
+  };
   // set dynamic title
-const titleEl = document.getElementById('portfolio-title');
-if (loggedIn) {
-  titleEl.textContent = `${userData.name}'s portfolio value:`;
-} else {
-  titleEl.textContent = 'Your portfolio value:';
-}
+  const titleEl = document.getElementById('portfolio-title');
+  if (loggedIn) {
+    titleEl.textContent = `${userData.name}'s portfolio value:`;
+  } else {
+    titleEl.textContent = 'Your portfolio value:';
+  }
 
 
   const pnlValue = userData.pnl;
@@ -102,8 +102,8 @@ if (loggedIn) {
   positionsTitle.classList.add('positions-title');
   holdingsGrid.parentNode.insertBefore(positionsTitle, holdingsGrid);
 
- // Populate via helper
- populatePositions(holdingsGrid, userData.holdings);
+  // Populate via helper
+  populatePositions(holdingsGrid, userData.holdings);
 }
 
 export function populatePortfolio() {
@@ -122,7 +122,7 @@ export function populatePortfolio() {
   holdingsGrid.parentNode.insertBefore(positionsTitle, holdingsGrid);
 
 
-    // Populate the holdings grid
-    console.log(userData.holdings);
-    populatePositions(holdingsGrid, userData.holdings);
+  // Populate the holdings grid
+  console.log(userData.holdings);
+  populatePositions(holdingsGrid, userData.holdings);
 }
