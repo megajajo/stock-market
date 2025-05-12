@@ -7,7 +7,7 @@ export function drawDetailedGraph(containerElement, data, config = {}) {
   let sortedData = [...data].sort((a, b) => a.date - b.date);
 
   // UI state
-  let currentRange = 'Max';
+  let currentRange = '1D';
 
   // D3 handles
   let d3svg, xAxisGroup, yAxisGroup, lineGroup, gridGroup, dragRect;
