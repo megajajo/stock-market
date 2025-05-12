@@ -226,21 +226,31 @@ export function drawDetailedGraph(containerElement, data, config = {}) {
 
     lineGenerator.y(d => globalYScale(d[config.yKey || 'value']));
     lineGroup.selectAll('path').attr('d', lineGenerator);
+
+    xAxisGroup.call(d3.axisBottom(currentXScale)
+                  .ticks(width < 400 ? 3 : 6)
+                  .tickFormat(formatX));   // formatX already defined in render()
+
   }
 
   // Initial draw
   render();
 
-  // ────────────────────── public API ──────────────────────
   return {
     /**
-     * Push fresh data into the graph without rebuilding the DOM.
-     * @param {Array<{date:Date,value:number,price:number}>} newData
+     * Push fresh data into the graph **without touching the x-domain**,
+     * so any pan / zoom the user has made stays exactly as-is.
      */
     update(newData) {
-      // keep same array reference → keeps D3 data binding alive
-      sortedData.splice(0, sortedData.length, ...newData.sort((a, b) => a.date - b.date));
-      render();
+      // 1️⃣  mutate the *same* array reference so the existing <path> keeps its binding
+      sortedData.splice(0, sortedData.length,
+                        ...newData.sort((a, b) => a.date - b.date));
+  
+      // 2️⃣  y-axis + line need a refresh because values may be higher/lower now
+      updateYAxisAndLine();
+  
+      // (no call to render(), so the x-scale & buttons stay untouched)
     }
   };
 }
+
