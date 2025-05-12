@@ -234,7 +234,7 @@ function connectClientSocket(email) {
        if (portfolioPerformanceData.length) {           // array already has data
        const lastEntry   = portfolioPerformanceData[portfolioPerformanceData.length - 1];
         const diffMinutes = (currentDate - lastEntry.date) / 60000;
-        needAdd = lastEntry.value !== userData.portfolioValue && diffMinutes < 5;
+        needAdd = lastEntry.value !== userData.portfolioValue && diffMinutes >= 5;
       }
 
        if (needAdd) {
