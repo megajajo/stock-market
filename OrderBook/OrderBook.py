@@ -554,25 +554,22 @@ class OrderBook:
 
         return cls._tickers[ticker]
 
-    # object as parameter, NOT IDs
-    def _add_order(self, order: Order):
-        """Add a limit order to the order book and execute trades if feasible."""
-        if order.type is not LIMIT:
-            raise ValueError("Only limit orders can be added to limit order book.")
-
-        opposite_book = self.asks if order.side == BUY else self.bids
-        same_book = self.bids if order.side == BUY else self.asks
-
-        # while a trade is feasible, try to execute one
+    def _execute_trades_between(self, order: Order, opposite_book: SortedList):
+        """Executes all possible trades between a given order and the opposite book."""
         while order.is_executable() and opposite_book:
             other_order: Order = opposite_book[0]
             trade_price = other_order.get_price()
 
-            # if all trades at feasible prices have been executed, no more trades are executable
-            if order.side == SELL and trade_price < order.get_price():
-                break
-            elif order.side == BUY and trade_price > order.get_price():
-                break
+            # if other orders was made by the same person, then skip it
+            if other_order.client == order.client:
+                continue
+
+            # if order is limit and all trades at feasible prices have been executed, no more trades are executable
+            if order.type == LIMIT:
+                if order.side == SELL and trade_price < order.get_price():
+                    break
+                elif order.side == BUY and trade_price > order.get_price():
+                    break
 
             # if order is executable, but has 0 volume, no more trades would be currently feasible
             if order.executable_volume(trade_price) == 0:
@@ -597,6 +594,17 @@ class OrderBook:
             if other_order.get_volume() == 0:
                 opposite_book.remove(other_order)
 
+    # object as parameter, NOT IDs
+    def _add_order(self, order: Order):
+        """Add a limit order to the order book and execute trades if feasible."""
+        if order.type is not LIMIT:
+            raise ValueError("Only limit orders can be added to limit order book.")
+
+        opposite_book = self.asks if order.side == BUY else self.bids
+        same_book = self.bids if order.side == BUY else self.asks
+
+        self._execute_trades_between(order, opposite_book)
+
         # an order is added even though it might not be feasible, but it may become feasible in the future
         # this means we should add "active orders" for each client
         if order.volume > 0:
@@ -610,33 +618,7 @@ class OrderBook:
 
         opposite_book = self.asks if order.side == BUY else self.bids
 
-        # while a trade is feasible, try to execute one
-        while order.is_executable() and opposite_book:
-            other_order: Order = opposite_book[0]
-            trade_price = other_order.get_price()
-
-            # if order is executable, but has 0 volume, no more trades would be currently feasible
-            if order.executable_volume(trade_price) == 0:
-                break
-
-            # if the other order can't trade at this price, remove it from the order book and skip it
-            if not other_order.is_executable():
-                self._remove_order(other_order, cancelling=True)
-                continue
-
-            # otherwise, a positive number of shares can be traded
-            trade_volume = min(
-                order.executable_volume(trade_price),
-                other_order.executable_volume(trade_price),
-            )
-
-            if order.side == BUY:
-                Transaction(order, other_order, trade_volume)
-            else:  # order.side == SELL
-                Transaction(other_order, order, trade_volume)
-
-            if other_order.get_volume() == 0:
-                opposite_book.remove(other_order)
+        self._execute_trades_between(order, opposite_book)
 
         return order.terminate()
 
