@@ -17,6 +17,8 @@ function handleCredentialResponse(response) {
   userData.profilePicUrl  = payload.picture;
   userData.email          = payload.email;  // store email for sign-out
 
+  // ─── Wipe the hard-coded demo points BEFORE live data starts arriving ───
+  portfolioPerformanceData.splice(0, portfolioPerformanceData.length);
   // Check if a client  with this email address already exists
   // If it does not exist, create it
   addClient()
