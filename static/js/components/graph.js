@@ -16,6 +16,7 @@ export function drawDetailedGraph(containerElement, data, config = {}) {
 
   // We build the DOM once and afterwards only update the bits that need it
   let firstBuild = true;
+  let formatX;
 
   function render() {
     width = config.width || containerElement.clientWidth || 600;
@@ -136,12 +137,12 @@ export function drawDetailedGraph(containerElement, data, config = {}) {
         .attr('stroke-width', 3)
         .attr('d', lineGenerator);
 
-    // ────────────────────── axes & grid ──────────────────────
+     // ────────────────────── axes & grid ──────────────────────
     const numTicks = width < 400 ? 3 : 6;
-    const formatX = d => {
+    formatX = d => {
       const diff = currentXScale.domain()[1] - currentXScale.domain()[0];
-      if (diff < 86400000) return d3.timeFormat('%H:%M')(d);          // < 1 day
-      if (diff < 2592000000) return d3.timeFormat('%b %d %H:%M')(d);  // < 30 days
+      if (diff < 86400000)      return d3.timeFormat('%H:%M')(d);          // < 1 day
+      if (diff < 2592000000)    return d3.timeFormat('%b %d %H:%M')(d);    // < 30 days
       return d3.timeFormat('%b %d')(d);
     };
 
@@ -253,4 +254,5 @@ export function drawDetailedGraph(containerElement, data, config = {}) {
     }
   };
 }
+
 
