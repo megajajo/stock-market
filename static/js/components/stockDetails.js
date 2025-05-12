@@ -237,7 +237,7 @@ socket.addEventListener("error", (error) => {
 
 socket.addEventListener("message", event => {
   const data = JSON.parse(event.data);
-  let tickers = ['AAPL', 'Stock1', 'Stock2'];
+  let tickers = ['AAPL', 'GOOG', 'TSLA'];
   console.log("Data from OrderBook socket", data);
   tickers.forEach(ticker => {
     stockDataDynamic[ticker] = data[ticker];

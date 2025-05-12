@@ -1,0 +1,1 @@
+TICKERS = ["AAPL", "GOOG", "TSLA"]

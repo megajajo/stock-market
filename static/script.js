@@ -30,13 +30,13 @@ const orderBookData = {
       asks: [
       ]
   },
-  "Stock1": {
+  "GOOG": {
       bids: [
       ],
       asks: [
       ]
   },
-  "Stock2": {
+  "TSLA": {
       bids: [
       ],
       asks: [

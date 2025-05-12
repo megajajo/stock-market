@@ -440,15 +440,15 @@ class Transaction:
         - ticker: The ticker of the order book.
 
         Returns a list of tuples with entries:
-        - transaction_id (int)
-        - bidder_id (int)
-        - bid_price (float)
-        - asker_id (int)
-        - ask_price (float)
-        - vol (int)
-        - ticker (str)
-        - time_stamp (str)
-        - transaction_price (float)
+        [0] transaction_id (int)
+        [1] bidder_id (int)
+        [2] bid_price (float)
+        [3] asker_id (int)
+        [4] ask_price (float)
+        [5] vol (int)
+        [6] ticker (str)
+        [7] time_stamp (str)
+        [8] transaction_price (float)
         """
         return Database().retrieve_transactions_stock(ticker)
 

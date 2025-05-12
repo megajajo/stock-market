@@ -6,6 +6,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
 from fastapi.encoders import jsonable_encoder
 from OrderBook.OrderBook import *
+from OrderBook.tickers import *
 from pydantic import BaseModel
 from database import Database
 import new_user_portfolio as new_user
@@ -24,7 +25,7 @@ app.add_middleware(
 )
 
 # Initialize order books
-order_books = [OrderBook("AAPL"), OrderBook("Stock1"), OrderBook("Stock2")]
+order_books = [OrderBook(ticker) for ticker in TICKERS]
 
 # Two example users
 client1 = Client(
@@ -388,11 +389,10 @@ async def websocket_endpoint(
 ):  # Note: Place some orders before testing this
     await websocket.accept()
     try:
-        tickers = ["AAPL", "Stock1", "Stock2"]
         summary = dict()
         print(f"Client subscribed to order book")
         while True:
-            for ticker in tickers:
+            for ticker in TICKERS:
                 best_bid = OrderBook.get_best_bid(ticker)
                 best_ask = OrderBook.get_best_ask(ticker)
                 all_bids = OrderBook.get_all_bids(ticker)
@@ -460,8 +460,7 @@ async def client_info_websocket(websocket: WebSocket):
             pval = OrderBook.portfolio_value(client)
             pnl = {}
             portfolioPnl = OrderBook.portfolio_pnl(client)
-            tickers = ["AAPL", "Stock1", "Stock2"]
-            for ticker in tickers:
+            for ticker in TICKERS:
                 pnl[ticker] = OrderBook.calculate_pnl_24h(ticker)
             client_info = {
                 "balance": client.balance,
@@ -509,7 +508,7 @@ async def startup_event():
 # # AR(1) parameters
 # PHI         = 0.97
 # SIGMA       = 0.3
-# MIDS        = {"AAPL":180.0, "Stock1":50.0, "Stock2":12.0}
+# MIDS        = {"AAPL":180.0, "GOOG":50.0, "TSLA":12.0}
 # SPREAD_BPS  = 20
 # TICK_SECONDS = 0.5
 # _last_price   = {ob.ticker: MIDS[ob.ticker] for ob in order_books}

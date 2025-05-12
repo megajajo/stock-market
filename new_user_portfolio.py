@@ -1,2 +1,4 @@
-stocks = {"AAPL": 10, "Stock1": 10, "Stock2": 10}
+from OrderBook.tickers import *
+
+stocks = {ticker: 10 for ticker in TICKERS}
 money = 10000
