@@ -1,95 +1,120 @@
 export function drawDetailedGraph(containerElement, data, config = {}) {
-  const width = config.width || containerElement.clientWidth || 600;
-  const height = config.height || 300;
   const margin = config.margin || { top: 20, right: 20, bottom: 40, left: 50 };
 
-  const sortedData = [...data].sort((a, b) => a.date - b.date);
+  // Keep mutable values in closure so the updater can mutate them in-place
+  let width = config.width || containerElement.clientWidth || 600;
+  let height = config.height || 300;
+  let sortedData = [...data].sort((a, b) => a.date - b.date);
 
+  // UI state
   let currentRange = 'Max';
-  let currentXScale, globalYScale, lineGenerator;
+
+  // D3 handles
   let d3svg, xAxisGroup, yAxisGroup, lineGroup, gridGroup, dragRect;
+  let currentXScale, globalYScale, lineGenerator;
+  let togglesDiv;
 
-  // --- Clear previous content ---
-  containerElement.innerHTML = '';
+  // We build the DOM once and afterwards only update the bits that need it
+  let firstBuild = true;
 
-  // --- Create timeframe buttons ---
-  const togglesDiv = document.createElement('div');
-  togglesDiv.classList.add('timeframe-toggles');
-
-  const timeFrames = ['1D', '1W', '1M', '6M', '1Y', 'Max'];
-  timeFrames.forEach(tf => {
-    const btn = document.createElement('button');
-    btn.textContent = tf;
-    btn.classList.add('timeframe-btn');
-    btn.dataset.range = tf;
-    togglesDiv.appendChild(btn);
-  });
-
-  // --- Create SVG ---
-  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  svg.classList.add('portfolio-graph');
-  containerElement.appendChild(svg);
-  containerElement.appendChild(togglesDiv);
-
-  // --- Graph render function ---
   function render() {
+    width = config.width || containerElement.clientWidth || 600;
+    height = config.height || 300;
+
     const xDomain = getXDomain(currentRange, sortedData);
 
-    d3.select(svg).attr('width', width).attr('height', height);
-    d3svg = d3.select(svg);
+    // ────────────────────── one-time DOM build ──────────────────────
+    if (firstBuild) {
+      containerElement.innerHTML = '';
 
-    if (!xAxisGroup) {
+      // Time-frame buttons
+      togglesDiv = document.createElement('div');
+      togglesDiv.classList.add('timeframe-toggles');
+      const timeFrames = ['1D', '1W', '1M', '6M', '1Y', 'Max'];
+      timeFrames.forEach(tf => {
+        const btn = document.createElement('button');
+        btn.textContent = tf;
+        btn.classList.add('timeframe-btn');
+        btn.dataset.range = tf;
+        togglesDiv.appendChild(btn);
+      });
+
+      const svgEl = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svgEl.classList.add('portfolio-graph');
+      containerElement.appendChild(svgEl);
+      containerElement.appendChild(togglesDiv);
+
+      d3svg = d3.select(svgEl).attr('width', width).attr('height', height);
+
+      // Axes & groups
       xAxisGroup = d3svg.append('g')
         .attr('class', 'x-axis')
-        .attr('transform', 'translate(0,' + (height - margin.bottom) + ')');
+        .attr('transform', `translate(0,${height - margin.bottom})`);
+
       yAxisGroup = d3svg.append('g')
         .attr('class', 'y-axis')
-        .attr('transform', 'translate(' + margin.left + ',0)');
-      // Append grid before line so grid lines are underneath
+        .attr('transform', `translate(${margin.left},0)`);
+
       gridGroup = d3svg.append('g').attr('class', 'y-grid');
       lineGroup = d3svg.append('g').attr('class', 'line-group');
-    } else {
-      lineGroup.selectAll('*').remove();
-      gridGroup.selectAll('*').remove();
-    }
 
-    // Clip path
-    let clip = d3svg.select('clipPath#clip');
-    if (clip.empty()) {
+      // Clip path
       d3svg.append('clipPath').attr('id', 'clip')
         .append('rect')
         .attr('x', margin.left)
         .attr('y', margin.top)
         .attr('width', width - margin.left - margin.right)
         .attr('height', height - margin.top - margin.bottom);
-    } else {
-      clip.select('rect')
-        .attr('x', margin.left)
-        .attr('y', margin.top)
-        .attr('width', width - margin.left - margin.right)
-        .attr('height', height - margin.top - margin.bottom);
-    }
-    lineGroup.attr('clip-path', 'url(#clip)');
 
-    // Drag area
-    if (!dragRect) {
+      lineGroup.attr('clip-path', 'url(#clip)');
+
+      // Drag rectangle for panning
       dragRect = d3svg.append('rect')
         .attr('fill', 'transparent')
         .style('cursor', 'move')
         .call(d3.drag().on('start', dragStart).on('drag', dragMove));
+
+      // Button wiring
+      togglesDiv.querySelectorAll('.timeframe-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          currentRange = btn.dataset.range;
+          togglesDiv.querySelectorAll('.timeframe-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          render();
+        });
+      });
+      togglesDiv.querySelector('[data-range="Max"]').classList.add('active');
+
+      // Live resize support
+      if (config.resizeOnWindow) {
+        window.addEventListener('resize', render);
+      }
+
+      firstBuild = false;
+    } else {
+      // Update dimensions & transforms
+      d3svg.attr('width', width).attr('height', height);
+      xAxisGroup.attr('transform', `translate(0,${height - margin.bottom})`);
+      yAxisGroup.attr('transform', `translate(${margin.left},0)`);
+      d3svg.select('clipPath#clip rect')
+        .attr('width', width - margin.left - margin.right)
+        .attr('height', height - margin.top - margin.bottom);
     }
+
+    // Drag rectangle always needs fresh size
     dragRect
       .attr('x', margin.left)
       .attr('y', margin.top)
       .attr('width', width - margin.left - margin.right)
       .attr('height', height - margin.top - margin.bottom);
 
+    // ────────────────────── scales ──────────────────────
     currentXScale = d3.scaleTime().domain(xDomain).range([margin.left, width - margin.right]);
 
     const visible = sortedData.filter(d => d.date >= xDomain[0] && d.date <= xDomain[1]);
     const yData = visible.length ? visible : sortedData;
-    const yMin = d3.min(yData, d => d.value || d.price);
-    const yMax = d3.max(yData, d => d.value || d.price);
+    const yMin = d3.min(yData, d => d[config.yKey || 'value'] || d.price);
+    const yMax = d3.max(yData, d => d[config.yKey || 'value'] || d.price);
     const yPad = (yMax - yMin) * 0.02;
 
     globalYScale = d3.scaleLinear()
@@ -102,40 +127,40 @@ export function drawDetailedGraph(containerElement, data, config = {}) {
       .x(d => currentXScale(d.date))
       .y(d => globalYScale(d[config.yKey || 'value']));
 
-    lineGroup.append('path')
-      .datum(sortedData)
-      .attr('fill', 'none')
-      .attr('stroke', isGain ? '#28a745' : '#dc3545')
-      .attr('stroke-width', 3)
-      .attr('d', lineGenerator);
+    // ────────────────────── draw / update line ──────────────────────
+    lineGroup.selectAll('path')
+      .data([sortedData]) // one line → single datum wrapped in array
+      .join('path')      // enter/update
+        .attr('fill', 'none')
+        .attr('stroke', isGain ? '#28a745' : '#dc3545')
+        .attr('stroke-width', 3)
+        .attr('d', lineGenerator);
 
+    // ────────────────────── axes & grid ──────────────────────
     const numTicks = width < 400 ? 3 : 6;
     const formatX = d => {
-      const range = currentXScale.domain();
-      const diff = range[1] - range[0];
-      if (diff < 86400000) return d3.timeFormat('%H:%M')(d);
-      if (diff < 2592000000) return d3.timeFormat('%b %d %H:%M')(d);
+      const diff = currentXScale.domain()[1] - currentXScale.domain()[0];
+      if (diff < 86400000) return d3.timeFormat('%H:%M')(d);          // < 1 day
+      if (diff < 2592000000) return d3.timeFormat('%b %d %H:%M')(d);  // < 30 days
       return d3.timeFormat('%b %d')(d);
     };
 
-    const xAxis = d3.axisBottom(currentXScale).ticks(numTicks).tickFormat(formatX);
-    const yAxis = d3.axisLeft(globalYScale).ticks(6);
-
-    xAxisGroup.call(xAxis);
-    yAxisGroup.call(yAxis);
+    xAxisGroup.call(d3.axisBottom(currentXScale).ticks(numTicks).tickFormat(formatX));
+    yAxisGroup.call(d3.axisLeft(globalYScale).ticks(6));
     yAxisGroup.select('.domain').remove();
 
     // Grid
-    const yGrid = d3.axisLeft(globalYScale)
-      .ticks(6)
-      .tickSize(- (width - margin.left - margin.right))
-      .tickFormat('');
-
-    gridGroup.attr('transform', 'translate(' + margin.left + ',0)').call(yGrid);
+    gridGroup.attr('transform', `translate(${margin.left},0)`).call(
+      d3.axisLeft(globalYScale)
+        .ticks(6)
+        .tickSize(-(width - margin.left - margin.right))
+        .tickFormat('')
+    );
     gridGroup.selectAll('line').attr('stroke', 'grey').attr('stroke-opacity', 0.2);
     gridGroup.select('path').remove();
   }
 
+  // ────────────────────── helpers ──────────────────────
   function getXDomain(range, data) {
     const latest = d3.max(data, d => d.date);
     switch (range) {
@@ -144,7 +169,8 @@ export function drawDetailedGraph(containerElement, data, config = {}) {
       case '1M': return [new Date(latest - 30 * 86400000), latest];
       case '6M': return [new Date(latest - 180 * 86400000), latest];
       case '1Y': return [new Date(latest - 365 * 86400000), latest];
-      case 'Max': default: return d3.extent(data, d => d.date);
+      case 'Max':
+      default:   return d3.extent(data, d => d.date);
     }
   }
 
@@ -159,32 +185,30 @@ export function drawDetailedGraph(containerElement, data, config = {}) {
     const offset = dx / (width - margin.left - margin.right) * span;
     const newDomain = [
       new Date(dragStart.domain[0].getTime() - offset),
-      new Date(dragStart.domain[1].getTime() - offset),
+      new Date(dragStart.domain[1].getTime() - offset)
     ];
     currentXScale.domain(newDomain);
-    const updatedTicks = width < 400 ? 3 : 6;
-    const updatedXAxis = d3.axisBottom(currentXScale)
-      .ticks(updatedTicks)
-      .tickFormat(d => {
-        const range = currentXScale.domain();
-        const diff = range[1] - range[0];
-        if (diff < 86400000) return d3.timeFormat('%H:%M')(d);
-        if (diff < 2592000000) return d3.timeFormat('%b %d %H:%M')(d);
-        return d3.timeFormat('%b %d')(d);
-      });
 
-    xAxisGroup.call(updatedXAxis);
+    const updatedTicks = width < 400 ? 3 : 6;
+    xAxisGroup.call(
+      d3.axisBottom(currentXScale)
+        .ticks(updatedTicks)
+        .tickFormat(d => {
+          const diff = currentXScale.domain()[1] - currentXScale.domain()[0];
+          if (diff < 86400000) return d3.timeFormat('%H:%M')(d);
+          if (diff < 2592000000) return d3.timeFormat('%b %d %H:%M')(d);
+          return d3.timeFormat('%b %d')(d);
+        })
+    );
 
     updateYAxisAndLine();
   }
 
   function updateYAxisAndLine() {
-    const visible = sortedData.filter(d =>
-      d.date >= currentXScale.domain()[0] && d.date <= currentXScale.domain()[1]
-    );
+    const visible = sortedData.filter(d => d.date >= currentXScale.domain()[0] && d.date <= currentXScale.domain()[1]);
     const yData = visible.length ? visible : sortedData;
-    const min = d3.min(yData, d => d.value || d.price);
-    const max = d3.max(yData, d => d.value || d.price);
+    const min = d3.min(yData, d => d[config.yKey || 'value'] || d.price);
+    const max = d3.max(yData, d => d[config.yKey || 'value'] || d.price);
     const pad = (max - min) * 0.02;
     globalYScale.domain([min - pad, max + pad]);
 
@@ -194,7 +218,7 @@ export function drawDetailedGraph(containerElement, data, config = {}) {
     gridGroup.call(
       d3.axisLeft(globalYScale)
         .ticks(6)
-        .tickSize(- (width - margin.left - margin.right))
+        .tickSize(-(width - margin.left - margin.right))
         .tickFormat('')
     );
     gridGroup.selectAll('line').attr('stroke', 'grey').attr('stroke-opacity', 0.2);
@@ -204,21 +228,19 @@ export function drawDetailedGraph(containerElement, data, config = {}) {
     lineGroup.selectAll('path').attr('d', lineGenerator);
   }
 
-  // Activate button logic
-  togglesDiv.querySelectorAll('.timeframe-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      currentRange = btn.dataset.range;
-      togglesDiv.querySelectorAll('.timeframe-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      render();
-    });
-  });
-
-  // Set default active state and render initially
-  togglesDiv.querySelector('[data-range=\"Max\"]').classList.add('active');
+  // Initial draw
   render();
 
-  if (config.resizeOnWindow) {
-    window.addEventListener('resize', render);
-  }
+  // ────────────────────── public API ──────────────────────
+  return {
+    /**
+     * Push fresh data into the graph without rebuilding the DOM.
+     * @param {Array<{date:Date,value:number,price:number}>} newData
+     */
+    update(newData) {
+      // keep same array reference → keeps D3 data binding alive
+      sortedData.splice(0, sortedData.length, ...newData.sort((a, b) => a.date - b.date));
+      render();
+    }
+  };
 }
