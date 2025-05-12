@@ -6,6 +6,10 @@ import { portfolioPerformanceData } from '../data/portfolioPerformance.js';
 import { drawDetailedGraph } from './graph.js';
 import { loggedIn } from '../main.js';
 
+// ────────────────────────────────────────────────────────────
+// Keep a handle to the live header graph so we can update it
+// ────────────────────────────────────────────────────────────
+let headerGraph; // will be set once in initPortfolioView()
 
 /**
  * Clears out and re-renders the .holdings-grid
@@ -13,19 +17,10 @@ import { loggedIn } from '../main.js';
  * @param {Array} holdings         userData.holdings
  */
 function populatePositions(container, holdings) {
-
-  // Draw the main portfolio graph inside header
-  const graphDiv = document.getElementById('header-graph');
-  drawDetailedGraph(graphDiv, portfolioPerformanceData, {
-    height: 200,
-    yKey: 'value',
-    resizeOnWindow: true
-  });
-
+  // Clear existing cards
   container.innerHTML = '';
 
-
-  // --- CASH CARD ---
+  // ── CASH CARD ─────────────────────────────────────────────
   const cashCard = document.createElement('div');
   cashCard.classList.add('holding-card');
   cashCard.innerHTML = `
@@ -33,11 +28,12 @@ function populatePositions(container, holdings) {
     <div class="holding-amount">Amount: $${userData.balance.toFixed(2)}</div>
   `;
   cashCard.addEventListener('click', () => {
-    // you could open a cash-detail modal here if you want
+    /* could open a cash‑detail modal */
   });
   container.appendChild(cashCard);
-  // ------------------
+  // ───────────────────────────────────────────────────────────
 
+  // One card per equity/crypto holding
   holdings.forEach(holding => {
     const card = document.createElement('div');
     card.classList.add('holding-card');
@@ -52,7 +48,6 @@ function populatePositions(container, holdings) {
 
     // draw the sparkline
     const miniChartContainer = card.querySelector('.mini-chart-container');
-    // console.log("data for drawing minichart:", stockDataPrices[holding.stock], holding.stock, stockDataPrices);
     drawMiniChart(miniChartContainer, stockDataPrices[holding.stock], {
       width: 100,
       height: 40,
@@ -62,20 +57,13 @@ function populatePositions(container, holdings) {
 }
 
 export function initPortfolioView() {
-  // Fill in header: profile pic, name, balance & PnL
+  // ── HEADER (profile, name, balance, PnL) ──────────────────
   const img = document.getElementById('header-pic');
   img.src = userData.profilePicUrl || 'assets/logo.jpg';
-  img.onerror = () => {
-    img.src = 'assets/logo.jpg';
-  };
-  // set dynamic title
-  const titleEl = document.getElementById('portfolio-title');
-  if (loggedIn) {
-    titleEl.textContent = `${userData.name}'s portfolio value:`;
-  } else {
-    titleEl.textContent = 'Your portfolio value:';
-  }
+  img.onerror = () => { img.src = 'assets/logo.jpg'; };
 
+  const titleEl = document.getElementById('portfolio-title');
+  titleEl.textContent = loggedIn ? `${userData.name}'s portfolio value:` : 'Your portfolio value:';
 
   const pnlValue = userData.pnl;
   const isPositive = pnlValue.startsWith('+');
@@ -85,27 +73,26 @@ export function initPortfolioView() {
   pnlEl.classList.remove('positive', 'negative');
   pnlEl.classList.add(isPositive ? 'positive' : 'negative');
 
-  // console.log("userData", userData);
-
-  // Draw the main portfolio graph inside header
+  // ── MAIN HEADER GRAPH (built once) ────────────────────────
   const graphDiv = document.getElementById('header-graph');
-  drawDetailedGraph(graphDiv, portfolioPerformanceData, {
+  headerGraph = drawDetailedGraph(graphDiv, portfolioPerformanceData, {
     height: 200,
     yKey: 'value',
     resizeOnWindow: true
   });
 
-  // Insert 'Your Positions' title between graph and holdings grid
+  // ── Insert “Your Positions” heading ──────────────────────
   const holdingsGrid = document.querySelector('.holdings-grid');
   const positionsTitle = document.createElement('h2');
   positionsTitle.textContent = 'Your Positions';
   positionsTitle.classList.add('positions-title');
   holdingsGrid.parentNode.insertBefore(positionsTitle, holdingsGrid);
 
-  // Populate via helper
+  // ── Initial cards render ─────────────────────────────────
   populatePositions(holdingsGrid, userData.holdings);
 }
 
+// Called every time fresh data arrives over the socket
 export function populatePortfolio() {
   // Update header numbers
   const pnlValue = userData.pnl;
@@ -116,13 +103,12 @@ export function populatePortfolio() {
   pnlEl.classList.remove('positive', 'negative');
   pnlEl.classList.add(isPositive ? 'positive' : 'negative');
 
-  // Re-populate positions only (graph was initialized once in initPortfolioView)
+  // Push new points into the existing graph (no DOM rebuild)
+  if (headerGraph) headerGraph.update(portfolioPerformanceData);
+
+  // Re-render positions grid
   const holdingsGrid = document.querySelector('.holdings-grid');
   const positionsTitle = document.querySelector('.positions-title');
   holdingsGrid.parentNode.insertBefore(positionsTitle, holdingsGrid);
-
-
-  // Populate the holdings grid
-  console.log(userData.holdings);
   populatePositions(holdingsGrid, userData.holdings);
 }
