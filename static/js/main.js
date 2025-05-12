@@ -229,12 +229,15 @@ function connectClientSocket(email) {
 
         // Update portfolio performance with portfolio pnl value and current timestamp
         const currentDate = new Date(Date.now());
-        const lastEntry = portfolioPerformanceData[portfolioPerformanceData.length - 1];
+       let needAdd = true;
 
-        const diffMs = currentDate.getTime() - lastEntry.date.getTime();  // Difference in milliseconds
-        const diffMinutes = diffMs / (1000 * 60);  // Convert to minutes
+       if (portfolioPerformanceData.length) {           // array already has data
+       const lastEntry   = portfolioPerformanceData[portfolioPerformanceData.length - 1];
+        const diffMinutes = (currentDate - lastEntry.date) / 60000;
+        needAdd = lastEntry.value !== userData.portfolioValue && diffMinutes < 5;
+      }
 
-        if(lastEntry.value != userData.portfolioValue || diffMinutes >= 5){
+       if (needAdd) {
           portfolioPerformanceData.push({date: currentDate, value: userData.portfolioValue});
           console.log("new portfolio data", {date: currentDate, value: userData.portfolioValue});
           console.log(portfolioPerformanceData);
