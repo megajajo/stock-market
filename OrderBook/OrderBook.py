@@ -4,6 +4,7 @@ from typing import Self
 from datetime import datetime, timezone, timedelta
 from sortedcontainers import SortedList
 from database import Database
+from .tickers import OPENING_PRICES
 
 
 class BuyOrSell(Enum):
@@ -460,9 +461,9 @@ class Transaction:
         timestamp = timestamp.strftime("%Y-%m-%d %H:%M:%S.%f")
         timestamp = datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S.%f")
 
-        # If there is nothing, just return 1 as the old price
+        # If there is nothing, just return initial price as the old price
         if len(all) == 0:
-            return 1
+            return OPENING_PRICES[ticker]
 
         max_before = all[0]
         for val in all:
@@ -474,7 +475,7 @@ class Transaction:
                 max_before = val
 
         if datetime.strptime(max_before[7], "%Y-%m-%d %H:%M:%S.%f") > timestamp:
-            return 1
+            return OPENING_PRICES[ticker]
 
         return max_before[8]
 
@@ -520,13 +521,19 @@ class OrderBook:
         OrderBook._tickers[ticker] = self
         self.bids = SortedList(key=lambda o: (-o.price, o.timestamp))
         self.asks = SortedList(key=lambda o: (o.price, o.timestamp))
-        self.last_price = 1  # the last price of a transaction
+        self._opening_price = OPENING_PRICES[ticker] if ticker in OPENING_PRICES else 50
+        self.last_price = Transaction.last_price_before(
+            ticker
+        )  # the last price of a transaction
         self.last_timestamp = datetime.now(
             timezone.utc
         )  # last date and time when a transaction has been made
 
     def get_ticker(self) -> str:
         return self.ticker
+
+    def get_opening_price(self) -> float:
+        return self._opening_price
 
     @classmethod
     def get_all_books(cls) -> dict:
