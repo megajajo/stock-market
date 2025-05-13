@@ -147,7 +147,7 @@ export function drawDetailedGraph(containerElement, data, config = {}) {
     };
 
     xAxisGroup.call(d3.axisBottom(currentXScale).ticks(numTicks).tickFormat(formatX));
-    yAxisGroup.call(d3.axisLeft(globalYScale).ticks(6));
+    yAxisGroup.call(d3.axisLeft(globalYScale).ticks(6).tickFormat(d3.format('.2s')));
     yAxisGroup.select('.domain').remove();
 
     // Grid
@@ -213,7 +213,7 @@ export function drawDetailedGraph(containerElement, data, config = {}) {
     const pad = (max - min) * 0.02;
     globalYScale.domain([min - pad, max + pad]);
 
-    yAxisGroup.call(d3.axisLeft(globalYScale).ticks(6));
+    yAxisGroup.call(d3.axisLeft(globalYScale).ticks(6).tickFormat(d3.format('.2s')));
     yAxisGroup.select('.domain').remove();
 
     gridGroup.call(
@@ -246,13 +246,11 @@ export function drawDetailedGraph(containerElement, data, config = {}) {
       // 1️⃣  mutate the *same* array reference so the existing <path> keeps its binding
       sortedData.splice(0, sortedData.length,
                         ...newData.sort((a, b) => a.date - b.date));
-  
+
       // 2️⃣  y-axis + line need a refresh because values may be higher/lower now
       updateYAxisAndLine();
-  
+
       // (no call to render(), so the x-scale & buttons stay untouched)
     }
   };
 }
-
-
