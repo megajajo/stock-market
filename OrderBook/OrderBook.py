@@ -454,7 +454,9 @@ class Transaction:
         return Database().retrieve_transactions_stock(ticker)
 
     @staticmethod
-    def last_price_before(ticker: str, timestamp: datetime = datetime.now) -> float:
+    def last_price_before(
+        ticker: str, timestamp: datetime = datetime.now(timezone.utc)
+    ) -> float:
         """Returns the price of the last transaction before a given time."""
         all = Transaction.get_transactions_of_stock(ticker)
 
